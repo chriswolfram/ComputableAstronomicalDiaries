@@ -1,0 +1,4 @@
+numpy
+numpyro
+funsor
+jupyter
