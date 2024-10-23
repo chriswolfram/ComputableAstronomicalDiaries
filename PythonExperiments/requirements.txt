@@ -1,4 +1,5 @@
 numpy
 numpyro
 funsor
+tensorflow_probability
 jupyter
