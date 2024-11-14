@@ -789,7 +789,7 @@ r 7'	19° nighttime was totality; when it began to clear, it cleared in 22° ni
 r 8'	it was eclipsed 1 cubit 4 fingers in front of β Virginis; the west and south winds blew; during onset, it entered  cloud [... Night of the 15th,]
 r 9'	last part of the night, the moon was 2 cubits below γ Virginis, the moon being 1/2 cubit back to the west. Night of the 16th, last part of the night, the moon was [...] in front of α [Virginis ... Night of the 17th, last part of the night,]
 r 10'	the moon was surrounded by a halo, Jupiter stood in the halo to the west. Night of the 18th, overcast, rain shower. The 18th, very overcast, rain [...]
-r 11'	Night of the 23rd, last part of the night, the moon was 1/2 cubit in front of ϑ Capricorni; Venus was [...] above γ Capricorni [...]
+r 11'	Night of the 23rd, last part of the night, the moon was 1/2 cubit in front of τ Capricorni; Venus was [...] above γ Capricorni [...]
 r 12'	Night of the 25th, last part of the night, Venus was 1 cubit above δ Capricorni; clouds were in the sky. The 25th, clouds [...]
 r 13'	The 26th, overcast, all day rain, a little PISAN DIB. Night of the 27th, clouds crossed the sky. The 27th, moonrise to sunrise: 16°; clouds [...]
 r 14'	solar eclipse; clouds, I did not watch. Night of the 29th, overcast, rain PISAN DIB. The 29th, clouds crossed the sky. [...]
@@ -2762,10 +2762,10 @@ o 6	[... rain, but the sandal was no]t? removed; first part of the night, the m
 o 7	[... Night of the 11th, beginning of the night,] the moon was 18 fingers above γ Virginis; clouds were in the sky. Night of the [12th, beginning of the night, the moo]n was 1 2/3 cubits above α Virginis, the moon having passed 1/2 cubit to the east; very overcast, light[ning ...]
 o 8	[... Night of the 1]3th, clouds crossed the sky. The 13th, sunrise to moonset: 20' ; clouds, I did not watch; in the morning, [...] Night of the 14th, moonrise to sunset: 4°, measured (despite) clouds; first part of the night, Venus was 1 cubit above Saturn, Venus being 5 [...]
 o 9	[... Night of the 15th, ...] last part of the night, the moon was 2 1/2 cubits behind α Scorpii. The 15th, in the morning, clou[ds ...] gusty wind, rain DUL. Night of the 16th, very overcast, rain so that the sandal was removed. Ni[ght of the 17th ...]
-o 10	[... The 1]7th, very overcast. Night of the 18th, clouds were in the sky; last part of the night, the moon was [...] in front of β Capricorni. Night of the 20th, last part of the night, the moon was 2 cubits behind δ Capricorni. Night [...]
-o 11	[... Mars ... ρ] Leonis 20 fingers; last part of the night, the moo[n was 2/3 cubit [... h/m] Geminorum. The 23rd, in the afternoon, clouds crossed the sky. Night of the 24th, [...]
-o 12	[... The 2]6th, moonrise to sunrise: 15°?. [...] in the afternoon, overcast. Night of the 27th(28th ?), clouds [...] The 27th(28th ?), clouds were in the sky [...]
-o 13	[... but the san]dal was not removed. That month, the equi[valent ...] 
+o 10	[... The 1]7th, very overcast. Night of the 18th, clouds were in the sky; last part of the night, the moon was [...] in front of β Capricorni. Night of the 20th, last part of the night, the moon was 2 cubits behind δ Capricorni. Night of the 22nd, first part of the night, Venus was 4 cubits above γ Geminorum;
+o 11	[Mars was] 20 fingers [above ρ] Leonis; last part of the night, the moo[n was 2/3 cubit [... h/m] Geminorum. The 23rd, in the afternoon, clouds crossed the sky. Night of the 24th, [...]
+o 12	[... The 2]6th, moonrise to sunrise: 15°?. [...] in the afternoon, overcast. Night of the 27th(28th ?), clouds [...] The 27th(28th ?), clouds were in the sky [...] .... [...] The 28th, Jupiter's last appearance in the Chariot.
+o 13	[... but the san]dal was not removed. That month, the equi[valent ...] .... From the 5th to [....]
 o 14	
 o 15	
 o 16	
@@ -2790,6 +2790,10 @@ r 15'
 
 t.e. 1	Diary from month I to the end of month VI, year 12 of king Alexander.
 END TEXT
+
+START CHANGE NOTES
+There appear to be big differences between ADART and Oracc around lines o 10 onward.
+END CHANGE NOTES
 
 
 ## START NEW TEXT
@@ -4019,7 +4023,7 @@ ii 10	That month, sick people recovered? [...]
 
 ii 11	Month III, the 1st (of which followed the 30th of the preceding month); sunset to moonset: 15°; the moon was low [...]
 ii 12	Night of the 3rd, beginning of the night, [...]
-13 2/3 cubit, the moon being 1/2 cubit [...]
+ii 13	2/3 cubit, the moon being 1/2 cubit [...]
 ii 13	
 ii 14	beginning of the night, ... [...] 
 
@@ -6215,6 +6219,7 @@ START TEXT METADATA
 	"language":"Akkadian",
 	"material":"clay",
 	"months_recorded":"VII VIII [ ] XII [",
+	"all_months_recorded":"VII VIII [ ] XII [\n] VII VIII [",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
@@ -9179,7 +9184,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"I - III [ ] IX X [",
+	"months_recorded":"I II III [ ] VII VIII IX X [",
+	"all_months_recorded":"I - III [ ] IX X [\n] VII VIII IX [",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
@@ -9262,6 +9268,10 @@ r 41'	[Month XI, (the 1st of which was identical with) the 30th (of the precedi
 r 42'	[...] ... Night of the 6th, very overcast, rain PISAN DIB. Night of the 7th, very overcast, rain ... [...] 
 r 43'	[... beginn]ing of the night, the moon was [...] in front of [...]
 END TEXT
+
+START CHANGE NOTES
+The month guide only references months up to X, but the text clearly mentioned month XI on r 41', and even contains some fragmentary observations from month XI.
+END CHANGE NOTES
 
 
 ## START NEW TEXT
@@ -12101,7 +12111,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"VII VIII IX [ ] XI XII",
+	"months_recorded":"VII VIII IX X XI XII",
+	"all_months_recorded":"VII VIII IX [ ] XI XII\n] VIII - XII",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
@@ -14978,7 +14989,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"I [ ] VI",
+	"months_recorded":"I [ ] III [ ] VI",
+	"all_months_recorded":"I [ ] VI\nI [ ]\n] III [",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
@@ -15008,6 +15020,7 @@ o AB13	was 3 1/2 cubits above γ Geminorum; 5° af[ter sunset?, solar eclipse w
 o AB14	dates, 3 pānu; mustard, 1 kurru; cress, 2 pānu 1 sūtu; se[same, ...] minas were sold for 1 shekel of silver which was given in the land. [...] 
 o AB15	first appearance. Around the 18th, Jupiter’s first appearance in the beginning of Taurus; 30+[x ... Mercury's] first appearance [in the west ...;] Saturn was in Leo [...] ... in Leo. [That] mo[nth, ...] 
 o AB16	[...] ... king of [...] ... [...]
+
 o C1'	[...] stood to the east. Night of the 2nd, the moon was [...] above α [Leonis? ...] 
 o C2'	[... Night of the 4th, beginning of the night, the moon was] 1 1/2 cubits behind β Virginis, [it stood] 1 1/2 cubits behind Mars [to the east ...] 
 o C3'	[... Night] of the 5th, beginning of the night, the moon was 2/3 cubit behind γ Virginis. Night [...] 
@@ -15245,7 +15258,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"VII VIII [ ] XII XII2",
+	"months_recorded":"VII VIII IX X XI XII XII2",
+	"all_months_recorded":"VII VIII [ ] XII XII2\nVIII - XII",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
@@ -15288,8 +15302,8 @@ o 22	[...] 1/2 cubit. The 28th, moonrise to sunrise: 9°; when I watched, I did
 o 23	[sesa]me, 2 sūtu 4 qa; wool, 3 minas [were sold for 1 shekel of silver. At that time, Jupiter was in Sagi]ttarius; Venus in the beginning of the month, was in [...]
 
 o 24	Month IX, the 1st (of which followed the 30th of the preceding month), sunset to moonset: 19°, measured; the moon was [...] above Jupiter [...] ... [...]
-o 25	rain DUL. The 1st, very overcast; in the morning, rain DUL ... Night of the 7th, beginning of the night, the moon was] 26 1 cubit [... α/β] Arietis. The 7th, Mercury’s [first appearance] in the west in Scorpius [...] 
-o 26	
+o 25	rain DUL. The 1st, very overcast; in the morning, rain DUL ... Night of the 7th, beginning of the night, the moon was]
+o 26	1 cubit [... α/β] Arietis. The 7th, Mercury’s [first appearance] in the west in Scorpius [...] 
 o 27	The 8th, Mars’ first appearance in Scorpius. Night of the 12th, beginning of the night, the moo[n ...]
 o 28	The 13th, sunrise to moonset: 10', measured. Night of the 14th, sunset to moonrise: 6° [...] 
 o 29	last part of the night, Saturn was [...] below η Cancri [...] 
@@ -15972,6 +15986,7 @@ r C6	[... Ni]ght of the 20th, clouds crossed the sky. The 20th, clouds crossed 
 r C7	[...] 1/2 cubit, the moon being 3 cubits low to the south. Night of the 25th, last part of the night, the moon was [...] behind β Capricorni 
 r C8	[... The 2]7th, moonrise to sunrise: 15° 40'. That month, the equivalent (for 1 shekel of silver was): barley, 3 pānu 4 sūtu; da[tes, ...] 
 r C9	[... woo]l, 5? minas. At that time, Jupiter was in Sagi[ttarius ...]  
+
 r B1'	[...] ... [...] 
 r B2'	[...] did not stand there; during the eclipse, [...] 
 r B3'	[...] very overcast, thunder, rain DUL. The 14th, equinox; I did not wa[tch ...] 
@@ -19931,7 +19946,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"I II III [",
+	"months_recorded":"I - VII",
+	"all_months_recorded":"I - VII\nI II III [",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -20380,7 +20396,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"VII IX [",
+	"months_recorded":"VII IX X XI [",
+	"all_months_recorded":"VII IX [\n] IX X XI [\n] X XI [",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -21348,6 +21365,7 @@ START TEXT METADATA
 	"language":"Akkadian",
 	"material":"clay",
 	"months_recorded":"I II [ ] VII",
+	"all_months_recorded":"I II [ ] VII\nI [ ] VII",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -21482,7 +21500,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"I [II]",
+	"months_recorded":"I II III IV [ ]",
+	"all_months_recorded":"I [II]\nI II\nI II III IV [ ]\n] II [\n] II III [\n] II III [",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -21567,7 +21586,6 @@ o B₂r1
 o C7'	[...] low to the south. The 23rd, the north wind blew. Night of the 24th, first part of the night, Mars was 2 fingers above β Virginis; last part of the night, the moon was 2 2/3 cubits below η Tauri, the moon having passed a little to the east. Night of the 25th, last part of the night, the moon was [...] above [α Tauri ...]
 o B₂r2	[... Night of the 25th, last part of the night, the moon] stood [... behind Venus to] the east, the moon being 1 cubit high to the north. The 25th, [... Night of the 26th, last part of] the night, the moon stood 2/3 cubit behind Saturn to the east
 o C8'	[...] high to the north. Night of the 26th, last part of the night, the moon stood 2/3 cubit behind Saturn to the east, the moon being 2/3 cubit high to the north. The 26th, the north wind blew. The 27th, moonrise to sunrise: 11° 30'; when I watched I did not see it; the north wind blew.  The 29th, mountain plants? ... [... the equivalent was:] barley, ... [...]
-o B₂r3	Month III, (the 1st of which was identical with) the 30th (of the preceding month), sunset to moonset: 14°; it was bright, [measured (despite)] mist [...]
 o C9'	[...] 1 pānu 4 qa; from the 6th to the 10th, 1 pānu 1 sūtu; from the 11th to the 22nd, 1 pānu 4 qa; until the end of the month, 1 pānu 1 sūtu; dates, until the middle of the month, 2 pānu 2 sūtu; from the 14th to the 20th, 2 pānu 3 sūtu; until the end of the month, 4 pānu [...]
 o B₂r4	
 o C10'	[...] 4 qa, until the end of the month, 1 sūtu 5 qa; wool, 2/3 mina. At that time, Jupiter and Mars were in Leo; on the 22nd, Mars reached Virgo; Venus was in Taurus; around the 3rd, Mercury’s first appearance in the west in Gemini [...]
@@ -21577,6 +21595,7 @@ o B₃1'
 o C12'	[...]na, the son of Bagaya'aša who was above the 4 generals, and Urrahšu?, the general, from the (position of) general [...]
 o B₃2'	
 
+o B₂r3	Month III, (the 1st of which was identical with) the 30th (of the preceding month), sunset to moonset: 14°; it was bright, [measured (despite)] mist [...]
 o C13'	[Month III, ...] Saturn was 3 cubits below β Tauri. Night of the 2nd, the moon was 1 1/2 cubits in front of ε Leonis, the moon being 2 1/2 cubits low to the south, 1 1/2 cubits above Mercury, the moon being 1/2 cubit back to the west. The 2nd, gusty north wind. Night of the 3rd, the moon was [...] above a Leonis [...]
 o B₃3'	
 o B₃4'	
@@ -22825,7 +22844,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"I II [ ] V [",
+	"months_recorded":"I II III IV V [",
+	"all_months_recorded":"I II [ ] V [\n] II III IV [",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -23583,7 +23603,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"VII VIII",
+	"months_recorded":"VII VIII IX X XI XII",
+	"all_months_recorded":"VII VIII\nVII [ ] XI XII\n] VIII - XI [\n] VIII [",
 	"object_type":"tablet",
 	"period":"Parthian",
 	"provenience":"Babylon",
@@ -28163,7 +28184,8 @@ START TEXT METADATA
 	"genre":"Astronomical Diary",
 	"language":"Akkadian",
 	"material":"clay",
-	"months_recorded":"VIII IX [X XI] XII XII2;",
+	"months_recorded":"VIII IX X XI XII XII2",
+	"all_months_recorded":"VIII IX [X XI] XII XII2\n] X XI XII [",
 	"object_type":"tablet",
 	"period":"Hellenistic",
 	"provenience":"Babylon",
