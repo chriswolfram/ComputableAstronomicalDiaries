@@ -27,8 +27,8 @@ sorting=ynt
 \newcommand\topannotation[2]{\(\overbrace{\text{#1}}^\text{#2}\)}
 
 \title{Summary: Computable Astronomical Diaries}
-% \author{Christopher Wolfram, Aaron Schein}
-\date{September 2024}
+\author{Christopher Wolfram, Aaron Schein}
+\date{November 2024}
 
 \begin{document}
 
@@ -36,10 +36,10 @@ sorting=ynt
 
 \section{Outline}
 
-The Computable Astronomical Diaries project uses large language models (LLMs) to extract structured data from translations of ancient Babylonian astronomical texts. As an application of this dataset, I fit a statistical model to the data to estimate the sizes of units used by the Babylonians, and to estimate the times when they made observations.
+The Computable Astronomical Diaries project uses large language models (LLMs) to extract structured data from translations of ancient Babylonian astronomical texts. As an application of this dataset, we fit a statistical model to the data to estimate the sizes of units used by the Babylonians, and to estimate the times when they made observations.
 
 \section{Background on the Astronomical Diaries}
-The Astronomical Diaries are the product of the longest running data collection project in human history \autocite[p.~41]{steeleIntro}\autocite{whoWrote}. Covering several hundred years from the mid 7th-century BCE to near the beginning of the first millennium, the diaries record daily astronomical observations (the positions of the Moon and planets relative to the fixed stars, times of eclipses, etc.), as well as observations of the weather, the level of the Euphrates river, prices of commodities in the market in Babylon, and more \autocite{sachsHunger}.
+The Astronomical Diaries are the product of the longest running data collection project in human history \autocite{steeleIntro, whoWrote}. Covering several hundred years from the mid 7th-century BCE to near the beginning of the first millennium, the diaries record daily astronomical observations (the positions of the Moon and planets relative to the fixed stars, times of eclipses, etc.), as well as observations of the weather, the level of the Euphrates river, prices of commodities in the market in Babylon, and more \autocite{sachsHunger}.
 
 The Astronomical Diaries were written on clay tablets, several hundred of which have survived to the present. Many of these were transliterated, translated to English, and dated by Sachs and Hunger \autocite{sachsHunger}, and are now available online from Oracc (\url{https://oracc.museum.upenn.edu/adsd/}). However, researchers interested in the diaries still have to manually go through hundreds of pages of translations to extract the data they care about, which is often impractical.
 
@@ -47,7 +47,7 @@ The Astronomical Diaries were written on clay tablets, several hundred of which 
 Below is an example excerpt of a translated Astronomical Diary:\footnote{-170E: \url{https://oracc.museum.upenn.edu/adsd/adart2/X201705}}
 
 \begin{displayquote}
-Year 141, kings Antiochus and Antiochus, his son. Month VII, the 1st (of which followed the 30th of the preceding month), sunset to moonset: 9°, measured. The 1st, the north wind blew. Night of the 2nd, the moon was 2 cubits behind $\alpha$ Scorpii. The 2nd, the north wind blew. Night of the 3rd, the moon was 2 1/2 cubits behind $\vartheta$ Ophiuchi. Night of the 6th, the moon was 4 cubits below $\beta$ Capricorni, the moon having passed 1/2 cubit to the east. Night of the 7th, the moon was 2 cubits in front of $\gamma$ Capricorni, the moon being 1 cubit low to the south. The 7th, Mercury’s first appearance [in the east] in Libra, Mercury was 2/3 cubit behind Venus, [Mercury being ...] high to the north;
+Year 141, kings Antiochus and Antiochus, his son. Month VII, the 1st (of which followed the 30th of the preceding month), sunset to moonset: 9°, measured. The 1st, the north wind blew. Night of the 2nd, the moon was 2 cubits behind $\alpha$ Scorpii. The 2nd, the north wind blew. Night of the 3rd, the moon was 2 1/2 cubits behind $\vartheta$ Ophiuchi. Night of the 6th, the moon was 4 cubits below $\beta$ Capricorni, the moon having passed 1/2 cubit to the east. Night of the 7th, the moon was 2 cubits in front of $\gamma$ Capricorni, the moon being 1 cubit low to the south. The 7th, Mercury's first appearance [in the east] in Libra, Mercury was 2/3 cubit behind Venus, [Mercury being ...] high to the north;
 \end{displayquote}
 
 \section{Parsing the Diaries}
@@ -57,9 +57,9 @@ The goal of the Computable Astronomical Diaries project is to make the systemati
 
 Back in 2020, I created a format for representing observations in the Astronomical Diaries and an interface for inputting data into that format. After manually inputting data from a couple of texts, I calculated that it would take about 200 hours of work to curate the entire corpus. 200 hours is short enough to be possible, but long enough that I never did it (and as far as I know, nobody else has done it either).
 
-However, LLMs are quite good at menial structured data extraction tasks and can process the entire Astronomical Diaries in a matter of minutes, and at the cost of a couple of dollars.
+However, LLMs are good at menial structured data extraction tasks and can process the entire Astronomical Diaries in a matter of minutes and at negligible cost.
 
-I use GPT-4o from OpenAI to extract ``distance observations'' (such as "the moon was 3 cubits in front of $\alpha$ Cancri") from the Astronomical Diaries. I target these observations first because they are some of the most complicated while also being some of the most numerous.
+We use GPT-4o from OpenAI to extract ``distance observations'' (such as ``the moon was 3 cubits in front of $\alpha$ Cancri'') from the Astronomical Diaries. We target distance observations because they make up the bulk of the diaries.
 
 \subsection{Anatomy of a Distance Observation}
 Here is an example of a distance observation:
@@ -69,18 +69,16 @@ Here is an example of a distance observation:
 It gives the distance between an object (i.e. Mars) and a reference (i.e. $\eta$ Tauri) in a particular direction (i.e. ``below'').
 
 \subsection{Prompting}
-I use a multi-phase pipeline to extract observations.
+We use a multi-phase pipeline to extract observations.
 
 The goal of the first phase is to identify which passages refer to which months. The translations provided by Sachs and Hunger include a month guide that indicates which sections of the translation correspond to which months \autocite{sachsHunger} (e.g. ``] II III [] V VI [''). The LLM is given this month guide along with the translation of the diary, and prompted to identify which months correspond to which line numbers in the translation.
 
-In the second phase, observations are extracted by prompting the LLM to list observations in a text, along with the line numbers on which observations appear (allowing alignment with the first phase). Currently, the only observation type I have implemented are distance observations.
-
-In the final phase, which I have not yet implemented, observations are passed through another LLM 1) to check that the observations were correctly extracted, and 2) to tag fragmentary or ambiguous observations.
+In the second phase, observations are extracted by prompting the LLM to list observations in a text, along with the line numbers on which observations appear (allowing alignment with the first phase).
 
 All prompts are available in the prompt appendix at the end of this document.
 
 \subsection{Results}
-There are a total of 7892 distance observations. The vast majority are lunar observations (6711).
+There are a total of 7751 distance observations. The vast majority are lunar observations (6597).
 
 \subsubsection{Example Data}
 Below is a table showing extracted observations from the tablet AD -278B\footnote{X102702 on Oracc: \url{https://oracc.museum.upenn.edu/adsd/adart1/X102782}}:
@@ -142,7 +140,7 @@ As an application of this dataset, I fit a Bayesian model to all distance observ
 
 The model is briefly described below.
 
-\subsection{Variables}
+\subsection{Variables OLD}
 \begin{align*}
     c_i &: \text{observed distance in observation $i$ (in cubits)} \\
     t_i &: \text{observed time category of observation $i$} \\
@@ -157,19 +155,44 @@ The model is briefly described below.
     m_i &: \text{whether an observation $i$ is an outlier}
 \end{align*}
 
+\subsection{Variables}
+\begin{align*}
+    c_i &: \text{observed distance in observation $i$ (in cubits)} \\
+    l &: \text{length of a cubit (in degrees)} \\
+    \sigma &: \text{observation variance} \\
+    \delta_i^\star &: \text{true distance in degrees for observation $i$ at time $\tau$ (computed with JPL ephemerides)}
+\end{align*}
+
 \subsection{Model}
 \begin{align*}
-    l_c &\sim \mathcal{N}(2,1) \\
-    \sigma_y &\sim \Gamma(1/2,1/2) \\
-    \mu_\text{outlier} &\sim \mathcal{N}(0,1) \\
-    \sigma_\text{outlier} &\sim \Gamma(2,1/2) \\
-    o_t &\sim \mathcal{N}(0,6) \\
-    p &\sim \text{Beta}(1/2,1) \\
-    m_i &\sim \text{Bernoulli}(p) \\
-    c_i &\sim \begin{cases}
-        \mathcal{N}(X_i(o_{t_i}) / l_c, \sigma_y) & m_i = 0 \\
-        \mathcal{N}(\mu_\text{outlier}, \sigma_\text{outlier}) & m_i = 1
-    \end{cases}
+    l &\sim \textrm{Normal}_{+}(2,1) \\
+    \sigma &\sim \textrm{Gamma}(1/2,1/2) \\
+    \mathbf{\Pi}^\textrm{(obj)} &\sim \textrm{Dirichlet}(1,1,\dots) \\
+    \mathbf{\Pi}^\textrm{(ref)} &\sim \textrm{Dirichlet}(1,1,\dots) \\
+    \mathbf{\Pi}^\textrm{(axis)} &\sim \textrm{Dirichlet}(1,1) \\
+    Z^\textrm{(obj)}_i &\sim \textrm{Categorical}(\mathbf{\Pi}^\textrm{(obj)}) \\
+    Z^\textrm{(ref)}_i &\sim \textrm{Categorical}(\mathbf{\Pi}^\textrm{(ref)}) \\
+    Z^\textrm{(axis)}_i &\sim \textrm{Categorical}(\mathbf{\Pi}^\textrm{(axis)}) \\
+    \Delta d_i &\sim \textrm{BetaBinomial}(1/2,1/2,d^\textrm{(min)}_i-d^\textrm{(max)}_i) \\
+    d_i &= d^\textrm{(min)}_i + \Delta d_i \\
+    \delta^\star_i &= \delta(Z^\textrm{(obj)}_i,Z^\textrm{(ref)}_i,Z^\textrm{(axis)}_i,d_i) \\
+    c_i &\sim \textrm{Normal}(\delta^\star_i / l, \sigma)
+\end{align*}
+
+\subsection{Model}
+\begin{align*}
+    \textrm{cubitlength} &\sim \textrm{Normal}_{+}(2,1) \\
+    \textrm{distancevariance} &\sim \textrm{Gamma}(1/2,1/2) \\
+    \textrm{objectdist} &\sim \textrm{Dirichlet}(1,1,\dots) \\
+    \textrm{referencedist} &\sim \textrm{Dirichlet}(1,1,\dots) \\
+    \textrm{axisdist} &\sim \textrm{Dirichlet}(1,1) \\
+    \textrm{object}_i &\sim \textrm{Categorical}(\textrm{objectdist}) \\
+    \textrm{reference}_i &\sim \textrm{Categorical}(\textrm{referencedist}) \\
+    \textrm{axis}_i &\sim \textrm{Categorical}(\textrm{axisdist}) \\
+    \textrm{dateoffset}_i &\sim \textrm{BetaBinomial}(1/2,1/2,\textrm{earliestdate}_i-\textrm{latestdate}_i) \\
+    \textrm{date}_i &= \textrm{earliestdate}_i + \textrm{dateoffset}_i \\
+    \textrm{truedistance}_i &= \textrm{computetruedistance}(\textrm{object}_i,\textrm{reference}_i,\textrm{axis}_i,\textrm{date}_i) \\
+    \textrm{cubits}_i &\sim \textrm{Normal}(\textrm{truedistance}_i / \textrm{cubitlength}, \textrm{distancevariance})
 \end{align*}
 
 \subsection{Results}
@@ -251,7 +274,7 @@ There are some remaining validation strategies that I also haven't implemented y
 \section{Next Steps}
 There are a few next steps:
 \begin{itemize}
-    \item Do more validation, particularly by comparing to existing datasets (for examples, from Alexander Jones, or from my manually curated data.)
+    \item Do more validation, particularly by comparing to existing datasets (for example, from Alexander Jones, or from my manually curated data.)
     \item Add an addition LLM pass to double-check observations, and to tag fragmentary or ambiguous ones.
     \item I think the Bayesian model may be indicating higher certainty that it should by assigning most of the variance to $\sigma_y$ (observational error), as opposed to uncertainty in the length of a cubit or in observation times. More experimentation is needed to test this.
     \item Add support for more observation types. Of particular interest are the zodiacal observations (where a planet is observed to be in a sign of the zodiac), as well as weather.
@@ -262,7 +285,7 @@ There are a few next steps:
 \printbibliography
 
 \section{Appendix: Prompts}
-All prompts below use few-shot learning, which involves giving a description of the task along with examples demonstrating how to perform the task correctly. The prompts below only show the instructions, but they are always followed by examples.
+All prompts below use few-shot learning, which involves giving a description of the task along with examples demonstrating how to perform the task correctly. The prompts below only show the instructions, but they are always followed by examples of ideal inputs and outputs.
 
 \subsection{Line-Month Alignment}
 \begin{lstlisting}
