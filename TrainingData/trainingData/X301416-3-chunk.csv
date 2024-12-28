@@ -1,0 +1,7 @@
+line,raw_string,damaged,explaination,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+o 22',it became stationary] 1 1/2 cubits [behind α Arietis,FALSE,,2,2,,Mars,1 1/2,,behind,α Arietis
+o 23',the moon was] 2 cubits [in front of η Pis]cium,FALSE,,10,10,beginning of the night,moon,2,,in front of,η Piscium
+o 23',the moon was] 2 cubits [in front of η Pis]cium,FALSE,,10,10,beginning of the night,moon,5,,south,η Piscium
+o 28',the moon] stood [... Saturn to the ,TRUE,,21,21,last part of the night,moon,,,,Saturn
+o 28',the moon being 1/2 cubit,FALSE,"The next date is 'The 27th', so this observation could be as late as 'Night of the 27th' which precedes the day.",21,27,,moon,1/2,,,
+o 29',having passed [nn cub]its to the east,FALSE,,21,27,,,,,east,
