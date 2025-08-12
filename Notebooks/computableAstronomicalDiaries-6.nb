@@ -10,17 +10,775 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[       814,         34]
-NotebookOptionsPosition[       557,         21]
-NotebookOutlinePosition[       950,         37]
-CellTagsIndexPosition[       907,         34]
+NotebookDataLength[     37876,        872]
+NotebookOptionsPosition[     33302,        779]
+NotebookOutlinePosition[     33695,        795]
+CellTagsIndexPosition[     33652,        792]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
+Cell[BoxData["Quit"], "Input",
+ CellLabel->"In[31]:=",ExpressionUUID->"71f5088b-7d68-40d4-8a0c-38a48ed869b8"],
+
+Cell[CellGroupData[{
+
+Cell["Init", "Section",ExpressionUUID->"011e6b0b-efe1-481c-9fd0-c73eb421d542"],
+
+Cell[CellGroupData[{
+
+Cell["Setting keys", "Subsection",ExpressionUUID->"28d05002-1884-4a16-9372-70add5c0b25c"],
+
+Cell["\<\
+Make sure that the OpenAI API key is set through SystemCredential:\
+\>", "Text",ExpressionUUID->"5a1336c4-ad36-4c26-96ab-618e6b8d7d66"],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+   RowBox[{"SystemCredential", "[", "\"\<OPENAI_API_KEY\>\"", "]"}], 
+   "=", "\"\<<your api key>\>\""}], "*)"}]], "Input",
+ CellLabel->"In[1]:=",ExpressionUUID->"bb05c246-952a-404c-9dd9-15d6f7e14f40"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Directories", "Subsection",
+ InitializationCell->
+  True,ExpressionUUID->"8d3b108a-9912-4182-8395-89fb7c1c00de"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"projectDirectory", "=", 
+  RowBox[{"ParentDirectory", "@", 
+   RowBox[{"NotebookDirectory", "[", "]"}]}]}]], "Input",
+ InitializationCell->True,
+ CellLabel->"In[1]:=",ExpressionUUID->"835fb90e-9d95-4b46-97da-87288175ee89"],
+
+Cell[BoxData["\<\"/Users/christopher/git/ComputableAstronomicalDiaries\"\>"], \
+"Output",
+ InitializationCell->True,
+ CellLabel->"Out[1]=",ExpressionUUID->"6d90d7ec-c4aa-44d5-b94c-1238ec9cf9cb"]
+}, Open  ]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"mxDirectory", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"projectDirectory", ",", "\"\<MX\>\""}], "}"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"If", "[", 
+   RowBox[{
+    RowBox[{"!", 
+     RowBox[{"DirectoryQ", "[", "mxDirectory", "]"}]}], ",", 
+    RowBox[{"CreateDirectory", "[", "mxDirectory", "]"}]}], "]"}], 
+  ";"}]}], "Input",
+ InitializationCell->True,
+ CellLabel->"In[2]:=",ExpressionUUID->"fd239bef-f73f-4b5c-9122-171ed901f4d3"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"batchOutputDirectory", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"projectDirectory", ",", "\"\<BatchOutputs\>\""}], "}"}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"If", "[", 
+   RowBox[{
+    RowBox[{"!", 
+     RowBox[{"DirectoryQ", "[", "batchOutputDirectory", "]"}]}], ",", 
+    RowBox[{"CreateDirectory", "[", "batchOutputDirectory", "]"}]}], "]"}], 
+  ";"}]}], "Input",
+ InitializationCell->True,
+ CellLabel->"In[4]:=",ExpressionUUID->"a4567b51-9590-4ade-a693-0259ca7dcb26"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"batchOutputPath", "[", 
+   RowBox[{"fileid_", "?", "StringQ"}], "]"}], ":=", 
+  RowBox[{"FileNameJoin", "[", 
+   RowBox[{"{", 
+    RowBox[{"batchOutputDirectory", ",", 
+     RowBox[{"fileid", "<>", "\"\<.jsonl\>\""}]}], "}"}], "]"}]}]], "Input",
+ InitializationCell->True,
+ CellLabel->"In[6]:=",ExpressionUUID->"f4567f7e-ea6d-4cc3-b31a-b392b9fff0cc"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Packages", "Subsection",
+ InitializationCell->
+  True,ExpressionUUID->"233965d3-c300-4cb4-9fe0-90086e3f0f4f"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+  "PacletInstall", "[", "\"\<ChristopherWolfram/CuneiformTools\>\"", "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Needs", "[", "\"\<ChristopherWolfram`CuneiformTools`\>\"", 
+  "]"}]}], "Input",
+ InitializationCell->True,
+ CellLabel->"In[7]:=",ExpressionUUID->"96757f91-40d1-4435-8f4e-f1e0a2826cb9"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"AppendTo", "[", 
+   RowBox[{"$Path", ",", 
+    RowBox[{"FileNameJoin", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"\<Packages\>\""}], 
+      "}"}], "]"}]}], "]"}], ";"}], "\n", 
+ RowBox[{"Needs", "[", "\"\<OpenAIUtilities`\>\"", "]"}]}], "Input",
+ InitializationCell->True,
+ CellLabel->"In[9]:=",ExpressionUUID->"84263246-6b40-46cd-8524-da39be731e8d"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Scratch space", "Section",ExpressionUUID->"eac517d6-34a7-4b51-96cc-bc176bd0f18f"],
+
+Cell[CellGroupData[{
+
+Cell["OpenAIUtilities example", "Subsection",ExpressionUUID->"d523633f-f6ad-4962-afaa-3301ec877391"],
+
+Cell[CellGroupData[{
+
+Cell["Chat completions and responses", "Subsubsection",ExpressionUUID->"428a24c7-621d-4a64-8a3c-49be9f63cd30"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"OpenAIChatComplete", "[", 
+  RowBox[{"<|", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\"\<model\>\"", "->", "\"\<gpt-5\>\""}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{"\"\<messages\>\"", "->", 
+     RowBox[{"{", 
+      RowBox[{"<|", 
+       RowBox[{
+        RowBox[{"\"\<role\>\"", "->", "\"\<user\>\""}], ",", 
+        RowBox[{"\"\<content\>\"", 
+         "->", "\"\<Repeat this after me: \[Alpha].\>\""}]}], "|>"}], 
+      "}"}]}]}], "\[IndentingNewLine]", "|>"}], "]"}]], "Input",
+ CellLabel->"In[12]:=",ExpressionUUID->"b4a908b8-fe99-4cb9-84ea-362b401fdc73"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"id\"\>", 
+    "\[Rule]", "\<\"chatcmpl-C3oTt5igf2xXC5SV59tCeW9M8uon1\"\>"}], ",", 
+   RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"chat.completion\"\>"}], ",", 
+   RowBox[{"\<\"created\"\>", "\[Rule]", "1755025069"}], ",", 
+   RowBox[{"\<\"model\"\>", "\[Rule]", "\<\"gpt-5-2025-08-07\"\>"}], ",", 
+   RowBox[{"\<\"choices\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\[LeftAssociation]", 
+      RowBox[{
+       RowBox[{"\<\"index\"\>", "\[Rule]", "0"}], ",", 
+       RowBox[{"\<\"message\"\>", "\[Rule]", 
+        RowBox[{"\[LeftAssociation]", 
+         RowBox[{
+          RowBox[{"\<\"role\"\>", "\[Rule]", "\<\"assistant\"\>"}], ",", 
+          RowBox[{"\<\"content\"\>", "\[Rule]", "\<\"\[Alpha].\"\>"}], ",", 
+          RowBox[{"\<\"refusal\"\>", "\[Rule]", "Null"}], ",", 
+          RowBox[{"\<\"annotations\"\>", "\[Rule]", 
+           RowBox[{"{", "}"}]}]}], "\[RightAssociation]"}]}], ",", 
+       RowBox[{"\<\"finish_reason\"\>", "\[Rule]", "\<\"stop\"\>"}]}], 
+      "\[RightAssociation]"}], "}"}]}], ",", 
+   RowBox[{"\<\"usage\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"prompt_tokens\"\>", "\[Rule]", "13"}], ",", 
+      RowBox[{"\<\"completion_tokens\"\>", "\[Rule]", "459"}], ",", 
+      RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "472"}], ",", 
+      RowBox[{"\<\"prompt_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{
+         RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], ",", 
+         RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}]}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"completion_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{
+         RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "448"}], ",", 
+         RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}], ",", 
+         RowBox[{"\<\"accepted_prediction_tokens\"\>", "\[Rule]", "0"}], ",", 
+         
+         RowBox[{"\<\"rejected_prediction_tokens\"\>", "\[Rule]", "0"}]}], 
+        "\[RightAssociation]"}]}]}], "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"service_tier\"\>", "\[Rule]", "\<\"default\"\>"}], ",", 
+   RowBox[{"\<\"system_fingerprint\"\>", "\[Rule]", "Null"}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellLabel->"Out[12]=",ExpressionUUID->"5ef12896-b936-402d-bd3a-f32ee888e8b7"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"OpenAIResponse", "[", 
+  RowBox[{"<|", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\"\<model\>\"", "->", "\"\<gpt-5\>\""}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{"\"\<input\>\"", 
+     "->", "\"\<Repeat this after me: \[Alpha].\>\""}]}], 
+   "\[IndentingNewLine]", "|>"}], "]"}]], "Input",
+ CellLabel->"In[17]:=",ExpressionUUID->"39303bca-0b62-4ba2-a6e5-6ee72fe08f41"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"id\"\>", 
+    "\[Rule]", \
+"\<\"resp_689b8f6eb42c8193867c6c14042f5edf0323cb81fc3cafbd\"\>"}], ",", 
+   RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"response\"\>"}], ",", 
+   RowBox[{"\<\"created_at\"\>", "\[Rule]", "1755025262"}], ",", 
+   RowBox[{"\<\"status\"\>", "\[Rule]", "\<\"completed\"\>"}], ",", 
+   RowBox[{"\<\"background\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"error\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"incomplete_details\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"instructions\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"max_output_tokens\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"max_tool_calls\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"model\"\>", "\[Rule]", "\<\"gpt-5-2025-08-07\"\>"}], ",", 
+   RowBox[{"\<\"output\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\[LeftAssociation]", 
+       RowBox[{
+        RowBox[{"\<\"id\"\>", 
+         "\[Rule]", \
+"\<\"rs_689b8f7064e88193af8b3f5c18c3d9bc0323cb81fc3cafbd\"\>"}], ",", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"reasoning\"\>"}], ",", 
+        RowBox[{"\<\"summary\"\>", "\[Rule]", 
+         RowBox[{"{", "}"}]}]}], "\[RightAssociation]"}], ",", 
+      RowBox[{"\[LeftAssociation]", 
+       RowBox[{
+        RowBox[{"\<\"id\"\>", 
+         "\[Rule]", "\<\"msg_689b8f7255cc8193960cb1b5c835b8c50323cb81fc3cafbd\
+\"\>"}], ",", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"message\"\>"}], ",", 
+        RowBox[{"\<\"status\"\>", "\[Rule]", "\<\"completed\"\>"}], ",", 
+        RowBox[{"\<\"content\"\>", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\[LeftAssociation]", 
+           RowBox[{
+            RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"output_text\"\>"}], ",", 
+            RowBox[{"\<\"annotations\"\>", "\[Rule]", 
+             RowBox[{"{", "}"}]}], ",", 
+            RowBox[{"\<\"logprobs\"\>", "\[Rule]", 
+             RowBox[{"{", "}"}]}], ",", 
+            RowBox[{"\<\"text\"\>", "\[Rule]", "\<\"\[Alpha].\"\>"}]}], 
+           "\[RightAssociation]"}], "}"}]}], ",", 
+        RowBox[{"\<\"role\"\>", "\[Rule]", "\<\"assistant\"\>"}]}], 
+       "\[RightAssociation]"}]}], "}"}]}], ",", 
+   RowBox[{"\<\"parallel_tool_calls\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"previous_response_id\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"prompt_cache_key\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"reasoning\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"effort\"\>", "\[Rule]", "\<\"medium\"\>"}], ",", 
+      RowBox[{"\<\"summary\"\>", "\[Rule]", "Null"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"safety_identifier\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"service_tier\"\>", "\[Rule]", "\<\"auto\"\>"}], ",", 
+   RowBox[{"\<\"store\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"temperature\"\>", "\[Rule]", "1.`"}], ",", 
+   RowBox[{"\<\"text\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"format\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"text\"\>"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"verbosity\"\>", "\[Rule]", "\<\"medium\"\>"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"tool_choice\"\>", "\[Rule]", "\<\"auto\"\>"}], ",", 
+   RowBox[{"\<\"tools\"\>", "\[Rule]", 
+    RowBox[{"{", "}"}]}], ",", 
+   RowBox[{"\<\"top_logprobs\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"top_p\"\>", "\[Rule]", "1.`"}], ",", 
+   RowBox[{"\<\"truncation\"\>", "\[Rule]", "\<\"disabled\"\>"}], ",", 
+   RowBox[{"\<\"usage\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"input_tokens\"\>", "\[Rule]", "13"}], ",", 
+      RowBox[{"\<\"input_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"output_tokens\"\>", "\[Rule]", "200"}], ",", 
+      RowBox[{"\<\"output_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "192"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "213"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"user\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"metadata\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellLabel->"Out[17]=",ExpressionUUID->"ca40aa57-df59-415f-bc19-49b6458d0dbb"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"OpenAIResponse", "[", 
+  RowBox[{"<|", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\"\<model\>\"", "->", "\"\<gpt-5\>\""}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{"\"\<input\>\"", 
+     "->", "\"\<What is the integral of 1/cos(x) dx?\>\""}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{"\"\<reasoning\>\"", "->", 
+     RowBox[{"<|", 
+      RowBox[{
+       RowBox[{"\"\<effort\>\"", "->", "\"\<medium\>\""}], ",", 
+       RowBox[{"\"\<summary\>\"", "->", "\"\<detailed\>\""}]}], "|>"}]}]}], 
+   "\[IndentingNewLine]", "|>"}], "]"}]], "Input",
+ CellLabel->"In[20]:=",ExpressionUUID->"2e0e94cf-2a1f-428d-afa6-bd29fa49df9c"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"id\"\>", 
+    "\[Rule]", \
+"\<\"resp_689b908fbfec8197bbe991768e99fb2f09c73b3c2127d3a7\"\>"}], ",", 
+   RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"response\"\>"}], ",", 
+   RowBox[{"\<\"created_at\"\>", "\[Rule]", "1755025551"}], ",", 
+   RowBox[{"\<\"status\"\>", "\[Rule]", "\<\"completed\"\>"}], ",", 
+   RowBox[{"\<\"background\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"error\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"incomplete_details\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"instructions\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"max_output_tokens\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"max_tool_calls\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"model\"\>", "\[Rule]", "\<\"gpt-5-2025-08-07\"\>"}], ",", 
+   RowBox[{"\<\"output\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\[LeftAssociation]", 
+       RowBox[{
+        RowBox[{"\<\"id\"\>", 
+         "\[Rule]", \
+"\<\"rs_689b9090cc308197a8bbd2ac73831b5c09c73b3c2127d3a7\"\>"}], ",", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"reasoning\"\>"}], ",", 
+        RowBox[{"\<\"summary\"\>", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"\[LeftAssociation]", 
+            RowBox[{
+             RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"summary_text\"\>"}], ",", 
+             
+             RowBox[{"\<\"text\"\>", 
+              "\[Rule]", "\<\"**Reviewing integral calculations**\\n\\nI need \
+to determine the integral of 1/cos(x) dx. This is \[Integral] sec x dx, which \
+equals ln|sec x + tan x| + C. Alternatively, there\[CloseCurlyQuote]s \
+arctanh(sin x) + C. I\[CloseCurlyQuote]m verifying that the derivative of \
+arctanh(sin x) corresponds to sec x. It checks out! So, I have confirmed that \
+\[Integral] sec x dx can indeed be expressed as both forms, but using ln|sec \
+x + tan x| + C is the standard approach.\"\>"}]}], "\[RightAssociation]"}], ",", 
+           RowBox[{"\[LeftAssociation]", 
+            RowBox[{
+             RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"summary_text\"\>"}], ",", 
+             
+             RowBox[{"\<\"text\"\>", 
+              "\[Rule]", "\<\"**Simplifying the integral response**\\n\\nThey \
+asked for the integral of 1/cos(x) dx. A minimal answer would be ln|sec x + \
+tan x| + C. However, it seems they might want the indefinite integral \
+explained further. I'll mention the possibility of using the standard formula \
+or multiplying numerator and denominator by sec + tan. To keep things \
+concise, I'll present the integral as \[Integral] sec x dx = ln|sec x + tan \
+x| + C, and optionally include the equivalence to artanh(sin x) + C.\"\>"}]}],
+             "\[RightAssociation]"}]}], "}"}]}]}], "\[RightAssociation]"}], ",", 
+      RowBox[{"\[LeftAssociation]", 
+       RowBox[{
+        RowBox[{"\<\"id\"\>", 
+         "\[Rule]", "\<\"msg_689b90997330819790d28323e3b9689b09c73b3c2127d3a7\
+\"\>"}], ",", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"message\"\>"}], ",", 
+        RowBox[{"\<\"status\"\>", "\[Rule]", "\<\"completed\"\>"}], ",", 
+        RowBox[{"\<\"content\"\>", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\[LeftAssociation]", 
+           RowBox[{
+            RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"output_text\"\>"}], ",", 
+            RowBox[{"\<\"annotations\"\>", "\[Rule]", 
+             RowBox[{"{", "}"}]}], ",", 
+            RowBox[{"\<\"logprobs\"\>", "\[Rule]", 
+             RowBox[{"{", "}"}]}], ",", 
+            
+            RowBox[{"\<\"text\"\>", 
+             "\[Rule]", "\<\"\[Integral] (1/cos x) dx = \[Integral] sec x dx \
+= ln|sec x + tan x| + C\\n\\n(Equivalently: artanh(sin x) + C)\"\>"}]}], 
+           "\[RightAssociation]"}], "}"}]}], ",", 
+        RowBox[{"\<\"role\"\>", "\[Rule]", "\<\"assistant\"\>"}]}], 
+       "\[RightAssociation]"}]}], "}"}]}], ",", 
+   RowBox[{"\<\"parallel_tool_calls\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"previous_response_id\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"prompt_cache_key\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"reasoning\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"effort\"\>", "\[Rule]", "\<\"medium\"\>"}], ",", 
+      RowBox[{"\<\"summary\"\>", "\[Rule]", "\<\"detailed\"\>"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"safety_identifier\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"service_tier\"\>", "\[Rule]", "\<\"auto\"\>"}], ",", 
+   RowBox[{"\<\"store\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"temperature\"\>", "\[Rule]", "1.`"}], ",", 
+   RowBox[{"\<\"text\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"format\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"type\"\>", "\[Rule]", "\<\"text\"\>"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"verbosity\"\>", "\[Rule]", "\<\"medium\"\>"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"tool_choice\"\>", "\[Rule]", "\<\"auto\"\>"}], ",", 
+   RowBox[{"\<\"tools\"\>", "\[Rule]", 
+    RowBox[{"{", "}"}]}], ",", 
+   RowBox[{"\<\"top_logprobs\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"top_p\"\>", "\[Rule]", "1.`"}], ",", 
+   RowBox[{"\<\"truncation\"\>", "\[Rule]", "\<\"disabled\"\>"}], ",", 
+   RowBox[{"\<\"usage\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"input_tokens\"\>", "\[Rule]", "19"}], ",", 
+      RowBox[{"\<\"input_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"output_tokens\"\>", "\[Rule]", "367"}], ",", 
+      RowBox[{"\<\"output_tokens_details\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "320"}], 
+        "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "386"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"user\"\>", "\[Rule]", "Null"}], ",", 
+   RowBox[{"\<\"metadata\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellLabel->"Out[20]=",ExpressionUUID->"0babdc7b-41a2-47c1-8f95-9c9880478262"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Batches", "Subsubsection",ExpressionUUID->"d0528751-17f5-4430-b378-4bccf60190b9"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"batchMessages", "=", 
+   RowBox[{"<|", 
+    RowBox[{
+     RowBox[{"\"\<id1\>\"", "->", 
+      RowBox[{"<|", 
+       RowBox[{
+        RowBox[{"\"\<model\>\"", "->", "\"\<gpt-5\>\""}], ",", 
+        RowBox[{"\"\<messages\>\"", "->", 
+         RowBox[{"{", 
+          RowBox[{"<|", 
+           RowBox[{
+            RowBox[{"\"\<role\>\"", "->", "\"\<user\>\""}], ",", 
+            
+            RowBox[{"\"\<content\>\"", 
+             "->", "\"\<Repeat this after me: \[Alpha].\>\""}]}], "|>"}], 
+          "}"}]}]}], "|>"}]}], ",", 
+     RowBox[{"\"\<id2\>\"", "->", 
+      RowBox[{"<|", 
+       RowBox[{
+        RowBox[{"\"\<model\>\"", "->", "\"\<gpt-5\>\""}], ",", 
+        RowBox[{"\"\<messages\>\"", "->", 
+         RowBox[{"{", 
+          RowBox[{"<|", 
+           RowBox[{
+            RowBox[{"\"\<role\>\"", "->", "\"\<user\>\""}], ",", 
+            
+            RowBox[{"\"\<content\>\"", 
+             "->", "\"\<Put a space between every character of the following \
+string: \[Alpha]\[Beta]\[Gamma].\>\""}]}], "|>"}], "}"}]}]}], "|>"}]}]}], 
+    "|>"}]}], ";"}]], "Input",
+ CellLabel->"In[12]:=",ExpressionUUID->"d344966d-4257-41fc-b725-d1174bb88289"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"batch", "=", 
+  RowBox[{"OpenAIBatchCreate", "[", "batchMessages", "]"}]}]], "Input",
+ CellLabel->"In[13]:=",ExpressionUUID->"5fb3e053-29df-4f5a-9875-7dfc8060c8c6"],
+
+Cell[BoxData[
+ RowBox[{"OpenAIBatch", "[", 
+  RowBox[{"\[LeftAssociation]", 
+   RowBox[{
+    RowBox[{"\<\"id\"\>", 
+     "\[Rule]", "\<\"batch_689b9adc85308190944bd61481c1d1a4\"\>"}], ",", 
+    RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"batch\"\>"}], ",", 
+    RowBox[{"\<\"endpoint\"\>", "\[Rule]", "\<\"/v1/chat/completions\"\>"}], ",", 
+    RowBox[{"\<\"errors\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"input_file_id\"\>", 
+     "\[Rule]", "\<\"file-Lh6F6PqaVue8171mjbZpKH\"\>"}], ",", 
+    RowBox[{"\<\"completion_window\"\>", "\[Rule]", "\<\"24h\"\>"}], ",", 
+    RowBox[{"\<\"status\"\>", "\[Rule]", "\<\"validating\"\>"}], ",", 
+    RowBox[{"\<\"output_file_id\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"error_file_id\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"created_at\"\>", "\[Rule]", "1755028188"}], ",", 
+    RowBox[{"\<\"in_progress_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"expires_at\"\>", "\[Rule]", "1755114588"}], ",", 
+    RowBox[{"\<\"finalizing_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"completed_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"failed_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"expired_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"cancelling_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"cancelled_at\"\>", "\[Rule]", "Null"}], ",", 
+    RowBox[{"\<\"request_counts\"\>", "\[Rule]", 
+     RowBox[{"\[LeftAssociation]", 
+      RowBox[{
+       RowBox[{"\<\"total\"\>", "\[Rule]", "0"}], ",", 
+       RowBox[{"\<\"completed\"\>", "\[Rule]", "0"}], ",", 
+       RowBox[{"\<\"failed\"\>", "\[Rule]", "0"}]}], 
+      "\[RightAssociation]"}]}], ",", 
+    RowBox[{"\<\"metadata\"\>", "\[Rule]", "Null"}]}], 
+   "\[RightAssociation]"}], "]"}]], "Output",
+ CellLabel->"Out[13]=",ExpressionUUID->"fdae7be8-45b7-4242-8826-ee51294c24e4"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"OpenAIBatchWait", "[", "batch", "]"}]], "Input",
+ CellLabel->"In[14]:=",ExpressionUUID->"ffe76fe7-9760-4569-bee5-c73040011de4"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"batchStatus", "=", 
+   RowBox[{"OpenAIBatchRetrieveStatus", "[", "batch", "]"}]}], ";"}]], "Input",\
+
+ CellLabel->"In[15]:=",ExpressionUUID->"e0ef7e82-9936-453f-967d-dc2335e160c0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"batchStatus", "[", "\"\<status\>\"", "]"}]], "Input",
+ CellLabel->"In[16]:=",ExpressionUUID->"15dc8a46-ca32-4a89-b27b-b023b206f045"],
+
+Cell[BoxData["\<\"completed\"\>"], "Output",
+ CellLabel->"Out[16]=",ExpressionUUID->"e2bc1838-70bd-44ed-854e-e001c9f29f68"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"batchResponse", "=", 
+  RowBox[{"OpenAIBatchRetrieve", "@", "batchStatus"}]}]], "Input",
+ CellLabel->"In[18]:=",ExpressionUUID->"6c676ada-5fea-49a8-8fc4-5bc813564a6e"],
+
+Cell[BoxData[
+ RowBox[{"OpenAIBatchResponse", "[", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"id\"\>", 
+       "\[Rule]", "\<\"batch_req_689b9b274f608190937666f3ff9d4d65\"\>"}], ",", 
+      RowBox[{"\<\"custom_id\"\>", "\[Rule]", "\<\"id1\"\>"}], ",", 
+      RowBox[{"\<\"response\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{
+         RowBox[{"\<\"status_code\"\>", "\[Rule]", "200"}], ",", 
+         RowBox[{"\<\"request_id\"\>", 
+          "\[Rule]", "\<\"781fc8c1aafabfd873540b074a48b895\"\>"}], ",", 
+         RowBox[{"\<\"body\"\>", "\[Rule]", 
+          RowBox[{"\[LeftAssociation]", 
+           RowBox[{
+            
+            RowBox[{"\<\"id\"\>", 
+             "\[Rule]", "\<\"chatcmpl-C3pJKdM6UB6G0qnFd16wccCOzMxL9\"\>"}], ",", 
+            RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"chat.completion\"\>"}], 
+            ",", 
+            RowBox[{"\<\"created\"\>", "\[Rule]", "1755028258"}], ",", 
+            RowBox[{"\<\"model\"\>", "\[Rule]", "\<\"gpt-5-2025-08-07\"\>"}], 
+            ",", 
+            RowBox[{"\<\"choices\"\>", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"\[LeftAssociation]", 
+               RowBox[{
+                RowBox[{"\<\"index\"\>", "\[Rule]", "0"}], ",", 
+                RowBox[{"\<\"message\"\>", "\[Rule]", 
+                 RowBox[{"\[LeftAssociation]", 
+                  RowBox[{
+                   RowBox[{"\<\"role\"\>", "\[Rule]", "\<\"assistant\"\>"}], ",", 
+                   
+                   RowBox[{"\<\"content\"\>", 
+                    "\[Rule]", "\<\"\[Alpha].\"\>"}], ",", 
+                   RowBox[{"\<\"refusal\"\>", "\[Rule]", "Null"}], ",", 
+                   RowBox[{"\<\"annotations\"\>", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]}], "\[RightAssociation]"}]}], ",", 
+                
+                RowBox[{"\<\"finish_reason\"\>", 
+                 "\[Rule]", "\<\"stop\"\>"}]}], "\[RightAssociation]"}], 
+              "}"}]}], ",", 
+            RowBox[{"\<\"usage\"\>", "\[Rule]", 
+             RowBox[{"\[LeftAssociation]", 
+              RowBox[{
+               RowBox[{"\<\"prompt_tokens\"\>", "\[Rule]", "13"}], ",", 
+               RowBox[{"\<\"completion_tokens\"\>", "\[Rule]", "267"}], ",", 
+               RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "280"}], ",", 
+               RowBox[{"\<\"prompt_tokens_details\"\>", "\[Rule]", 
+                RowBox[{"\[LeftAssociation]", 
+                 RowBox[{
+                  RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], ",", 
+                  RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}]}], 
+                 "\[RightAssociation]"}]}], ",", 
+               RowBox[{"\<\"completion_tokens_details\"\>", "\[Rule]", 
+                RowBox[{"\[LeftAssociation]", 
+                 RowBox[{
+                  RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "256"}], ",", 
+                  RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}], ",", 
+                  
+                  RowBox[{"\<\"accepted_prediction_tokens\"\>", "\[Rule]", 
+                   "0"}], ",", 
+                  
+                  RowBox[{"\<\"rejected_prediction_tokens\"\>", "\[Rule]", 
+                   "0"}]}], "\[RightAssociation]"}]}]}], 
+              "\[RightAssociation]"}]}], ",", 
+            RowBox[{"\<\"service_tier\"\>", "\[Rule]", "\<\"default\"\>"}], ",", 
+            RowBox[{"\<\"system_fingerprint\"\>", "\[Rule]", "Null"}]}], 
+           "\[RightAssociation]"}]}]}], "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"error\"\>", "\[Rule]", "Null"}]}], "\[RightAssociation]"}],
+     ",", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"id\"\>", 
+       "\[Rule]", "\<\"batch_req_689b9b274e04819090e08f4b5dab80d3\"\>"}], ",", 
+      RowBox[{"\<\"custom_id\"\>", "\[Rule]", "\<\"id2\"\>"}], ",", 
+      RowBox[{"\<\"response\"\>", "\[Rule]", 
+       RowBox[{"\[LeftAssociation]", 
+        RowBox[{
+         RowBox[{"\<\"status_code\"\>", "\[Rule]", "200"}], ",", 
+         RowBox[{"\<\"request_id\"\>", 
+          "\[Rule]", "\<\"0bb0cb66ed7438e5b53672ab5be3dab3\"\>"}], ",", 
+         RowBox[{"\<\"body\"\>", "\[Rule]", 
+          RowBox[{"\[LeftAssociation]", 
+           RowBox[{
+            
+            RowBox[{"\<\"id\"\>", 
+             "\[Rule]", "\<\"chatcmpl-C3pJFyNLlY8KfW9IuGVrzYpt0hmzD\"\>"}], ",", 
+            RowBox[{"\<\"object\"\>", "\[Rule]", "\<\"chat.completion\"\>"}], 
+            ",", 
+            RowBox[{"\<\"created\"\>", "\[Rule]", "1755028253"}], ",", 
+            RowBox[{"\<\"model\"\>", "\[Rule]", "\<\"gpt-5-2025-08-07\"\>"}], 
+            ",", 
+            RowBox[{"\<\"choices\"\>", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"\[LeftAssociation]", 
+               RowBox[{
+                RowBox[{"\<\"index\"\>", "\[Rule]", "0"}], ",", 
+                RowBox[{"\<\"message\"\>", "\[Rule]", 
+                 RowBox[{"\[LeftAssociation]", 
+                  RowBox[{
+                   RowBox[{"\<\"role\"\>", "\[Rule]", "\<\"assistant\"\>"}], ",", 
+                   
+                   RowBox[{"\<\"content\"\>", 
+                    "\[Rule]", "\<\"\[Alpha] \[Beta] \[Gamma]\"\>"}], ",", 
+                   RowBox[{"\<\"refusal\"\>", "\[Rule]", "Null"}], ",", 
+                   RowBox[{"\<\"annotations\"\>", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]}], "\[RightAssociation]"}]}], ",", 
+                
+                RowBox[{"\<\"finish_reason\"\>", 
+                 "\[Rule]", "\<\"stop\"\>"}]}], "\[RightAssociation]"}], 
+              "}"}]}], ",", 
+            RowBox[{"\<\"usage\"\>", "\[Rule]", 
+             RowBox[{"\[LeftAssociation]", 
+              RowBox[{
+               RowBox[{"\<\"prompt_tokens\"\>", "\[Rule]", "21"}], ",", 
+               RowBox[{"\<\"completion_tokens\"\>", "\[Rule]", "268"}], ",", 
+               RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "289"}], ",", 
+               RowBox[{"\<\"prompt_tokens_details\"\>", "\[Rule]", 
+                RowBox[{"\[LeftAssociation]", 
+                 RowBox[{
+                  RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], ",", 
+                  RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}]}], 
+                 "\[RightAssociation]"}]}], ",", 
+               RowBox[{"\<\"completion_tokens_details\"\>", "\[Rule]", 
+                RowBox[{"\[LeftAssociation]", 
+                 RowBox[{
+                  RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "256"}], ",", 
+                  RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}], ",", 
+                  
+                  RowBox[{"\<\"accepted_prediction_tokens\"\>", "\[Rule]", 
+                   "0"}], ",", 
+                  
+                  RowBox[{"\<\"rejected_prediction_tokens\"\>", "\[Rule]", 
+                   "0"}]}], "\[RightAssociation]"}]}]}], 
+              "\[RightAssociation]"}]}], ",", 
+            RowBox[{"\<\"service_tier\"\>", "\[Rule]", "\<\"default\"\>"}], ",", 
+            RowBox[{"\<\"system_fingerprint\"\>", "\[Rule]", "Null"}]}], 
+           "\[RightAssociation]"}]}]}], "\[RightAssociation]"}]}], ",", 
+      RowBox[{"\<\"error\"\>", "\[Rule]", "Null"}]}], 
+     "\[RightAssociation]"}]}], "}"}], "]"}]], "Output",
+ CellLabel->"Out[18]=",ExpressionUUID->"e55aeba5-ec71-4c1f-9347-840872002342"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"batchResponse", "[", "\"\<TotalUsage\>\"", "]"}]], "Input",
+ CellLabel->"In[19]:=",ExpressionUUID->"ba2ee08b-9530-42fc-b95e-fd70c5d2d03d"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"prompt_tokens\"\>", "\[Rule]", "34"}], ",", 
+   RowBox[{"\<\"completion_tokens\"\>", "\[Rule]", "535"}], ",", 
+   RowBox[{"\<\"total_tokens\"\>", "\[Rule]", "569"}], ",", 
+   RowBox[{"\<\"prompt_tokens_details\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"cached_tokens\"\>", "\[Rule]", "0"}], ",", 
+      RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}]}], 
+     "\[RightAssociation]"}]}], ",", 
+   RowBox[{"\<\"completion_tokens_details\"\>", "\[Rule]", 
+    RowBox[{"\[LeftAssociation]", 
+     RowBox[{
+      RowBox[{"\<\"reasoning_tokens\"\>", "\[Rule]", "512"}], ",", 
+      RowBox[{"\<\"audio_tokens\"\>", "\[Rule]", "0"}], ",", 
+      RowBox[{"\<\"accepted_prediction_tokens\"\>", "\[Rule]", "0"}], ",", 
+      RowBox[{"\<\"rejected_prediction_tokens\"\>", "\[Rule]", "0"}]}], 
+     "\[RightAssociation]"}]}]}], "\[RightAssociation]"}]], "Output",
+ CellLabel->"Out[19]=",ExpressionUUID->"632488ff-d85c-48ee-a645-5f1fe7ab44d9"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"batchResponse", "[", "\"\<Outputs\>\"", "]"}]], "Input",
+ CellLabel->"In[20]:=",ExpressionUUID->"ed77dac9-2ab2-4f22-ba1c-18a6aae7e75a"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"id1\"\>", "\[Rule]", "\<\"\[Alpha].\"\>"}], ",", 
+   RowBox[{"\<\"id2\"\>", "\[Rule]", "\<\"\[Alpha] \[Beta] \[Gamma]\"\>"}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellLabel->"Out[20]=",ExpressionUUID->"7edbc433-ff5b-4504-b5dc-aca8ef0ca2a5"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]]
+}, Open  ]]
 },
 WindowSize->{808, 911},
-WindowMargins->{{Automatic, 259}, {Automatic, 25}},
+WindowMargins->{{Automatic, 197}, {Automatic, 13}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"8199b884-1fe8-4bf4-b63a-a579bcdfb455"
@@ -36,9 +794,87 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
+Cell[554, 20, 109, 1, 29, "Input",ExpressionUUID->"71f5088b-7d68-40d4-8a0c-38a48ed869b8"],
+Cell[CellGroupData[{
+Cell[688, 25, 78, 0, 66, "Section",ExpressionUUID->"011e6b0b-efe1-481c-9fd0-c73eb421d542"],
+Cell[CellGroupData[{
+Cell[791, 29, 89, 0, 53, "Subsection",ExpressionUUID->"28d05002-1884-4a16-9372-70add5c0b25c"],
+Cell[883, 31, 145, 2, 33, "Text",ExpressionUUID->"5a1336c4-ad36-4c26-96ab-618e6b8d7d66"],
+Cell[1031, 35, 242, 5, 29, "Input",ExpressionUUID->"bb05c246-952a-404c-9dd9-15d6f7e14f40"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1310, 45, 118, 2, 53, "Subsection",ExpressionUUID->"8d3b108a-9912-4182-8395-89fb7c1c00de",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[1453, 51, 246, 5, 45, "Input",ExpressionUUID->"835fb90e-9d95-4b46-97da-87288175ee89",
+ InitializationCell->True],
+Cell[1702, 58, 194, 3, 70, "Output",ExpressionUUID->"6d90d7ec-c4aa-44d5-b94c-1238ec9cf9cb",
+ InitializationCell->True]
+}, Open  ]],
+Cell[1911, 64, 524, 14, 65, "Input",ExpressionUUID->"fd239bef-f73f-4b5c-9122-171ed901f4d3",
+ InitializationCell->True],
+Cell[2438, 80, 566, 15, 65, "Input",ExpressionUUID->"a4567b51-9590-4ade-a693-0259ca7dcb26",
+ InitializationCell->True],
+Cell[3007, 97, 385, 9, 65, "Input",ExpressionUUID->"f4567f7e-ea6d-4cc3-b31a-b392b9fff0cc",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3429, 111, 115, 2, 53, "Subsection",ExpressionUUID->"233965d3-c300-4cb4-9fe0-90086e3f0f4f",
+ InitializationCell->True],
+Cell[3547, 115, 340, 8, 65, "Input",ExpressionUUID->"96757f91-40d1-4435-8f4e-f1e0a2826cb9",
+ InitializationCell->True],
+Cell[3890, 125, 439, 11, 65, "Input",ExpressionUUID->"84263246-6b40-46cd-8524-da39be731e8d",
+ InitializationCell->True]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[4378, 142, 87, 0, 52, "Section",ExpressionUUID->"eac517d6-34a7-4b51-96cc-bc176bd0f18f"],
+Cell[CellGroupData[{
+Cell[4490, 146, 100, 0, 53, "Subsection",ExpressionUUID->"d523633f-f6ad-4962-afaa-3301ec877391"],
+Cell[CellGroupData[{
+Cell[4615, 150, 110, 0, 43, "Subsubsection",ExpressionUUID->"428a24c7-621d-4a64-8a3c-49be9f63cd30"],
+Cell[CellGroupData[{
+Cell[4750, 154, 598, 14, 90, "Input",ExpressionUUID->"b4a908b8-fe99-4cb9-84ea-362b401fdc73"],
+Cell[5351, 170, 2405, 47, 196, "Output",ExpressionUUID->"5ef12896-b936-402d-bd3a-f32ee888e8b7"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7793, 222, 405, 9, 90, "Input",ExpressionUUID->"39303bca-0b62-4ba2-a6e5-6ee72fe08f41"],
+Cell[8201, 233, 4636, 94, 401, "Output",ExpressionUUID->"ca40aa57-df59-415f-bc19-49b6458d0dbb"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12874, 332, 658, 15, 111, "Input",ExpressionUUID->"2e0e94cf-2a1f-428d-afa6-bd29fa49df9c"],
+Cell[13535, 349, 6316, 123, 872, "Output",ExpressionUUID->"0babdc7b-41a2-47c1-8f95-9c9880478262"]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[19900, 478, 87, 0, 35, "Subsubsection",ExpressionUUID->"d0528751-17f5-4430-b378-4bccf60190b9"],
+Cell[19990, 480, 1195, 32, 172, "Input",ExpressionUUID->"d344966d-4257-41fc-b725-d1174bb88289"],
+Cell[CellGroupData[{
+Cell[21210, 516, 188, 3, 29, "Input",ExpressionUUID->"5fb3e053-29df-4f5a-9875-7dfc8060c8c6"],
+Cell[21401, 521, 1836, 33, 176, "Output",ExpressionUUID->"fdae7be8-45b7-4242-8826-ee51294c24e4"]
+}, Open  ]],
+Cell[23252, 557, 151, 2, 29, "Input",ExpressionUUID->"ffe76fe7-9760-4569-bee5-c73040011de4"],
+Cell[23406, 561, 215, 5, 29, "Input",ExpressionUUID->"e0ef7e82-9936-453f-967d-dc2335e160c0"],
+Cell[CellGroupData[{
+Cell[23646, 570, 156, 2, 29, "Input",ExpressionUUID->"15dc8a46-ca32-4a89-b27b-b023b206f045"],
+Cell[23805, 574, 123, 1, 33, "Output",ExpressionUUID->"e2bc1838-70bd-44ed-854e-e001c9f29f68"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[23965, 580, 191, 3, 29, "Input",ExpressionUUID->"6c676ada-5fea-49a8-8fc4-5bc813564a6e"],
+Cell[24159, 585, 7326, 144, 503, "Output",ExpressionUUID->"e55aeba5-ec71-4c1f-9347-840872002342"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[31522, 734, 162, 2, 29, "Input",ExpressionUUID->"ba2ee08b-9530-42fc-b95e-fd70c5d2d03d"],
+Cell[31687, 738, 1046, 20, 94, "Output",ExpressionUUID->"632488ff-d85c-48ee-a645-5f1fe7ab44d9"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[32770, 763, 159, 2, 29, "Input",ExpressionUUID->"ed77dac9-2ab2-4f22-ba1c-18a6aae7e75a"],
+Cell[32932, 767, 318, 6, 33, "Output",ExpressionUUID->"7edbc433-ff5b-4504-b5dc-aca8ef0ca2a5"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]]
+}, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 
