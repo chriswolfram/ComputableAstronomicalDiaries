@@ -9,7 +9,7 @@ OpenAIDownloadFile
 
 OpenAIBatch
 OpenAIBatchCreate
-OpenAIBatchRetrieveStatus
+OpenAIBatchStatusRetrieve
 OpenAIBatchWait
 OpenAIBatchRetrieve
 OpenAIBatchResponse
@@ -83,13 +83,13 @@ OpenAIDownloadFile[fileID_?StringQ] :=
 OpenAIBatch[assoc_][prop_] := assoc[prop]
 
 
-batchRequestByteArray[idBodies_] :=
+batchRequestByteArray[idBodies_, endpoint_] :=
 	ByteArray@ToCharacterCode@StringRiffle[
 		KeyValueMap[
 			ExportString[<|
-					"custom_id"->#1,
+					"custom_id"->BaseEncode[BinarySerialize[#1]],
 					"method"->"POST",
-					"url"->"/v1/chat/completions",
+					"url"->endpoint,
 					"body"->#2
 				|>,
 				"JSON","Compact"->True
@@ -99,7 +99,7 @@ batchRequestByteArray[idBodies_] :=
 		"\n"
 	]
 
-OpenAIBatchCreate[fileID_?StringQ, endpoint_:"/v1/chat/completions", completionWindow_:"24h"] :=
+OpenAIBatchCreate[fileID_?StringQ, endpoint_, completionWindow_] :=
 	Enclose@OpenAIBatch@Confirm@OpenAIRequest[<|
 		"Method" -> "POST",
 		"Path" -> {"v1", "batches"},
@@ -111,29 +111,32 @@ OpenAIBatchCreate[fileID_?StringQ, endpoint_:"/v1/chat/completions", completionW
 		"ContentType" -> "application/json"
 	|>]
 
-OpenAIBatchCreate[file_OpenAIFile, endpoint_:"/v1/chat/completions", completionWindow_:"24h"] :=
+OpenAIBatchCreate[file_OpenAIFile, endpoint_, completionWindow_] :=
 	OpenAIBatchCreate[file["id"], endpoint, completionWindow]
 
-OpenAIBatchCreate[batchMessages_] :=
-	OpenAIBatchCreate@OpenAIFileUpload@batchRequestByteArray[batchMessages]
+OpenAIBatchCreate[batchMessages_, endpoint_, completionWindow_] :=
+	OpenAIBatchCreate@OpenAIFileUpload@batchRequestByteArray[batchMessages, endpoint]
+
+OpenAIBatchCreate[batchSpec_] := OpenAIBatchCreate[batchSpec, "/v1/responses"]
+OpenAIBatchCreate[batchSpec_, endpoint_] := OpenAIBatchCreate[batchSpec, endpoint, "24h"]
 
 
-OpenAIBatchRetrieveStatus[batchID_?StringQ] :=
+OpenAIBatchStatusRetrieve[batchID_?StringQ] :=
 	Enclose@OpenAIBatch@Confirm@OpenAIRequest[<|
 		"Method"->"GET",
 		"Path"->{"v1", "batches", batchID}
 	|>]
 
-OpenAIBatchRetrieveStatus[batch_OpenAIBatch]:=
-	OpenAIBatchRetrieveStatus[batch["id"]]
+OpenAIBatchStatusRetrieve[batch_OpenAIBatch]:=
+	OpenAIBatchStatusRetrieve[batch["id"]]
 
 
 OpenAIBatchWait[batchID_?StringQ, t_] :=
 	Module[{status},
-		status=OpenAIBatchRetrieveStatus[batchID];
+		status=OpenAIBatchStatusRetrieve[batchID];
 		Monitor[
 			While[status["status"] =!= "completed",
-				Pause[t];status=OpenAIBatchRetrieveStatus[batchID]
+				Pause[t];status=OpenAIBatchStatusRetrieve[batchID]
 			],
 			Dataset[status[[1]]]
 		]
@@ -153,8 +156,13 @@ OpenAIBatchResponse[assoc_][prop_] := assoc[prop]
 OpenAIBatchResponse[assoc_]["TotalUsage"] :=
 	Total@assoc[[All, "response", "body", "usage"]]
 
-OpenAIBatchResponse[assoc_]["Outputs"] :=
-	Association[#"custom_id" -> #[["response", "body", "choices", 1, "message", "content"]] & /@ assoc]
+OpenAIBatchResponse[assoc_]["CompletionOutputs"] :=
+	Association[BinaryDeserialize[BaseDecode[#"custom_id"]] -> #[["response", "body", "choices", 1, "message", "content"]] & /@ assoc]
+
+OpenAIBatchResponse[assoc_]["ResponseOutputs"] :=
+	Association[BinaryDeserialize[BaseDecode[#"custom_id"]] -> #[["response", "body", "output", -1, "content", 1, "text"]] & /@ assoc]
+
+OpenAIBatchResponse[assoc_]["Outputs"] := OpenAIBatchResponse[assoc]["ResponseOutputs"]
 
 
 importJSONL[i_] :=
