@@ -34,7 +34,7 @@ FuzzyAlignments[text_,frags_,delim_:"&"]:=
 			Function[{ps,f},
 				If[EditDistance[StringTake[text,ps],f] === 0,
 					ps,
-					fuzzyAlignSingle[StringTake[text,ps],f]+ps[[1]]
+					fuzzyAlignSingle[StringTake[text,ps],f]+ps[[1]]-1
 				]],
 				{positions, frags}
 			];
