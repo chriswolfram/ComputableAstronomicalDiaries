@@ -115,7 +115,7 @@ OpenAIBatchCreate[file_OpenAIFile, endpoint_, completionWindow_] :=
 	OpenAIBatchCreate[file["id"], endpoint, completionWindow]
 
 OpenAIBatchCreate[batchMessages_, endpoint_, completionWindow_] :=
-	OpenAIBatchCreate@OpenAIFileUpload@batchRequestByteArray[batchMessages, endpoint]
+	OpenAIBatchCreate[OpenAIFileUpload@batchRequestByteArray[batchMessages, endpoint], endpoint, completionWindow]
 
 OpenAIBatchCreate[batchSpec_] := OpenAIBatchCreate[batchSpec, "/v1/responses"]
 OpenAIBatchCreate[batchSpec_, endpoint_] := OpenAIBatchCreate[batchSpec, endpoint, "24h"]
@@ -135,7 +135,7 @@ OpenAIBatchWait[batchID_?StringQ, t_] :=
 	Module[{status},
 		status=OpenAIBatchStatusRetrieve[batchID];
 		Monitor[
-			While[status["status"] =!= "completed",
+			While[!MemberQ[{"completed", "failed", "expired", "cancelled"}, status["status"]],
 				Pause[t];status=OpenAIBatchStatusRetrieve[batchID]
 			],
 			Dataset[status[[1]]]
@@ -157,7 +157,10 @@ OpenAIBatchResponse[assoc_]["TotalUsage"] :=
 	Total@assoc[[All, "response", "body", "usage"]]
 
 OpenAIBatchResponse[assoc_]["CompletionOutputs"] :=
-	Association[BinaryDeserialize[BaseDecode[#"custom_id"]] -> #[["response", "body", "choices", 1, "message", "content"]] & /@ assoc]
+	OpenAIBatchResponse[assoc]["CompletionOutputChoices"][[All,1]]
+
+OpenAIBatchResponse[assoc_]["CompletionOutputChoices"] :=
+	Association[BinaryDeserialize[BaseDecode[#"custom_id"]] -> #[["response", "body", "choices", All, "message", "content"]] & /@ assoc]
 
 OpenAIBatchResponse[assoc_]["ResponseOutputs"] :=
 	Association[BinaryDeserialize[BaseDecode[#"custom_id"]] -> #[["response", "body", "output", -1, "content", 1, "text"]] & /@ assoc]

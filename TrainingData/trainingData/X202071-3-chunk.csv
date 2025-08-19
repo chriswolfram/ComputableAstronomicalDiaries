@@ -1,4 +1,4 @@
-line,raw_string,damaged,explaination,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
 o 33,the moon was] 1 cubit [below α Geminorum],FALSE,,1,1,,moon,1,,below,α Geminorum
 o 33,the moon having passed a little to the east,FALSE,,1,1,,moon,,,east,α Geminorum
 o 33,the moon was 1 1/2 cubits in front of δ Cancri,FALSE,,2,2,,moon,1 1/2,,in front of,δ Cancri

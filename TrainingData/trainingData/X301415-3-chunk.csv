@@ -1,4 +1,4 @@
-line,raw_string,damaged,explaination,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
 r 2',the moon was [...] above α Virginis,TRUE,,4,4,beginning of the night,moon,,,above,α Virginis
 r 3',the moon] stood [... behind Jupiter?] to the east,TRUE,,6,6,beginning of the night,moon,,,behind,Jupiter
 r 3',the moon being 1 1/2 cubi[ts,FALSE,"This is connected to the earlier damaged observation, but because of the damage the date cannot be given exactly.",6,11,,moon,1 1/2,,,

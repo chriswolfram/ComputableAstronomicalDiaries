@@ -1,4 +1,4 @@
-line,raw_string,damaged,explaination,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
 o 3',the moon was] 2 cubits in front of β Arietis,FALSE,"The next day after this observation is the 'The 12th' and not 'Night of the 12th', indicating that this observation could have happened on the night of the 12th which precedes the day of the 12th.",3,12,,moon,2,,in front of,β Arietis
 o 4',the moon being 1 [...],FALSE,,3,12,,moon,,,,
 o 5',the moon being 1 1/2 cubits low to the south,FALSE,,3,12,,moon,1 1/2,,south,
