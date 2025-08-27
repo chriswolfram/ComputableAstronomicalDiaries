@@ -1,6 +1,8 @@
-BeginPackage["FuzzyAlignment`"];
+BeginPackage["AstronomicalDiaries`FuzzyAlignment`"];
 
 FuzzyAlignments
+
+Needs["AstronomicalDiaries`"]
 
 Begin["`Private`"];
 

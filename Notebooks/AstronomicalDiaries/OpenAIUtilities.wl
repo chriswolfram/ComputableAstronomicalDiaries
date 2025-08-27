@@ -1,4 +1,4 @@
-BeginPackage["OpenAIUtilities`"];
+BeginPackage["AstronomicalDiaries`OpenAIUtilities`"];
 
 (*
 OpenAIRequest
@@ -16,6 +16,8 @@ OpenAIBatchResponse
 
 OpenAIChatComplete
 OpenAIResponse
+
+Needs["AstronomicalDiaries`"]
 
 Begin["`Private`"];
 
