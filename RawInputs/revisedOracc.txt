@@ -6677,7 +6677,8 @@ o 26
 
 r 1'	[... Night of the 16th, last part of the night, the moon was] 1/2 cubit [...] δ Cancri, the moon being 1/2 cubit to [...] 
 r 2'	[...] Night of the 18th, last part of the night, the moon was [...] below ρ Leonis. 
-gr 4'	[...] which was set to the west side blew. Night of the 21st, last part of the night, the moon was 1 cubit in front of α Virginis, the moon being 1 cubit 
+r 3'	[...] Night of the 19th, last part of the night, the moon was 1 1/2 cubits in front of β Virginis, the moon being 1/2 cubit low to the south. The 19th, clouds were in the sky. 
+r 4'	[...] which was set to the west side blew. Night of the 21st, last part of the night, the moon was 1 cubit in front of α Virginis, the moon being 1 cubit 
 r 5'	[low to the south ... Night of the 22nd, last part of the night,] the moon was 3 1/2 cubits below Saturn, the moon having passed 1/2 cubit to the east. The 22nd, clouds were in the sky, the north wind blew, cold. Night of the 23rd, 
 r 6'	last part of the night, the moon was [...] Night of the 24th, last part of the night, the moon was 1 cubit in front of π Scorpii, the moon being 1/2 cubit low to the south. The 24th, clouds were in the sky. 
 r 7'	Night of the 25th, last part of the night, the moon was 1 1/2 cubits behind α Scorpii [...] overcast, gusty south wind; in the morning, a little rain shower. Night of the 26th, all night clouds were in the sky, gusty south wind. The 26th, moonrise to sunrise: 16°, measured (despite) clouds; 
