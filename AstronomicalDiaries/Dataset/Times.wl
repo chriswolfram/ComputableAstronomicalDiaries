@@ -1,6 +1,6 @@
 BeginPackage["AstronomicalDiaries`Dataset`Times`"];
 
-findObservationTimes
+findTextTimePositions
 
 Begin["`Private`"];
 
@@ -29,20 +29,6 @@ findTextTimePositions[t_] :=
 
 		Thread[positions -> times]
 	]
-
-
-findObservationTimes[text_, observationRanges_] :=
-	Module[{timePositions, chunkSplits},
-		timePositions = findTextTimePositions[text];
-		chunkSplits = findChunkSplits[text];
-		With[{timeAnnotation = findEarlierAnnotation[getSameChunkAnnotations[timePositions, chunkSplits, #], #]},
-			If[MissingQ[timeAnnotation] || earlierAnnotationDamageQ[text, #, timeAnnotation], 
-				Missing[] -> Missing[],
-				timeAnnotation
-			]
-		] & /@ observationRanges
-	]
-
 
 End[];
 EndPackage[];

@@ -21,38 +21,56 @@ observationsDataPath := observationsDataPath = FileNameJoin[{$ADBase, "Observati
 
 (* Parsing utilities *)
 
-findChunkSplits[text_] := Join[{1}, StringPosition[text, "\n\n"][[All, 1]], {StringLength[text]}]
+findChunkSplits[text_] := Join[{0}, StringPosition[text, "\n\n"][[All, 1]], {StringLength[text]}]
 
-getSameChunkAnnotations[annotations_, chunkSplits_, {start_Integer, end_Integer}] :=
-	Module[{chunk, range},
-		chunk = Last@Select[chunkSplits, LessEqualThan[start] -> "Index"];
-		range = chunkSplits[[{chunk, chunk + 1}]];
-		Select[annotations, Between[Mean[#[[1]]], range] &]
-	]
-
-
-findEarlierAnnotation[annotations_, {start_Integer, end_Integer}] :=
-	Catch@annotations[[First@Last[Position[annotations[[All, 1, 2]], _?(LessEqualThan[end]), {1}], Throw[Missing[]]]]]
-
-findEarlierAnnotation[annotations_, ranges_List] := findEarlierAnnotation[annotations, #] & /@ ranges
-
-
-findLaterAnnotation[annotations_, {start_Integer, end_Integer}] :=
-	Catch[annotations[[First@FirstPosition[annotations[[All, 1, 2]], _?(GreaterThan[end]),Throw[Missing[]]]]]]
-
-findLaterAnnotation[annotations_, ranges_List] := findLaterAnnotation[annotations, #] & /@ ranges
-
-
-earlierAnnotationDamageQ[text_, {obsStart_, obsEnd_}, {annotationStart_, annotationEnd_} -> annotation_] :=
-	If[annotationEnd >= obsStart,
-		False,
-		StringContainsQ[StringTake[text, {annotationEnd, obsStart}], "..."]
-	]
+findTextDamagePositions[text_] := StringPosition[text, "..."][[All,2]]
 
 observationDamagedQ[{text_, {obsStart_, obsEnd_}}] := 
 	StringContainsQ[StringTake[ADText@text, {obsStart, obsEnd}], "..."]
 
 optionalBracketPattern[str_] := StringExpression @@ Riffle[Characters[str], ("[" | "]") ...]
+
+
+(* Days and times *)
+
+findObservationDayTimes[text_, obsList_] :=
+	Module[{chunkSplits, damagePositions, dayPositions, timePositions, lastDamage, lastChunk, lastBreak, time, day, dayRange},
+		chunkSplits = findChunkSplits[text];
+		damagePositions = findTextDamagePositions[text];
+		dayPositions = findTextDayPositions[text];
+		timePositions = findTextTimePositions[text];
+		
+		Function[{obsStart, obsEnd},
+			lastDamage = Max[0,Select[damagePositions, # <= obsStart&]];
+			(*TODO: Should this use month breaks instead of chunk breaks?*)
+			lastChunk = Max[0,Select[chunkSplits, # <= obsStart&]];
+			lastBreak = Max[lastDamage, lastChunk];
+			
+			time = Last[Select[timePositions,
+				MatchQ[({start_, end_} -> time_) /; lastBreak <= end && start <= obsEnd]
+			], Missing[]->Missing[]];
+			
+			day = Select[dayPositions,
+				MatchQ[({start_, end_} -> day_) /; lastBreak <= end && start <= obsEnd]
+			];
+			
+			If[day =!= {},
+				dayRange = {Last[day], Last[day]},
+				dayRange = {
+					Last[
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; start <= obsEnd]],
+						Missing[] -> {"Night", 1}
+					],
+					nextEarlierDay@First[
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; obsStart <= end]],
+						Missing[] -> {"Day", 30}
+					]
+				}
+			];
+			
+			<|"Time" -> time, "DayRange" -> dayRange|>
+		] @@@ obsList
+	]
 
 
 (* Line numbers *)
@@ -93,7 +111,7 @@ Options[ADObservations] = {
 };
 
 ADObservations[observationParses_, OptionsPattern[]] :=
-	Module[{hash, observationsData, observationDayRanges, observationTimes, lineMonths, observations},
+	Module[{hash, observationsData, observationDayTimes, lineMonths, observations},
 		
 		hash = Hash[observationParses];
 
@@ -102,25 +120,17 @@ ADObservations[observationParses_, OptionsPattern[]] :=
 			If[observationsData["Hash"] =!= hash,
 				Return@Failure["ChecksumFailure", <|
 						"MessageTemplate" -> "The inputted observation parses do not match those used to generate the cached observations.\
-						Delete the cached files under `1` and regenerate observation parses to continue.",
+Delete the cached files under `1` and regenerate observation parses to continue.",
 						"MessageParameters" -> {observationsDataPath}
 					|>]
 			];
 			Return@observationsData["Observations"]
 		];
 		
-		observationDayRanges =
+		observationDayTimes =
 			Join @@ KeyValueMap[
 				Function[{textID, obsIDs},
-					AssociationThread[obsIDs, findObservationDayRanges[ADText[textID], obsIDs[[All, 2]]]]
-				],
-				GroupBy[Keys[observationParses], First]
-			];
-
-		observationTimes =
-			Join @@ KeyValueMap[
-				Function[{textID, obsIDs},
-					AssociationThread[obsIDs, findObservationTimes[ADText[textID], obsIDs[[All, 2]]]]
+					AssociationThread[obsIDs, findObservationDayTimes[ADText[textID], obsIDs[[All, 2]]]]
 				],
 				GroupBy[Keys[observationParses], First]
 			];
@@ -128,20 +138,16 @@ ADObservations[observationParses_, OptionsPattern[]] :=
 		lineMonths = ADLineMonths[];
 
 		observations = KeyValueMap[
-			Module[{obsID, line, earliestDay, latestDay, day, time, timeRange, rawMonthYear, month, rawRegnalYear, regnalYear, seYear, julianDate},
+			Module[{obsID, line, dayTimeData, earliestDay, latestDay, day, time, timeRange, rawMonthYear, month, rawRegnalYear, regnalYear, seYear, julianDate},
 				obsID = #1;
 				Function[
 					line = getPositionLineNumber[ADTextData[obsID[[1]]], obsID[[2, 1]]];
 
-					earliestDay = observationDayRanges[obsID][[1, 2]];
-					latestDay = observationDayRanges[obsID][[2, 2]];
+					dayTimeData = observationDayTimes[obsID];
+					{earliestDay, latestDay} = dayTimeData["DayRange"][[All, 2, 2]];
 					day = If[earliestDay === latestDay, earliestDay, Missing[]];
 
-					{time, timeRange} =
-						Replace[observationTimes[obsID], {
-								_Missing -> {Missing[], Missing[]},
-								(range_ -> val_) :> {val, range}
-							}];
+					{time, timeRange} = Replace[dayTimeData["Time"], (range_ -> val_) :> {val, range}];
 
 					rawMonthYear = Lookup[Lookup[lineMonths, obsID[[1]], <||>], line,
 							<|"Year" -> Missing[], "Month" -> Missing[]|>
@@ -175,8 +181,8 @@ ADObservations[observationParses_, OptionsPattern[]] :=
 						"TextID" -> obsID[[1]],
 						"Range" -> obsID[[2]],
 						"TimeRange" -> timeRange,
-						"EarliestDayRange" -> observationDayRanges[obsID][[1, 1]],
-						"LatestDayRange" -> observationDayRanges[obsID][[2, 1]]
+						"EarliestDayRange" -> dayTimeData[["DayRange", 1, 1]],
+						"LatestDayRange" -> dayTimeData[["DayRange", 2, 1]]
 					|>
 				]@#2
 			]&,

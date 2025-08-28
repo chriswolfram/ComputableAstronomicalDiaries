@@ -1,6 +1,7 @@
 BeginPackage["AstronomicalDiaries`Dataset`Days`"];
 
-findObservationDayRanges
+findTextDayPositions
+nextEarlierDay
 
 Begin["`Private`"];
 
@@ -57,33 +58,9 @@ findTextDayPositions[t_] :=
 
 
 nextEarlierDay[m_?MissingQ] := m
+nextEarlierDay[r_ -> m_?MissingQ] := r -> m
 nextEarlierDay[r_ -> {"Night", n_Integer}] := r -> {"Day", n - 1}
 nextEarlierDay[r_ -> {"Day", n_Integer}] := r -> {"Night", n}
-
-
-findObservationDayRanges[text_, observationRanges_] :=
-	Module[{dayPositions, chunkSplits},
-		dayPositions = findTextDayPositions[text];
-		chunkSplits = findChunkSplits[text];
-		Function[obsRange,
-			Module[{sameChunkAnnotations, earlierDay, laterDay},
-				sameChunkAnnotations = getSameChunkAnnotations[dayPositions, chunkSplits, obsRange];
-				earlierDay = findEarlierAnnotation[sameChunkAnnotations, obsRange];
-
-				If[MissingQ[earlierDay] || earlierAnnotationDamageQ[text, obsRange, earlierDay],
-					laterDay = nextEarlierDay@findLaterAnnotation[sameChunkAnnotations, obsRange],
-					laterDay = earlierDay
-				];
-
-				earlierDay //= Replace[(r_ -> {t_, d_}) :> (r -> d)];
-				laterDay //= Replace[(r_ -> {t_, d_}) :> (r -> d)];
-				{
-					Replace[earlierDay, _Missing -> (Missing[] -> 1)],
-					Replace[laterDay, _Missing -> (Missing[] -> 30)]
-				}
-			]
-		] /@ observationRanges
-	]
 
 
 End[];
