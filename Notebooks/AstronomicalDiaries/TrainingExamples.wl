@@ -2,9 +2,9 @@ BeginPackage["AstronomicalDiaries`TrainingExamples`"];
 
 trainingExample
 
-Needs["AstronomicalDiaries`"]
-
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
 
 trainingExampleBase := trainingExampleBase = FileNameJoin[{$ADBase, "TrainingExamples"}]
 

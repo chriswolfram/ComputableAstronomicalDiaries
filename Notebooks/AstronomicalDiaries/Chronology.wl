@@ -1,13 +1,13 @@
 BeginPackage["AstronomicalDiaries`Chronology`"];
 
-Needs["AstronomicalDiaries`"]
-
 regnalToSE
 parseRegnalYear
 
 getPDChronologyMonthMap
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
 
 
 chronologyPath := FileNameJoin[{$ADBase, "Chronology"}]

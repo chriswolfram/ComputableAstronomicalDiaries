@@ -1,11 +1,11 @@
 BeginPackage["AstronomicalDiaries`LineMonths`Prompt`"];
 
-Needs["AstronomicalDiaries`"]
-Needs["AstronomicalDiaries`LineMonths`FewShotExamples`"]
-
 prompt
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
+Needs["AstronomicalDiaries`LineMonths`FewShotExamples`"]
 
 prompt := prompt =
 "Below is text from an ancient Babylonian tablet containing astronomical observations. For each line in the text, identify the month and year that the line covers, and return the result in a JSON format.

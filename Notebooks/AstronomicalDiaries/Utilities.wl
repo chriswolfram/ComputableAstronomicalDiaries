@@ -1,11 +1,11 @@
 BeginPackage["AstronomicalDiaries`Utilities`"];
 
-Needs["AstronomicalDiaries`"]
-
 importUTF8JSON
 exportUTF8JSON
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
 
 importUTF8JSON[str_] := ImportString[FromCharacterCode[ToCharacterCode[str, "UTF8"]], "RawJSON"]
 

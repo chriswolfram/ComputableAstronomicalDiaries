@@ -1,12 +1,12 @@
 BeginPackage["AstronomicalDiaries`LineMonths`"];
 
+Begin["`Private`"];
+
 Needs["AstronomicalDiaries`"]
 Needs["AstronomicalDiaries`OpenAIUtilities`"]
 Needs["AstronomicalDiaries`Utilities`"]
 Needs["AstronomicalDiaries`Texts`"]
 Needs["AstronomicalDiaries`LineMonths`Prompt`"]
-
-Begin["`Private`"];
 
 lineMonthsPath := lineMonthsPath = FileNameJoin[{$ADBase, "LineMonths"}];
 batchPath := batchPath = FileNameJoin[{lineMonthsPath, "batch.mx"}];

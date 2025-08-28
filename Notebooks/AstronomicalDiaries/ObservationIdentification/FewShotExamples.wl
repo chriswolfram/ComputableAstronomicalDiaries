@@ -1,12 +1,12 @@
 BeginPackage["AstronomicalDiaries`ObservationIdentification`FewShotExamples`"];
 
-Needs["AstronomicalDiaries`"]
-Needs["AstronomicalDiaries`Utilities`"]
-Needs["AstronomicalDiaries`TrainingExamples`"]
-
 examplePrompt
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
+Needs["AstronomicalDiaries`Utilities`"]
+Needs["AstronomicalDiaries`TrainingExamples`"]
 
 
 trainingChunks = {

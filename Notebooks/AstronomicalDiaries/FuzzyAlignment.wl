@@ -1,10 +1,10 @@
 BeginPackage["AstronomicalDiaries`FuzzyAlignment`"];
 
-Needs["AstronomicalDiaries`"]
-
 FuzzyAlignments
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
 
 fuzzyAlignSingle[text_, frag_]:=
 	Module[{alignment},

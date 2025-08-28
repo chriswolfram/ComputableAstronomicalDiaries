@@ -1,13 +1,13 @@
 BeginPackage["AstronomicalDiaries`ObservationIdentification`"];
 
+Begin["`Private`"];
+
 Needs["AstronomicalDiaries`"]
 Needs["AstronomicalDiaries`ObservationIdentification`Prompt`"]
 Needs["AstronomicalDiaries`Texts`"]
 Needs["AstronomicalDiaries`OpenAIUtilities`"]
 Needs["AstronomicalDiaries`FuzzyAlignment`"]
 Needs["AstronomicalDiaries`Utilities`"]
-
-Begin["`Private`"];
 
 obsIDPath := obsIDPath = FileNameJoin[{$ADBase, "ObservationIdentification"}];
 batchPath := batchPath = FileNameJoin[{obsIDPath, "batch.mx"}];
@@ -65,13 +65,8 @@ batchResponseLoad[batchResponse_] :=
 	]
 
 
-observationIDs = Missing[];
-
 ADObservationIDs[] :=
-	Module[{batch, batchResponse},
-
-		 (* Load if already cached *)
-		 If[!MissingQ[observationIDs], Return@observationIDs];
+	Module[{batch, batchResponse, observationIDs},
 
 		(* Create batch *)
 		If[!FileExistsQ[batchPath],

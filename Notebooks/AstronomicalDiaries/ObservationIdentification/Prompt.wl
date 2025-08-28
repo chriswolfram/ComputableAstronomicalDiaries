@@ -1,12 +1,12 @@
 BeginPackage["AstronomicalDiaries`ObservationIdentification`Prompt`"];
 
-Needs["AstronomicalDiaries`"]
-Needs["AstronomicalDiaries`Utilities`"]
-Needs["AstronomicalDiaries`ObservationIdentification`FewShotExamples`"]
-
 prompt
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
+Needs["AstronomicalDiaries`Utilities`"]
+Needs["AstronomicalDiaries`ObservationIdentification`FewShotExamples`"]
 
 
 prompt := prompt = "You will receive a translation of an ancient Babylonian tablet containing astronomical observations. Your task is to extract only the distance-based observations and present them in a concise, structured JSON format.

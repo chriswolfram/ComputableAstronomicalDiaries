@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      6632,        173]
-NotebookOptionsPosition[      4182,        125]
-NotebookOutlinePosition[      4575,        141]
-CellTagsIndexPosition[      4532,        138]
+NotebookDataLength[      7712,        205]
+NotebookOptionsPosition[      4903,        150]
+NotebookOutlinePosition[      5299,        166]
+CellTagsIndexPosition[      5256,        163]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -89,7 +89,7 @@ Cell[CellGroupData[{
 
 Cell["Line months", "Subsection",ExpressionUUID->"7c0b5bec-6537-48f6-9d3e-62cd0a70f23c"],
 
-Cell["Use an LLM to find the mapping from line numbers to months:", "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
+Cell["Automatically find the mapping from line numbers to months:", "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
 
 Cell[BoxData[
  RowBox[{
@@ -112,7 +112,7 @@ Cell[CellGroupData[{
 
 Cell["Observation flagging", "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
 
-Cell["Use an LLM to find all the ", "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
+Cell["Find all the substrings that contain observations:", "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
 
 Cell[BoxData[
  RowBox[{
@@ -120,11 +120,36 @@ Cell[BoxData[
  CellLabel->"In[4]:=",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
 }, Open  ]],
 
-Cell["Observation parsing", "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"]
+Cell[CellGroupData[{
+
+Cell["Observation parsing", "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"],
+
+Cell["Parse the observation substrings:", "Text",ExpressionUUID->"23303b57-cd68-425b-b4f5-c2343b3dc3a1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ADObservationParses", "[", "]"}], ";"}]], "Input",
+ CellLabel->"In[7]:=",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Dataset[
+    Part[AstronomicalDiaries`OpenAIUtilities`Private`status$131605, 1]], 
+   StandardForm],
+  Evaluator->"Local",
+  ImageSizeCache->{
+   633., {263.8328857421875, 269.1239013671875}}]], "PrintTemporary",
+ CellLabel->
+  "During evaluation of \
+In[7]:=",ExpressionUUID->"a1fcd396-701d-4e8d-a1cc-7238321eabad"]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 },
 WindowSize->{808, 911},
-WindowMargins->{{120, Automatic}, {Automatic, 44}},
+WindowMargins->{{-19, Automatic}, {Automatic, -1180}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"8e7ee2c9-6c2c-41f0-bd9c-7699b98b808c"
@@ -170,10 +195,17 @@ Cell[3488, 104, 169, 3, 29, "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a5
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[3694, 112, 97, 0, 53, "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
-Cell[3794, 114, 98, 0, 33, "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
-Cell[3895, 116, 160, 3, 29, "Input",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
+Cell[3794, 114, 121, 0, 33, "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
+Cell[3918, 116, 160, 3, 29, "Input",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
 }, Open  ]],
-Cell[4070, 122, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"]
+Cell[CellGroupData[{
+Cell[4115, 124, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"],
+Cell[4214, 126, 104, 0, 33, "Text",ExpressionUUID->"23303b57-cd68-425b-b4f5-c2343b3dc3a1"],
+Cell[CellGroupData[{
+Cell[4343, 130, 163, 3, 29, "Input",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"],
+Cell[4509, 135, 354, 10, 540, "PrintTemporary",ExpressionUUID->"a1fcd396-701d-4e8d-a1cc-7238321eabad"]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 }
 ]

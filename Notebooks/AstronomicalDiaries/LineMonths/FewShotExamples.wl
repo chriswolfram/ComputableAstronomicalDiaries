@@ -1,11 +1,11 @@
 BeginPackage["AstronomicalDiaries`LineMonths`FewShotExamples`"];
 
-Needs["AstronomicalDiaries`"]
-Needs["AstronomicalDiaries`Utilities`"]
-
 examplePrompt
 
 Begin["`Private`"];
+
+Needs["AstronomicalDiaries`"]
+Needs["AstronomicalDiaries`Utilities`"]
 
 
 examples := examples = {
