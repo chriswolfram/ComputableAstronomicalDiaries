@@ -1,0 +1,371 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     17673,        363]
+NotebookOptionsPosition[     16918,        343]
+NotebookOutlinePosition[     17314,        359]
+CellTagsIndexPosition[     17271,        356]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData["Quit"], "Input",
+ CellLabel->"In[5]:=",ExpressionUUID->"9ebd20c9-af05-4caa-b8a2-185fa7a7e3aa"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"AppendTo", "[", 
+   RowBox[{"$Path", ",", 
+    RowBox[{"ParentDirectory", "@", 
+     RowBox[{"NotebookDirectory", "[", "]"}]}]}], "]"}], ";"}], "\n", 
+ RowBox[{"Needs", "[", "\"\<AstronomicalDiaries`\>\"", "]"}]}], "Input",
+ CellLabel->"In[1]:=",ExpressionUUID->"aa547005-164c-4bd6-b6e0-06ef6463eddd"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"testDir", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"ParentDirectory", "@", 
+       RowBox[{"NotebookDirectory", "[", "]"}]}], ",", "\"\<Tests\>\""}], 
+     "}"}], "]"}]}], ";"}]], "Input",
+ CellLabel->"In[3]:=",ExpressionUUID->"8b84b666-c294-48ab-ae0c-4ece3512e56c"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"rep", "=", 
+  RowBox[{"TestReport", "@", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"testDir", ",", "\"\<Dataset.wlt\>\""}], "}"}], 
+    "]"}]}]}]], "Input",
+ CellLabel->"In[4]:=",ExpressionUUID->"70991a64-e41f-4e56-bc3b-91e9fa017176"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestReportObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False, Typeset`embedState$$ = "Ready"}, 
+    
+    TemplateBox[{
+      PaneSelectorBox[{False -> GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxOpener"], 
+               ImageSizeCache -> {10.6984921875, {0., 10.6984921875}}], 
+              Appearance -> None, BaseStyle -> {}, 
+              ButtonFunction :> (Typeset`open$$ = True), Evaluator -> 
+              Automatic, Method -> "Preemptive"], 
+             Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[
+             InsetBox[
+              PaneBox[
+               DynamicBox[
+                FEPrivate`FrontEndResource["MUnitExpressions", "SuccessIcon"],
+                 ImageSizeCache -> {
+                 23.81513671875, {8.822607421875, 14.992529296875}}], 
+               Alignment -> Center, ImageSize -> 
+               Dynamic[{
+                 Automatic, 
+                  3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])}]]], AspectRatio -> 1, Axes -> False, 
+             Background -> GrayLevel[0.93], Frame -> True, FrameStyle -> 
+             Directive[
+               Thickness[Tiny], 
+               GrayLevel[0.55]], FrameTicks -> None, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}], PlotRange -> {{0, 1}, {0, 1}}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Title: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["\"Test Report: Dataset.wlt\"", "SummaryItem"]}], 
+               "\[SpanFromLeft]"}, {
+               RowBox[{
+                 TagBox["\"Success rate: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  TagBox[
+                   InterpretationBox[
+                    StyleBox["\"100%\"", ShowStringCharacters -> False], 1., 
+                    AutoDelete -> True], PercentForm], "SummaryItem"]}], 
+               RowBox[{
+                 TagBox["\"Tests count: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["6", "SummaryItem"]}]}}, AutoDelete -> False, 
+             BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}, 
+             GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, 
+             GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {
+              "Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}}, AutoDelete -> 
+          False, BaselinePosition -> {1, 1}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True -> 
+        GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxCloser"], 
+               ImageSizeCache -> {10.6984921875, {0., 10.6984921875}}], 
+              Appearance -> None, BaseStyle -> {}, 
+              ButtonFunction :> (Typeset`open$$ = False), Evaluator -> 
+              Automatic, Method -> "Preemptive"], 
+             Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[
+             InsetBox[
+              PaneBox[
+               DynamicBox[
+                FEPrivate`FrontEndResource["MUnitExpressions", "SuccessIcon"],
+                 ImageSizeCache -> {
+                 23.81513671875, {8.822607421875, 14.992529296875}}], 
+               Alignment -> Center, ImageSize -> 
+               Dynamic[{
+                 Automatic, 
+                  3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])}]]], AspectRatio -> 1, Axes -> False, 
+             Background -> GrayLevel[0.93], Frame -> True, FrameStyle -> 
+             Directive[
+               Thickness[Tiny], 
+               GrayLevel[0.55]], FrameTicks -> None, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}], PlotRange -> {{0, 1}, {0, 1}}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Title: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["\"Test Report: Dataset.wlt\"", "SummaryItem"]}], 
+               "\[SpanFromLeft]"}, {
+               RowBox[{
+                 TagBox["\"Success rate: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  TagBox[
+                   InterpretationBox[
+                    StyleBox["\"100%\"", ShowStringCharacters -> False], 1., 
+                    AutoDelete -> True], PercentForm], "SummaryItem"]}], 
+               RowBox[{
+                 TagBox["\"Tests count: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["6", "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"Success count: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["6", "SummaryItem"]}], "\[SpanFromLeft]"}, {
+               RowBox[{
+                 TagBox["\"Time elapsed: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  
+                  TemplateBox[{
+                   "0.202368`4.678505587028428", "\"s\"", "seconds", 
+                    "\"Seconds\""}, "Quantity"], "SummaryItem"]}], 
+               "\[SpanFromLeft]"}}, AutoDelete -> False, 
+             BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}, 
+             GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, 
+             GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {
+              "Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}}, AutoDelete -> 
+          False, BaselinePosition -> {1, 1}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, 
+       Dynamic[Typeset`open$$], ImageSize -> Automatic]},
+     "SummaryPanel"],
+    DynamicModuleValues:>{}], "]"}],
+  TestReportObject[<|
+   "Title" -> "Test Report: Dataset.wlt", "Aborted" -> False, 
+    "TestResults" -> <|
+     8515911251024398431 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.965396780371042`15.651891634460958*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "8968f9fe-a576-4bd6-abee-a7ac0a4cb2b1", "TestID" -> 
+         "t0ewtcq38uztoy", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "0383e7b6-b9e2-402a-aa10-7f03f476ab0b", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the 12th, beginning of the night, test observation here. \
+Night of the 14th.", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {1, 15} -> 12}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {1, 15} -> 12}}], "ActualMessages" -> {}, 
+         "AbsoluteTimeUsed" -> 0.200363`5.452332523513135, "CPUTimeUsed" -> 
+         0.19509200000000004`, "MemoryUsed" -> 5813944, 
+         "IntermediateTestsTree" -> {}, "Outcome" -> "Success", "FailureType" -> 
+         None|>], 6512775923090122268 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.965396780371211`15.651891634460975*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "98f61215-056a-41b5-9353-bce9591f871a", "TestID" -> 
+         "t0p39gdp3ca6uq", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "861415ea-c1cd-4413-a9ad-a743db2a9f82", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the 12th, ..., beginning of the night, test observation \
+here. Night of the 14th.", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {72, 86} -> 13}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {72, 86} -> 13}}], "ActualMessages" -> {}, 
+         "AbsoluteTimeUsed" -> 0.000781`3.0431660317092946, "CPUTimeUsed" -> 
+         0.0007800000000000029, "MemoryUsed" -> 5144, 
+         "IntermediateTestsTree" -> {}, "Outcome" -> "Success", "FailureType" -> 
+         None|>], 4687635409659086148 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.965396780371346`15.651891634460993*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "5041413d-c8e6-4bef-958a-c12da625dd63", "TestID" -> 
+         "t15hvm6bulucb7", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "e0457b38-2c99-47eb-a53a-9e6aa2185ebb", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the 12th, beginning of the night, test observation here. \
+Night of the", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {1, 15} -> 12}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{{1, 15} -> 12, {1, 15} -> 12}}], "ActualMessages" -> {}, 
+         "AbsoluteTimeUsed" -> 0.000378`2.7280067976692193, "CPUTimeUsed" -> 
+         0.0003789999999999072, "MemoryUsed" -> 3736, 
+         "IntermediateTestsTree" -> {}, "Outcome" -> "Success", "FailureType" -> 
+         None|>], 4514475889476698698 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.96539678037147`15.651891634461006*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "7bc8d42b-3b9b-44de-a0fa-a5aa01f39540", "TestID" -> 
+         "t1nuxas3avd28m", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "3f1180f1-8edf-4e2d-a887-9a2ba1e10916", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the 12th, ..., beginning of the night, test observation \
+here. Night of the.", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{{1, 15} -> 12, Missing[] -> 30}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{{1, 15} -> 12, Missing[] -> 30}}], "ActualMessages" -> {},
+          "AbsoluteTimeUsed" -> 0.000392`2.743801064852451, "CPUTimeUsed" -> 
+         0.00039999999999995595`, "MemoryUsed" -> 3752, 
+         "IntermediateTestsTree" -> {}, "Outcome" -> "Success", "FailureType" -> 
+         None|>], 2805041693751044091 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.965396780371589`15.651891634461018*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "01c94b92-76d0-45d4-9809-ad840f4fb03b", "TestID" -> 
+         "t165n3f6z0bzbp", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "fb758fdc-eeef-428a-a1bd-3be18dee4516", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the, beginning of the night, test observation here. \
+Night of the 14th.", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{Missing[] -> 1, {62, 76} -> 13}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{Missing[] -> 1, {62, 76} -> 13}}], "ActualMessages" -> {},
+          "AbsoluteTimeUsed" -> 0.000374`2.7233866000324745, "CPUTimeUsed" -> 
+         0.0003740000000000965, "MemoryUsed" -> 3752, 
+         "IntermediateTestsTree" -> {}, "Outcome" -> "Success", "FailureType" -> 
+         None|>], 9014481819703689967 -> 
+      TestObject[<|
+        "MetaInformation" -> None, "AbsoluteTime" -> 
+         3.965396780371707`15.65189163446103*^9, "SameTest" -> SameQ, 
+         "SameMessages" -> Testing`MessageMatchQ, "MemoryConstraint" -> 
+         DirectedInfinity[1], "TimeConstraint" -> DirectedInfinity[1], 
+         "CreationID" -> "16d0e8dc-be94-4d44-ac0a-2f7c4ed8783d", "TestID" -> 
+         "t1rik5h9qgx940", "TestFileName" -> 
+         "/Users/christopher/git/ComputableAstronomicalDiaries/Tests/Dataset.\
+wlt", "EvaluationID" -> "65b5f391-c8ed-48e4-a550-88de58ba07bc", "Input" -> 
+         HoldForm[
+           AstronomicalDiaries`Dataset`Private`findObservationDayRanges[
+           "Night of the, beginning of the night, test observation here. \
+Night of the.", {{44, 45}}]], "ExpectedOutput" -> 
+         HoldForm[{{Missing[] -> 1, Missing[] -> 30}}], "ExpectedMessages" -> 
+         HoldForm[{}], "ActualOutput" -> 
+         HoldForm[{{Missing[] -> 1, Missing[] -> 30}}], 
+         "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
+         0.00008`2.0536049848239375, "CPUTimeUsed" -> 0.00008099999999999774, 
+         "MemoryUsed" -> 3880, "IntermediateTestsTree" -> {}, "Outcome" -> 
+         "Success", "FailureType" -> None|>]|>, "FailureResults" -> <||>, 
+    "TestsNotEvaluatedKeys" -> {}, "TestsFailedWrongResultsKeys" -> {}, 
+    "TestsFailedWithMessagesKeys" -> {}, 
+    "TestsSucceededKeys" -> {8515911251024398431, 6512775923090122268, 
+     4687635409659086148, 4514475889476698698, 2805041693751044091, 
+     9014481819703689967}|>],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellLabel->"Out[4]=",ExpressionUUID->"a73c18ea-1dae-452f-8afd-24dbba035005"]
+}, Open  ]]
+},
+WindowSize->{808, 911},
+WindowMargins->{{-45, Automatic}, {Automatic, -1085}},
+FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"bdb6facc-9b4f-4c46-afe7-eaedbd4a25ab"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 108, 1, 29, "Input",ExpressionUUID->"9ebd20c9-af05-4caa-b8a2-185fa7a7e3aa"],
+Cell[665, 23, 337, 7, 49, "Input",ExpressionUUID->"aa547005-164c-4bd6-b6e0-06ef6463eddd"],
+Cell[1005, 32, 345, 9, 29, "Input",ExpressionUUID->"8b84b666-c294-48ab-ae0c-4ece3512e56c"],
+Cell[CellGroupData[{
+Cell[1375, 45, 281, 7, 29, "Input",ExpressionUUID->"70991a64-e41f-4e56-bc3b-91e9fa017176"],
+Cell[1659, 54, 15243, 286, 58, "Output",ExpressionUUID->"a73c18ea-1dae-452f-8afd-24dbba035005"]
+}, Open  ]]
+}
+]
+*)
+

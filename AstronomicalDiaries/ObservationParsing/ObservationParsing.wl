@@ -97,7 +97,7 @@ batchCreate[observationIDs_] :=
 		observationIDs
 	]
 
-batchResponseLoad[batchResponse_] := importUTF8JSON & /@ batchResponse["Outputs"]
+batchResponseLoad[batchResponse_] := importUTF8JSON /@ batchResponse["Outputs"]
 
 
 observationParses = Missing[];
