@@ -10,25 +10,22 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[    257499,       4865]
-NotebookOptionsPosition[    252820,       4776]
-NotebookOutlinePosition[    253216,       4792]
-CellTagsIndexPosition[    253173,       4789]
+NotebookDataLength[    251278,       4722]
+NotebookOptionsPosition[    248579,       4664]
+NotebookOutlinePosition[    248975,       4680]
+CellTagsIndexPosition[    248932,       4677]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
-Cell[BoxData["Quit"], "Input",
- CellLabel->"In[9]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
 
 Cell[CellGroupData[{
-
-Cell["Init", "Section",ExpressionUUID->"5e1d323f-2d73-4173-ae6f-bbb5370c544e"],
+Cell["Init", "Section",ExpressionUUID->"304d9dd4-0a7c-4ad7-9b3a-669a13918e10"],
 
 Cell["\<\
 Load the package and set the base directory where intermediate files will be \
 created:\
-\>", "Text",ExpressionUUID->"e424bd2f-1b4d-4148-a607-15e62ec02438"],
+\>", "Text",ExpressionUUID->"a4b1ab52-dba3-47df-98da-02f057a63b81"],
 
 Cell[BoxData[{
  RowBox[{
@@ -38,7 +35,7 @@ Cell[BoxData[{
      RowBox[{"NotebookDirectory", "[", "]"}]}]}], "]"}], ";"}], "\n", 
  RowBox[{"Needs", "[", "\"\<AstronomicalDiaries`\>\"", "]"}]}], "Input",
  InitializationCell->True,
- CellLabel->"In[5]:=",ExpressionUUID->"b3ea4588-b9e7-4a11-b083-292512da60bd"],
+ CellLabel->"In[1]:=",ExpressionUUID->"c99cf050-1335-407b-9aaa-5902ed817349"],
 
 Cell[BoxData[
  RowBox[{
@@ -50,105 +47,21 @@ Cell[BoxData[
        RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ",", "\"\<Data\>\""}], 
      "}"}], "]"}]}], ";"}]], "Input",
  InitializationCell->True,
- CellLabel->"In[7]:=",ExpressionUUID->"8f6617a6-818d-4802-bd15-e754a2e31cde"]
+ CellLabel->"In[3]:=",ExpressionUUID->"5263dd43-b17d-452c-8641-1219cf55b956"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Getting texts", "Section",ExpressionUUID->"5adb787c-752c-414b-a07b-5379639897bc"],
-
-Cell[TextData[{
- "Download the texts and metadata from Oracc and then create a file called ",
- StyleBox["revisdOracc.txt", "Program"],
- " that can be edited to fix errors in the Oracc texts:"
-}], "Text",ExpressionUUID->"ffe8dc62-f3b2-4d93-b449-423fb5539921"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"ADRevisedOraccExport", "[", "]"}]], "Input",
- CellLabel->"In[4]:=",ExpressionUUID->"974617a7-df68-4f2c-bf4e-f1c6d8adb3b1"],
-
-Cell[BoxData["\<\"/Users/christopher/git/ComputableAstronomicalDiaries/\
-InputTexts/revisedOracc.txt\"\>"], "Output",
- CellLabel->"Out[4]=",ExpressionUUID->"43fb3fa0-6df0-4617-8bdf-7895a8759654"]
-}, Open  ]]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["Parsing", "Section",ExpressionUUID->"2cd32681-5414-47a5-b380-33d9485feb4c"],
+Cell["Validation", "Section",ExpressionUUID->"63089e74-a34a-4054-b67a-7d691ae3397d"],
 
 Cell["\<\
-Make sure that the OpenAI API key is set through SystemCredential:\
-\>", "Text",ExpressionUUID->"25e04915-d387-4630-b62a-813fe65bc499"],
-
-Cell[BoxData[
- RowBox[{"(*", 
-  RowBox[{
-   RowBox[{"SystemCredential", "[", "\"\<OPENAI_API_KEY\>\"", "]"}], 
-   "=", "\"\<<your api key>\>\""}], "*)"}]], "Input",
- CellLabel->"In[5]:=",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"],
+Check that all of the list of names used to canonicalize parser outputs isn't \
+missing anything important.\
+\>", "Text",ExpressionUUID->"de084d43-14ea-480e-b35a-30db12c79373"],
 
 Cell[CellGroupData[{
 
-Cell["Line months", "Subsection",ExpressionUUID->"7c0b5bec-6537-48f6-9d3e-62cd0a70f23c"],
-
-Cell["Automatically find the mapping from line numbers to months:", "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"ADLineMonths", "[", "]"}], ";"}]], "Input",
- CellLabel->"In[11]:=",ExpressionUUID->"8fe057c1-869c-4029-bb73-9f6b44131955"],
-
-Cell["\<\
-If the automatically-generated mapping from line numbers to months was wrong, \
-it can be hardcoded. The line below creates an editable file that can be used \
-to hardcode the line-month mapping:\
-\>", "Text",ExpressionUUID->"4c056f58-4c95-4db9-87a2-542a2269f069"],
-
-Cell[BoxData[
- RowBox[{"(*", 
-  RowBox[{"ADLineMonthHardcode", "[", "\"\<X102611\>\"", "]"}], 
-  "*)"}]], "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a58df8647e4"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["Observation flagging", "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
-
-Cell["Find all the substrings that contain observations:", "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"ADObservationIDs", "[", "]"}], ";"}]], "Input",
- CellLabel->"In[4]:=",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["Observation parsing", "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"],
-
-Cell["Parse the observation substrings:", "Text",ExpressionUUID->"23303b57-cd68-425b-b4f5-c2343b3dc3a1"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"ADObservationParses", "[", "]"}], ";"}]], "Input",
- CellLabel->"In[4]:=",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["Dataset construction", "Subsection",ExpressionUUID->"4e649896-66f3-4d84-ae3f-7667a0bcec6a"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"ADObservations", "[", "]"}], "//", "Dataset"}]], "Input",
- CellLabel->"In[4]:=",ExpressionUUID->"cc4a5d74-a00d-49bd-b34d-7acb68aabb82"],
-
-Cell[CellGroupData[{
-
-Cell["Objects", "Subsubsection",ExpressionUUID->"38230b93-b739-401d-9997-97295d114fea"],
+Cell["Objects", "Subsection",ExpressionUUID->"4795008a-fb1e-443a-9972-6e8483e1b9cc"],
 
 Cell[CellGroupData[{
 
@@ -160,7 +73,7 @@ Cell[BoxData[
      RowBox[{"ADObservationParses", "[", "]"}], "[", 
      RowBox[{"[", 
       RowBox[{"All", ",", "\"\<object\>\""}], "]"}], "]"}]}]}]}]], "Input",
- CellLabel->"In[18]:=",ExpressionUUID->"8c0c1c12-7644-471f-9231-b88b6db9fc0e"],
+ CellLabel->"In[6]:=",ExpressionUUID->"c11f2fa6-548a-4a89-9581-ba0b0b658051"],
 
 Cell[BoxData[
  TagBox[
@@ -839,7 +752,7 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[18]=",ExpressionUUID->"0c87729d-b23c-4459-b292-d6153dc12c18"]
+ CellLabel->"Out[6]=",ExpressionUUID->"c739a349-1875-4423-a419-33c21ca14aa4"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -856,33 +769,33 @@ Cell[BoxData[
         RowBox[{"All", ",", "\"\<object\>\""}], "]"}], "]"}]}]}], ",", 
     RowBox[{"Keys", "@", "AstronomicalDiaries`Dataset`Names`objectNames"}]}], 
    "]"}]}]], "Input",
- CellLabel->"In[19]:=",ExpressionUUID->"2e6eaa6a-f24a-403a-8601-0ef090b200d9"],
+ CellLabel->"In[7]:=",ExpressionUUID->"c9e5c45a-6317-4690-9526-c9a5b7310f07"],
 
 Cell[BoxData[
  TagBox[
   TagBox[
    DynamicModuleBox[{TypeSystem`NestedGrid`PackagePrivate`$state$$ = <|
     "InitialData" -> <|
-      Null -> 1000, "the moon" -> 99, "it" -> 21, "comet" -> 4, "Mars?" -> 2, 
+      Null -> 1000, "it" -> 21, "comet" -> 4, "Mars?" -> 2, 
        "Mars and Mercury" -> 1, "\[Alpha] Leonis" -> 1, "small star" -> 1|>, 
      "AllowEmbedding" -> True, "InitialShape" -> 
      TypeSystem`PackageScope`Limited[
        TypeSystem`PackageScope`ColumnShape[
         TypeSystem`PackageScope`KeyValueShape[
          TypeSystem`PackageScope`UnknownShape[True], 
-         TypeSystem`PackageScope`AtomShape[34]]], 8, 
+         TypeSystem`PackageScope`AtomShape[34]]], 7, 
        DirectedInfinity[1], {}], "InitialType" -> 
      TypeSystem`Assoc[TypeSystem`AnyType, 
-       TypeSystem`Atom[Integer], 8], "Meta" -> <||>, "RowTarget" -> 20, 
+       TypeSystem`Atom[Integer], 7], "Meta" -> <||>, "RowTarget" -> 20, 
      "ColumnTarget" -> 10, "Shape" -> TypeSystem`PackageScope`Limited[
        TypeSystem`PackageScope`ColumnShape[
         TypeSystem`PackageScope`KeyValueShape[
          TypeSystem`PackageScope`UnknownShape[True], 
-         TypeSystem`PackageScope`AtomShape[34]]], 8, 
+         TypeSystem`PackageScope`AtomShape[34]]], 7, 
        DirectedInfinity[1], {}], "Type" -> 
      TypeSystem`Assoc[TypeSystem`AnyType, 
-       TypeSystem`Atom[Integer], 8], "Path" -> {}, "DisplayedRowCount" -> 8, 
-     "DisplayedColumnCount" -> 1, "DataRowCount" -> 8, "DataColumnCount" -> 1,
+       TypeSystem`Atom[Integer], 7], "Path" -> {}, "DisplayedRowCount" -> 7, 
+     "DisplayedColumnCount" -> 1, "DataRowCount" -> 7, "DataColumnCount" -> 1,
       "SortPaths" -> {}, "SortDirections" -> {}, "HiddenItemsMap" -> Null, 
      "UpdateType" -> 1|>, TypeSystem`NestedGrid`PackagePrivate`$outputID$$, 
     TypeSystem`NestedGrid`PackagePrivate`$path$$ = {}, 
@@ -917,29 +830,6 @@ Cell[BoxData[
                 TypeSystem`NestedGrid`PackagePrivate`localHold[
                 TypeSystem`NestedGrid`PackagePrivate`$outputID$$]][{
                  Key[Null]}, "Item", False], "Mouse"], 
-              ImageSize -> {{34, Full}, Automatic}, 
-              ImageMargins -> {{5, 3}, {4, 5}}], 
-             ItemSize -> {Full, Automatic}]}, {
-            Item[
-             Pane[
-              Annotation["the moon", 
-               TypeSystem`NestedGrid`PackagePrivate`$SliceMarker[
-                TypeSystem`NestedGrid`PackagePrivate`localHold[
-                TypeSystem`NestedGrid`PackagePrivate`$outputID$$]][{
-                 Key["the moon"]}, "Item", False], "Mouse"], 
-              ImageSize -> {{89.60000000000001, Full}, Automatic}, 
-              ImageMargins -> {{5, 3}, {4, 5}}], Background -> 
-             RGBColor[
-              0.9500473017990948, 0.9500473017990948, 0.9500473017990948], 
-             Alignment -> {Left, Baseline}], 
-            Item[
-             Pane[
-              Annotation[
-               RawBoxes["99"], 
-               TypeSystem`NestedGrid`PackagePrivate`$SliceMarker[
-                TypeSystem`NestedGrid`PackagePrivate`localHold[
-                TypeSystem`NestedGrid`PackagePrivate`$outputID$$]][{
-                 Key["the moon"]}, "Item", False], "Mouse"], 
               ImageSize -> {{34, Full}, Automatic}, 
               ImageMargins -> {{5, 3}, {4, 5}}], 
              ItemSize -> {Full, Automatic}]}, {
@@ -1225,8 +1115,7 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
                     TypeSystem`NestedGrid`PackagePrivate`$outputID$$]][
                     TypeSystem`NestedGrid`PackagePrivate`lastPath$, 
                     "Descending"]], MenuEvaluator -> Automatic], Nothing], 
-                    If[
-                    TypeSystem`NestedGrid`PackagePrivate`sortDirection$ =!= 
+                    If[TypeSystem`NestedGrid`PackagePrivate`sortDirection$ =!= 
                     None, 
                     MenuItem["Unsort", 
                     KernelExecute[
@@ -1374,15 +1263,15 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
         Hold[
           TypeSystem`NestedGrid`PackagePrivate`localHold[
           TypeSystem`NestedGrid`PackagePrivate`$outputID$$]]], StandardForm],
-      ImageSizeCache->{230.20000000000002`, {104.025390625, 109.75732421875}},
-      
+      ImageSizeCache->{
+       230.20000000000002`, {90.72647094726562, 96.45840454101562}},
       TrackedSymbols:>{
        TypeSystem`NestedGrid`PackagePrivate`$state$$, 
         TypeSystem`NestedGrid`PackagePrivate`$grid$$}], 
      TypeSystem`NestedGrid`PackagePrivate`mouseAnnotation$$ = 
      MouseAnnotation[],
-     ImageSizeCache->{230.20000000000002`, {104.025390625, 109.75732421875}}],
-    
+     ImageSizeCache->{
+      230.20000000000002`, {90.72647094726562, 96.45840454101562}}],
     BaseStyle->{
      LineBreakWithin -> False, 
       LightDarkAutoColorRules -> <|"MarkedColors" -> True|>},
@@ -1396,13 +1285,13 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[19]=",ExpressionUUID->"138b3b39-e1c2-4c61-b422-ebea42e5c254"]
+ CellLabel->"Out[7]=",ExpressionUUID->"4453e676-967e-4bae-93ca-92ff211666e1"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["References", "Subsubsection",ExpressionUUID->"6846d5ba-c725-46b3-ac6b-2d487c250e4f"],
+Cell["References", "Subsection",ExpressionUUID->"052fff12-2419-49c1-bdc4-cab49a71304e"],
 
 Cell[CellGroupData[{
 
@@ -1415,7 +1304,7 @@ Cell[BoxData[
      RowBox[{"[", 
       RowBox[{"All", ",", "\"\<reference\>\""}], "]"}], "]"}]}]}]}]], "Input",\
 
- CellLabel->"In[20]:=",ExpressionUUID->"8135caa1-fb7e-4810-b1e2-3f1311e768b2"],
+ CellLabel->"In[8]:=",ExpressionUUID->"20a26c5c-09fe-4297-8bdd-3fedae865f72"],
 
 Cell[BoxData[
  TagBox[
@@ -2604,7 +2493,7 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[20]=",ExpressionUUID->"57b0c336-4139-4b6b-9617-06ca2a964086"]
+ CellLabel->"Out[8]=",ExpressionUUID->"820d86ca-1d5f-446f-90fb-b3f92a38406d"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -2622,7 +2511,7 @@ Cell[BoxData[
     RowBox[{
     "Keys", "@", "AstronomicalDiaries`Dataset`Names`referenceNames"}]}], 
    "]"}]}]], "Input",
- CellLabel->"In[21]:=",ExpressionUUID->"82cf6ccd-660d-48dc-8a82-4f909dd2bf72"],
+ CellLabel->"In[9]:=",ExpressionUUID->"fdb127e5-2df2-4238-b980-c2e16c4db0a6"],
 
 Cell[BoxData[
  TagBox[
@@ -3795,13 +3684,13 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[21]=",ExpressionUUID->"118ab8ac-ac43-446b-8fe6-a8a6aa102c3e"]
+ CellLabel->"Out[9]=",ExpressionUUID->"e0ef68bb-5284-42fe-ad5e-03e49e82005d"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["References", "Subsubsection",ExpressionUUID->"18b7a12a-5dba-42f2-b9fd-5cb0d41abc90"],
+Cell["Relations", "Subsection",ExpressionUUID->"b68a7845-d32f-44b5-a5a1-638529903c45"],
 
 Cell[CellGroupData[{
 
@@ -3813,7 +3702,7 @@ Cell[BoxData[
      RowBox[{"ADObservationParses", "[", "]"}], "[", 
      RowBox[{"[", 
       RowBox[{"All", ",", "\"\<relation\>\""}], "]"}], "]"}]}]}]}]], "Input",
- CellLabel->"In[22]:=",ExpressionUUID->"336a6fc5-e2eb-4228-aa4d-7a508cabe31e"],
+ CellLabel->"In[10]:=",ExpressionUUID->"f483a417-14b4-4de9-b4dd-12a505cf00b9"],
 
 Cell[BoxData[
  TagBox[
@@ -4376,7 +4265,7 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[22]=",ExpressionUUID->"9310f047-0550-4558-92bc-2832bab28c77"]
+ CellLabel->"Out[10]=",ExpressionUUID->"f3759fef-c690-49e0-9eea-cc1e90e6e825"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -4394,7 +4283,7 @@ Cell[BoxData[
     RowBox[{
     "Keys", "@", "AstronomicalDiaries`Dataset`Names`relationNames"}]}], 
    "]"}]}]], "Input",
- CellLabel->"In[23]:=",ExpressionUUID->"84a3237a-33fe-49a0-bd2b-1281fbd8dcd2"],
+ CellLabel->"In[11]:=",ExpressionUUID->"851d3468-80c1-472b-9ee1-b62f4aca270c"],
 
 Cell[BoxData[
  TagBox[
@@ -4768,17 +4657,16 @@ lastPathIsLeafHeader, TypeSystem`NestedGrid`PackagePrivate`headerHidden$ = And[
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellLabel->"Out[23]=",ExpressionUUID->"a47c878d-940f-438b-8c78-444785a9a31d"]
-}, Open  ]]
+ CellLabel->"Out[11]=",ExpressionUUID->"8c977511-ff08-4b25-a7ec-87503f810ea8"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{808, 911},
-WindowMargins->{{245, Automatic}, {Automatic, -1319}},
+WindowMargins->{{Automatic, 106}, {Automatic, -1348}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
-ExpressionUUID->"8e7ee2c9-6c2c-41f0-bd9c-7699b98b808c"
+ExpressionUUID->"bfcb9468-b03b-41b2-bfe0-706fe8c5ff11"
 ]
 (* End of Notebook Content *)
 
@@ -4791,79 +4679,48 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 108, 1, 29, "Input",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
 Cell[CellGroupData[{
-Cell[687, 25, 78, 0, 66, "Section",ExpressionUUID->"5e1d323f-2d73-4173-ae6f-bbb5370c544e"],
-Cell[768, 27, 166, 3, 33, "Text",ExpressionUUID->"e424bd2f-1b4d-4148-a607-15e62ec02438"],
-Cell[937, 32, 364, 8, 65, "Input",ExpressionUUID->"b3ea4588-b9e7-4a11-b083-292512da60bd",
+Cell[576, 22, 78, 0, 66, "Section",ExpressionUUID->"304d9dd4-0a7c-4ad7-9b3a-669a13918e10"],
+Cell[657, 24, 166, 3, 33, "Text",ExpressionUUID->"a4b1ab52-dba3-47df-98da-02f057a63b81"],
+Cell[826, 29, 364, 8, 65, "Input",ExpressionUUID->"c99cf050-1335-407b-9aaa-5902ed817349",
  InitializationCell->True],
-Cell[1304, 42, 376, 10, 45, "Input",ExpressionUUID->"8f6617a6-818d-4802-bd15-e754a2e31cde",
+Cell[1193, 39, 376, 10, 45, "Input",ExpressionUUID->"5263dd43-b17d-452c-8641-1219cf55b956",
  InitializationCell->True]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1717, 57, 87, 0, 66, "Section",ExpressionUUID->"5adb787c-752c-414b-a07b-5379639897bc"],
-Cell[1807, 59, 258, 4, 55, "Text",ExpressionUUID->"ffe8dc62-f3b2-4d93-b449-423fb5539921"],
+Cell[1606, 54, 84, 0, 66, "Section",ExpressionUUID->"63089e74-a34a-4054-b67a-7d691ae3397d"],
+Cell[1693, 56, 186, 3, 33, "Text",ExpressionUUID->"de084d43-14ea-480e-b35a-30db12c79373"],
 Cell[CellGroupData[{
-Cell[2090, 67, 146, 2, 29, "Input",ExpressionUUID->"974617a7-df68-4f2c-bf4e-f1c6d8adb3b1"],
-Cell[2239, 71, 195, 2, 33, "Output",ExpressionUUID->"43fb3fa0-6df0-4617-8bdf-7895a8759654"]
+Cell[1904, 63, 84, 0, 53, "Subsection",ExpressionUUID->"4795008a-fb1e-443a-9972-6e8483e1b9cc"],
+Cell[CellGroupData[{
+Cell[2013, 67, 337, 8, 29, "Input",ExpressionUUID->"c11f2fa6-548a-4a89-9581-ba0b0b658051"],
+Cell[2353, 77, 35958, 677, 390, "Output",ExpressionUUID->"c739a349-1875-4423-a419-33c21ca14aa4"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[38348, 759, 483, 12, 49, "Input",ExpressionUUID->"c9e5c45a-6317-4690-9526-c9a5b7310f07"],
+Cell[38834, 773, 28032, 514, 204, "Output",ExpressionUUID->"4453e676-967e-4bae-93ca-92ff211666e1"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2483, 79, 81, 0, 66, "Section",ExpressionUUID->"2cd32681-5414-47a5-b380-33d9485feb4c"],
-Cell[2567, 81, 145, 2, 33, "Text",ExpressionUUID->"25e04915-d387-4630-b62a-813fe65bc499"],
-Cell[2715, 85, 242, 5, 29, "Input",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"],
+Cell[66915, 1293, 87, 0, 53, "Subsection",ExpressionUUID->"052fff12-2419-49c1-bdc4-cab49a71304e"],
 Cell[CellGroupData[{
-Cell[2982, 94, 88, 0, 53, "Subsection",ExpressionUUID->"7c0b5bec-6537-48f6-9d3e-62cd0a70f23c"],
-Cell[3073, 96, 130, 0, 33, "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
-Cell[3206, 98, 157, 3, 29, "Input",ExpressionUUID->"8fe057c1-869c-4029-bb73-9f6b44131955"],
-Cell[3366, 103, 274, 4, 55, "Text",ExpressionUUID->"4c056f58-4c95-4db9-87a2-542a2269f069"],
-Cell[3643, 109, 169, 3, 29, "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a58df8647e4"]
+Cell[67027, 1297, 342, 9, 29, "Input",ExpressionUUID->"20a26c5c-09fe-4297-8bdd-3fedae865f72"],
+Cell[67372, 1308, 64554, 1187, 570, "Output",ExpressionUUID->"820d86ca-1d5f-446f-90fb-b3f92a38406d"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3849, 117, 97, 0, 53, "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
-Cell[3949, 119, 121, 0, 33, "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
-Cell[4073, 121, 160, 3, 29, "Input",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[4270, 129, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"],
-Cell[4369, 131, 104, 0, 33, "Text",ExpressionUUID->"23303b57-cd68-425b-b4f5-c2343b3dc3a1"],
-Cell[4476, 133, 163, 3, 29, "Input",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[4676, 141, 97, 0, 53, "Subsection",ExpressionUUID->"4e649896-66f3-4d84-ae3f-7667a0bcec6a"],
-Cell[4776, 143, 170, 3, 29, "Input",ExpressionUUID->"cc4a5d74-a00d-49bd-b34d-7acb68aabb82"],
-Cell[CellGroupData[{
-Cell[4971, 150, 87, 0, 43, "Subsubsection",ExpressionUUID->"38230b93-b739-401d-9997-97295d114fea"],
-Cell[CellGroupData[{
-Cell[5083, 154, 338, 8, 29, "Input",ExpressionUUID->"8c0c1c12-7644-471f-9231-b88b6db9fc0e"],
-Cell[5424, 164, 35959, 677, 390, "Output",ExpressionUUID->"0c87729d-b23c-4459-b292-d6153dc12c18"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[41420, 846, 484, 12, 49, "Input",ExpressionUUID->"2e6eaa6a-f24a-403a-8601-0ef090b200d9"],
-Cell[41907, 860, 29177, 538, 230, "Output",ExpressionUUID->"138b3b39-e1c2-4c61-b422-ebea42e5c254"]
+Cell[131963, 2500, 494, 13, 49, "Input",ExpressionUUID->"fdb127e5-2df2-4238-b980-c2e16c4db0a6"],
+Cell[132460, 2515, 63628, 1171, 570, "Output",ExpressionUUID->"e0ef68bb-5284-42fe-ad5e-03e49e82005d"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[71133, 1404, 90, 0, 43, "Subsubsection",ExpressionUUID->"6846d5ba-c725-46b3-ac6b-2d487c250e4f"],
+Cell[196137, 3692, 86, 0, 53, "Subsection",ExpressionUUID->"b68a7845-d32f-44b5-a5a1-638529903c45"],
 Cell[CellGroupData[{
-Cell[71248, 1408, 343, 9, 29, "Input",ExpressionUUID->"8135caa1-fb7e-4810-b1e2-3f1311e768b2"],
-Cell[71594, 1419, 64555, 1187, 570, "Output",ExpressionUUID->"57b0c336-4139-4b6b-9617-06ca2a964086"]
+Cell[196248, 3696, 340, 8, 29, "Input",ExpressionUUID->"f483a417-14b4-4de9-b4dd-12a505cf00b9"],
+Cell[196591, 3706, 30263, 561, 257, "Output",ExpressionUUID->"f3759fef-c690-49e0-9eea-cc1e90e6e825"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[136186, 2611, 495, 13, 49, "Input",ExpressionUUID->"82cf6ccd-660d-48dc-8a82-4f909dd2bf72"],
-Cell[136684, 2626, 63629, 1171, 570, "Output",ExpressionUUID->"118ab8ac-ac43-446b-8fe6-a8a6aa102c3e"]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[200362, 3803, 90, 0, 43, "Subsubsection",ExpressionUUID->"18b7a12a-5dba-42f2-b9fd-5cb0d41abc90"],
-Cell[CellGroupData[{
-Cell[200477, 3807, 340, 8, 29, "Input",ExpressionUUID->"336a6fc5-e2eb-4228-aa4d-7a508cabe31e"],
-Cell[200820, 3817, 30263, 561, 257, "Output",ExpressionUUID->"9310f047-0550-4558-92bc-2832bab28c77"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[231120, 4383, 493, 13, 49, "Input",ExpressionUUID->"84a3237a-33fe-49a0-bd2b-1281fbd8dcd2"],
-Cell[231616, 4398, 21152, 372, 44, "Output",ExpressionUUID->"a47c878d-940f-438b-8c78-444785a9a31d"]
-}, Open  ]]
+Cell[226891, 4272, 493, 13, 49, "Input",ExpressionUUID->"851d3468-80c1-472b-9ee1-b62f4aca270c"],
+Cell[227387, 4287, 21152, 372, 44, "Output",ExpressionUUID->"8c977511-ff08-4b25-a7ec-87503f810ea8"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

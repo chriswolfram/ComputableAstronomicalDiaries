@@ -19,6 +19,7 @@ objectNames := objectNames =
 		"Jupiter" -> Entity["Planet", "Jupiter"],
 		"Saturn" -> Entity["Planet", "Saturn"],
 		"moon" -> Entity["PlanetaryMoon", "Moon"],
+		"the moon" -> Entity["PlanetaryMoon", "Moon"],
 		"Sirius" -> Entity["Star", "Sirius"]
 	|>;
 
