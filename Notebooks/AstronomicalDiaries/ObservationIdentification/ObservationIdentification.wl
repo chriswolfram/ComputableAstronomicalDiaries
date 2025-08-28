@@ -12,7 +12,7 @@ Begin["`Private`"];
 obsIDPath := obsIDPath = FileNameJoin[{$ADBase, "ObservationIdentification"}];
 batchPath := batchPath = FileNameJoin[{obsIDPath, "batch.mx"}];
 batchResponsePath := batchResponsePath = FileNameJoin[{obsIDPath, "batchResponse.mx"}];
-textObservationPositionsPath := textObservationPositionsPath = FileNameJoin[{obsIDPath, "textObservationPositions.mx"}]
+observationIDsPath := observationIDsPath = FileNameJoin[{obsIDPath, "observationIDs.mx"}]
 
 (* Formatting requests *)
 
@@ -46,30 +46,32 @@ request[text_] :=
 batchCreate[] := OpenAIBatchCreate@Discard[AssociationMap[request@*ADText, allChunks], #input === "" &]
 
 batchResponseLoad[batchResponse_] :=
-	Module[{chunkObservationStrings, chunkObservationPositions},
+	Module[{chunkObservationStrings, chunkObservationPositions, textObservationPositions},
 
 		chunkObservationStrings = importUTF8JSON[#]["observations"] & /@ batchResponse["Outputs"];
 
 		chunkObservationPositions =
 			MapIndexed[
-				FuzzyAlignments[getText[#2[[1, 1]]], #1]&,
+				FuzzyAlignments[ADText[#2[[1, 1]]], #1]&,
 				chunkObservationStrings
 			];
 
-		Join[
-			AssociationMap[{} &, allTexts],
+		textObservationPositions = Join[
+			AssociationMap[{} &, Keys@ADTextData[]],
 			Merge[KeyValueMap[First[#1] -> chunkOffsets[#1] + #2 &, chunkObservationPositions], Catenate]
-		]
+		];
+
+		Catenate@KeyValueMap[Function[{text, spans}, {text, #} & /@ spans], textObservationPositions]
 	]
 
 
-textObservationPositions = Missing[];
+observationIDs = Missing[];
 
-ADTextObservationPositions[] :=
+ADObservationIDs[] :=
 	Module[{batch, batchResponse},
 
 		 (* Load if already cached *)
-		 If[!MissingQ[textObservationPositions], Return@textObservationPositions];
+		 If[!MissingQ[observationIDs], Return@observationIDs];
 
 		(* Create batch *)
 		If[!FileExistsQ[batchPath],
@@ -89,14 +91,14 @@ ADTextObservationPositions[] :=
 		];
 
 		(* Process response *)
-		If[!FileExistsQ[textObservationPositionsPath],
-			textObservationPositions = batchResponseLoad@batchResponse;
-			Export[textObservationPositionsPath, textObservationPositions];
+		If[!FileExistsQ[observationIDsPath],
+			observationIDs = batchResponseLoad@batchResponse;
+			Export[observationIDsPath, observationIDs];
 			,
-			textObservationPositions = Import@textObservationPositionsPath
+			observationIDs = Import@observationIDsPath
 		];
 
-		textObservationPositions
+		observationIDs
 	]
 
 

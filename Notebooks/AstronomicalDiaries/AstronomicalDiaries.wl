@@ -15,7 +15,7 @@ ADFromBabylonianDate
 ADLineMonths
 ADLineMonthHardcode
 
-ADTextObservationPositions
+ADObservationIDs
 
 Begin["`Private`"];
 

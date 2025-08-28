@@ -10,16 +10,16 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      6979,        188]
-NotebookOptionsPosition[      4483,        138]
-NotebookOutlinePosition[      4876,        154]
-CellTagsIndexPosition[      4833,        151]
+NotebookDataLength[      6632,        173]
+NotebookOptionsPosition[      4182,        125]
+NotebookOutlinePosition[      4575,        141]
+CellTagsIndexPosition[      4532,        138]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData["Quit"], "Input",
- CellLabel->"In[5]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
+ CellLabel->"In[9]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
 
 Cell[CellGroupData[{
 
@@ -37,7 +37,7 @@ Cell[BoxData[{
     RowBox[{"NotebookDirectory", "[", "]"}]}], "]"}], ";"}], "\n", 
  RowBox[{"Needs", "[", "\"\<AstronomicalDiaries`\>\"", "]"}]}], "Input",
  InitializationCell->True,
- CellLabel->"In[4]:=",ExpressionUUID->"b3ea4588-b9e7-4a11-b083-292512da60bd"],
+ CellLabel->"In[1]:=",ExpressionUUID->"b3ea4588-b9e7-4a11-b083-292512da60bd"],
 
 Cell[BoxData[
  RowBox[{
@@ -45,7 +45,7 @@ Cell[BoxData[
    RowBox[{"ParentDirectory", "[", 
     RowBox[{"NotebookDirectory", "[", "]"}], "]"}]}], ";"}]], "Input",
  InitializationCell->True,
- CellLabel->"In[6]:=",ExpressionUUID->"8f6617a6-818d-4802-bd15-e754a2e31cde"]
+ CellLabel->"In[3]:=",ExpressionUUID->"8f6617a6-818d-4802-bd15-e754a2e31cde"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -112,25 +112,12 @@ Cell[CellGroupData[{
 
 Cell["Observation flagging", "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
 
-Cell[CellGroupData[{
+Cell["Use an LLM to find all the ", "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"ADTextObservationPositions", "[", "]"}], ";"}]], "Input",
- CellLabel->"In[10]:=",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"],
-
-Cell[BoxData[
- DynamicBox[ToBoxes[
-   Dataset[
-    Part[AstronomicalDiaries`OpenAIUtilities`Private`status$38108, 1]], 
-   StandardForm],
-  Evaluator->"Local",
-  ImageSizeCache->{
-   633., {263.8328857421875, 269.1239013671875}}]], "PrintTemporary",
- CellLabel->
-  "During evaluation of \
-In[10]:=",ExpressionUUID->"9a252ea4-95a9-4efc-b082-2a2fc565d87d"]
-}, Open  ]]
+  RowBox[{"ADObservationIDs", "[", "]"}], ";"}]], "Input",
+ CellLabel->"In[4]:=",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
 }, Open  ]],
 
 Cell["Observation parsing", "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"]
@@ -183,12 +170,10 @@ Cell[3488, 104, 169, 3, 29, "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a5
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[3694, 112, 97, 0, 53, "Subsection",ExpressionUUID->"b7d1cdee-131c-4d7a-a9e4-00a0c67f0970"],
-Cell[CellGroupData[{
-Cell[3816, 116, 171, 3, 29, "Input",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"],
-Cell[3990, 121, 354, 10, 540, "PrintTemporary",ExpressionUUID->"9a252ea4-95a9-4efc-b082-2a2fc565d87d"]
-}, Open  ]]
+Cell[3794, 114, 98, 0, 33, "Text",ExpressionUUID->"0bcfbc82-b097-443f-9d41-fa6544673e31"],
+Cell[3895, 116, 160, 3, 29, "Input",ExpressionUUID->"3831037a-9c62-4030-8235-2f7033ff5fa9"]
 }, Open  ]],
-Cell[4371, 135, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"]
+Cell[4070, 122, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"]
 }, Open  ]]
 }
 ]

@@ -125,7 +125,7 @@ allChunks := allChunks = Keys@chunkTabletData@ADTextData[];
 
 chunkOffsets := chunkOffsets =
 	Module[{textChunkLengths, textChunkOffsets},
-		textChunkLengths = StringLength[GroupBy[allChunks, First -> getText]] + StringLength[chunkDelimiter];
+		textChunkLengths = StringLength[GroupBy[allChunks, First -> ADText]] + StringLength[chunkDelimiter];
 		textChunkOffsets = Prepend[0]@*Accumulate@*Most /@ textChunkLengths;
 		Association@Catenate@MapIndexed[{#2[[1, 1]], #2[[2]]} -> #1 &, textChunkOffsets, {2}]
 	];
