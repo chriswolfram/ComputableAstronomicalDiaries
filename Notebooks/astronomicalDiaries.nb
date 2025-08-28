@@ -10,16 +10,16 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      7341,        192]
-NotebookOptionsPosition[      4667,        140]
-NotebookOutlinePosition[      5063,        156]
-CellTagsIndexPosition[      5020,        153]
+NotebookDataLength[      7871,        206]
+NotebookOptionsPosition[      4974,        150]
+NotebookOutlinePosition[      5370,        166]
+CellTagsIndexPosition[      5327,        163]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData["Quit"], "Input",
- CellLabel->"In[6]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
+ CellLabel->"In[9]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
 
 Cell[CellGroupData[{
 
@@ -135,6 +135,16 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"ADObservationParses", "[", "]"}], ";"}]], "Input",
  CellLabel->"In[4]:=",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Dataset construction", "Subsection",ExpressionUUID->"4e649896-66f3-4d84-ae3f-7667a0bcec6a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ADObservations", "[", "]"}], "//", "Dataset"}]], "Input",
+ CellLabel->"In[4]:=",ExpressionUUID->"cc4a5d74-a00d-49bd-b34d-7acb68aabb82"]
 }, Open  ]]
 }, Open  ]]
 },
@@ -192,6 +202,10 @@ Cell[CellGroupData[{
 Cell[4270, 129, 96, 0, 53, "Subsection",ExpressionUUID->"86d0f5ea-da2d-4c59-a4b2-9105f4d76596"],
 Cell[4369, 131, 104, 0, 33, "Text",ExpressionUUID->"23303b57-cd68-425b-b4f5-c2343b3dc3a1"],
 Cell[4476, 133, 163, 3, 29, "Input",ExpressionUUID->"492a05c5-ec37-4951-96a6-2ff96193864f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4676, 141, 97, 0, 53, "Subsection",ExpressionUUID->"4e649896-66f3-4d84-ae3f-7667a0bcec6a"],
+Cell[4776, 143, 170, 3, 29, "Input",ExpressionUUID->"cc4a5d74-a00d-49bd-b34d-7acb68aabb82"]
 }, Open  ]]
 }, Open  ]]
 }

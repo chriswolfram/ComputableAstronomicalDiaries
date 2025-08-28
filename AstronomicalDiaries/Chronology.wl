@@ -153,7 +153,8 @@ getADARTChronologyMonthMap[] := getADARTChronologyMonthMap[] =
 
 ADChronology["PD"] := getPDChronologyMonthMap[]
 ADChronology["ADART"] := getADARTChronologyMonthMap[]
-ADChronology[] := ADChronology["ADART"]
+ADChronology[Automatic] := ADChronology["ADART"]
+ADChronology[] := ADChronology[Automatic]
 
 ADFromBabylonianDate[{y_, m_, _Missing | Null}, chron_] := Missing[]
 ADFromBabylonianDate[{y_, m_, d_}, chron_] := Catch[Lookup[chron, Key[{y, m}], Throw[Missing[]]] + Quantity[d - 1, "Days"]]

@@ -116,7 +116,7 @@ ADObservationParses[observationIDs_] :=
 			If[batchData["Hash"] =!= hash,
 					Return@Failure["ChecksumFailure", <|
 						"MessageTemplate" -> "The inputted observation IDs do not match those used to generate the cached version of\
-the observation parses. Delete the cached files under `1` and regeneration observation parses to continue.",
+the observation parses. Delete the cached files under `1` and regenerate observation parses to continue.",
 						"MessageParameters" -> {obsParsePath}
 					|>]
 				];
