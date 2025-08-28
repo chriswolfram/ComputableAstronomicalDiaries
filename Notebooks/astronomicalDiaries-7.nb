@@ -10,16 +10,16 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      4258,        119]
-NotebookOptionsPosition[      2766,         86]
-NotebookOutlinePosition[      3162,        102]
-CellTagsIndexPosition[      3119,         99]
+NotebookDataLength[      5592,        149]
+NotebookOptionsPosition[      3607,        109]
+NotebookOutlinePosition[      4000,        125]
+CellTagsIndexPosition[      3957,        122]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData["Quit"], "Input",
- CellLabel->"In[10]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
+ CellLabel->"In[11]:=",ExpressionUUID->"d654d384-57d5-46bf-be6b-ea1fad121de3"],
 
 Cell[CellGroupData[{
 
@@ -64,7 +64,7 @@ Cell[BoxData[
 
 Cell[BoxData["\<\"/Users/christopher/git/ComputableAstronomicalDiaries/\
 InputTexts/revisedOracc.txt\"\>"], "Output",
- CellLabel->"Out[4]=",ExpressionUUID->"a1671a8b-c0b8-403f-8837-eb017b14586f"]
+ CellLabel->"Out[4]=",ExpressionUUID->"5f9114d8-f24a-4159-86de-690141a4deab"]
 }, Open  ]]
 }, Open  ]],
 
@@ -81,11 +81,34 @@ Cell[BoxData[
   RowBox[{
    RowBox[{"SystemCredential", "[", "\"\<OPENAI_API_KEY\>\"", "]"}], 
    "=", "\"\<<your api key>\>\""}], "*)"}]], "Input",
- CellLabel->"In[1]:=",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"]
+ CellLabel->"In[5]:=",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"],
+
+Cell[CellGroupData[{
+
+Cell["Line months", "Subsection",ExpressionUUID->"7c0b5bec-6537-48f6-9d3e-62cd0a70f23c"],
+
+Cell["Use an LLM to find the mapping from line numbers to months:", "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ADLineMonths", "[", "]"}], ";"}]], "Input",
+ CellLabel->"In[4]:=",ExpressionUUID->"8fe057c1-869c-4029-bb73-9f6b44131955"],
+
+Cell["\<\
+If the automatically-generated mapping from line numbers to months was wrong, \
+it can be hardcoded requesting that it be exported and then editing it in a \
+text editor:\
+\>", "Text",ExpressionUUID->"4c056f58-4c95-4db9-87a2-542a2269f069"],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{"ADLineMonthHardcode", "[", "\"\<X102611\>\"", "]"}], 
+  "*)"}]], "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a58df8647e4"]
+}, Open  ]]
 }, Open  ]]
 },
 WindowSize->{808, 911},
-WindowMargins->{{-19, Automatic}, {Automatic, -1180}},
+WindowMargins->{{120, Automatic}, {Automatic, 44}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"8e7ee2c9-6c2c-41f0-bd9c-7699b98b808c"
@@ -113,13 +136,20 @@ Cell[1510, 50, 87, 0, 66, "Section",ExpressionUUID->"5adb787c-752c-414b-a07b-537
 Cell[1600, 52, 258, 4, 55, "Text",ExpressionUUID->"ffe8dc62-f3b2-4d93-b449-423fb5539921"],
 Cell[CellGroupData[{
 Cell[1883, 60, 146, 2, 29, "Input",ExpressionUUID->"974617a7-df68-4f2c-bf4e-f1c6d8adb3b1"],
-Cell[2032, 64, 195, 2, 33, "Output",ExpressionUUID->"a1671a8b-c0b8-403f-8837-eb017b14586f"]
+Cell[2032, 64, 195, 2, 33, "Output",ExpressionUUID->"5f9114d8-f24a-4159-86de-690141a4deab"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[2276, 72, 81, 0, 66, "Section",ExpressionUUID->"2cd32681-5414-47a5-b380-33d9485feb4c"],
 Cell[2360, 74, 145, 2, 33, "Text",ExpressionUUID->"25e04915-d387-4630-b62a-813fe65bc499"],
-Cell[2508, 78, 242, 5, 29, "Input",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"]
+Cell[2508, 78, 242, 5, 29, "Input",ExpressionUUID->"92b62a63-083e-4cdb-9e03-26655364802b"],
+Cell[CellGroupData[{
+Cell[2775, 87, 88, 0, 53, "Subsection",ExpressionUUID->"7c0b5bec-6537-48f6-9d3e-62cd0a70f23c"],
+Cell[2866, 89, 130, 0, 33, "Text",ExpressionUUID->"a2ac3ccb-7dd8-4f1b-832a-2571cde8f80d"],
+Cell[2999, 91, 156, 3, 29, "Input",ExpressionUUID->"8fe057c1-869c-4029-bb73-9f6b44131955"],
+Cell[3158, 96, 249, 4, 55, "Text",ExpressionUUID->"4c056f58-4c95-4db9-87a2-542a2269f069"],
+Cell[3410, 102, 169, 3, 29, "Input",ExpressionUUID->"5e66648a-2ec1-45c2-bed0-7a58df8647e4"]
+}, Open  ]]
 }, Open  ]]
 }
 ]

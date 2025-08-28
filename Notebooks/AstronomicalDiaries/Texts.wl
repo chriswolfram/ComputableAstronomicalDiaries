@@ -4,13 +4,13 @@ oraccTextURL
 removeLineNumbers
 getTextLineNumbers
 
+Begin["`Private`"];
+
 Needs["AstronomicalDiaries`"]
 Needs["AstronomicalDiaries`Utilities`"]
 
 PacletInstall["ChristopherWolfram/CuneiformTools"];
 Needs["ChristopherWolfram`CuneiformTools`"]
-
-Begin["`Private`"];
 
 textsPath := FileNameJoin[{$ADBase, "InputTexts"}]
 rawTabletTextDataPath := FileNameJoin[{textsPath, "rawTabletTextData.mx"}]

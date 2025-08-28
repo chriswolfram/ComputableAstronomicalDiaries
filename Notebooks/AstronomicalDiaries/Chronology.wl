@@ -1,11 +1,11 @@
 BeginPackage["AstronomicalDiaries`Chronology`"];
 
+Needs["AstronomicalDiaries`"]
+
 regnalToSE
 parseRegnalYear
 
 getPDChronologyMonthMap
-
-Needs["AstronomicalDiaries`"]
 
 Begin["`Private`"];
 

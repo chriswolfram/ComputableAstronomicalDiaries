@@ -1,9 +1,9 @@
 BeginPackage["AstronomicalDiaries`Utilities`"];
 
+Needs["AstronomicalDiaries`"]
+
 importUTF8JSON
 exportUTF8JSON
-
-Needs["AstronomicalDiaries`"]
 
 Begin["`Private`"];
 

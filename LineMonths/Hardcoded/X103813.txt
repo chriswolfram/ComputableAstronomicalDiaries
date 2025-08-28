@@ -1,0 +1,12 @@
+o 1	ArtI 23	VII
+o 2	ArtI 23	VII
+o 3	ArtI 23	VII
+o 4	ArtI 23	VII
+o 5	ArtI 23	VII
+r 1'	ArtI 23	XII2
+r 2'	ArtI 23	XII2
+r 3'	ArtI 23	XII2
+r 4'	ArtI 23	XII2
+r 5'	ArtI 23	XII2
+t.e. 1	-	-
+t.e. 2	-	-
