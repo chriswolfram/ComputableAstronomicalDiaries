@@ -12,9 +12,9 @@ Needs["AstronomicalDiaries`FuzzyAlignment`"]
 Needs["AstronomicalDiaries`Utilities`"]
 
 obsParsePath := obsParsePath = FileNameJoin[{$ADBase, "ObservationParsing"}];
-batchPath := batchPath = FileNameJoin[{obsParsePath, "batch.mx"}];
+batchDataPath := batchDataPath = FileNameJoin[{obsParsePath, "batchData.mx"}];
 batchResponsePath := batchResponsePath = FileNameJoin[{obsParsePath, "batchResponse.mx"}];
-observationParsesDataPath := observationParsesDataPath = FileNameJoin[{obsParsePath, "observationParsesData.mx"}]
+observationParsesPath := observationParsesPath = FileNameJoin[{obsParsePath, "observationParses.mx"}]
 
 (* Formatting requests *)
 
@@ -103,16 +103,24 @@ batchResponseLoad[batchResponse_] := importUTF8JSON & /@ batchResponse["Outputs"
 observationParses = Missing[];
 
 ADObservationParses[observationIDs_] :=
-	Module[{hash, batch, batchResponse, observationParsesData},
+	Module[{hash, batchData, batch, batchResponse, observationParses},
 
 		hash = Hash[observationIDs];
 
 		(* Create batch *)
-		If[!FileExistsQ[batchPath],
+		If[!FileExistsQ[batchDataPath],
 			batch = batchCreate[observationIDs];
-			Export[batchPath, batch]
+			Export[batchDataPath, <|"Hash" -> hash, "Batch" -> batch|>]
 			,
-			batch := batch = Import@batchPath
+			batchData := batchData = Import@batchDataPath;
+			If[batchData["Hash"] =!= hash,
+					Return@Failure["ChecksumFailure", <|
+						"MessageTemplate" -> "The inputted observation IDs do not match those used to generate the cached version of\
+the observation parses. Delete the cached files under `1` and regeneration observation parses to continue.",
+						"MessageParameters" -> {obsParsePath}
+					|>]
+				];
+			batch = batchData["Batch"]
 		];
 
 		(* Download response *)
@@ -125,22 +133,14 @@ ADObservationParses[observationIDs_] :=
 		];
 
 		(* Process response *)
-		If[!FileExistsQ[observationDataParsesPath],
-			observationParsesData = batchResponseLoad@batchResponse;
-			Export[observationParsesDataPath, <|"Hash" -> hash, "ObservationParses" -> observationParsesData|>];
+		If[!FileExistsQ[observationParsesPath],
+			observationParses = batchResponseLoad@batchResponse;
+			Export[observationParsesPath, observationParses];
 			,
-			observationParsesData = Import@observationParsesDataPath
+			observationParses = Import@observationParsesPath
 		];
 
-		If[observationParsesData["Hash"] =!= hash,
-			Return@Failure["ChecksumFailure", <|
-					"MessageTemplate" -> "The	 inputted observation IDs do not match those used to generate the cached version of\
-the observation parses. Delete the cached files under `1` and regeneration observation parses to continue.",
-					"MessageParameters" -> {obsParsePath}
-				|>],
-
-			observationParsesData["ObservationParses"]
-		]
+		observationParses
 	]
 
 ADObservationParses[] := ADObservationParses@ADObservationIDs[]
