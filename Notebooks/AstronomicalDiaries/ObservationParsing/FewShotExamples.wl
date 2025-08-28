@@ -57,5 +57,4 @@ formatExample[example_] :=
 examplePrompt := examplePrompt = StringRiffle[formatExample /@ examples, "\n\n\n"];
 
 End[];
-
 EndPackage[];

@@ -42,5 +42,4 @@ prompt := prompt =
 " <> examplePrompt;
 
 End[];
-
 EndPackage[];

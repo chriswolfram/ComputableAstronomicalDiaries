@@ -207,5 +207,4 @@ examplePrompt := examplePrompt =
 
 
 End[];
-
 EndPackage[];

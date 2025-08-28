@@ -12,5 +12,4 @@ importUTF8JSON[str_] := ImportString[FromCharacterCode[ToCharacterCode[str, "UTF
 exportUTF8JSON[json_] := FromCharacterCode[ToCharacterCode@ExportString[json /. _?MissingQ -> Null, "JSON", "Compact" -> True], "UTF8"]
 
 End[];
-
 EndPackage[];

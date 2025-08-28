@@ -38,5 +38,4 @@ If no observations are found, return:
 
 
 End[];
-
 EndPackage[];

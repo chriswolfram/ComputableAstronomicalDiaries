@@ -160,5 +160,4 @@ ADFromBabylonianDate[{y_, m_, d_}, chron_] := Catch[Lookup[chron, Key[{y, m}], T
 ADFromBabylonianDate[d_] := ADFromBabylonianDate[d, ADChronology[]]
 
 End[];
-
 EndPackage[];

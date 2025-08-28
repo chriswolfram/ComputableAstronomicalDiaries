@@ -44,5 +44,4 @@ getTrainingExampleList[] :=
 
 
 End[];
-
 EndPackage[];
