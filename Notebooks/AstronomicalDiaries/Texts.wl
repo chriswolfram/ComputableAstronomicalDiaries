@@ -3,6 +3,8 @@ BeginPackage["AstronomicalDiaries`Texts`"];
 oraccTextURL
 removeLineNumbers
 getTextLineNumbers
+chunkOffsets
+allChunks
 
 Begin["`Private`"];
 
@@ -119,6 +121,16 @@ chunkTabletData[texts_?AssociationQ, delim_] :=
 
 chunkTabletData[t_] := chunkTabletData[t, chunkDelimiter]
 
+allChunks := allChunks = Keys@chunkTabletData@ADTextData[];
+
+chunkOffsets := chunkOffsets =
+	Module[{textChunkLengths, textChunkOffsets},
+		textChunkLengths = StringLength[GroupBy[allChunks, First -> getText]] + StringLength[chunkDelimiter];
+		textChunkOffsets = Prepend[0]@*Accumulate@*Most /@ textChunkLengths;
+		Association@Catenate@MapIndexed[{#2[[1, 1]], #2[[2]]} -> #1 &, textChunkOffsets, {2}]
+	];
+
+
 (* Utilities *)
 
 oraccTextURL[text_] := URLBuild[{$OraccBase, "adsd", text}]
@@ -141,7 +153,7 @@ ADReloadTextData[] := (tabletTextData = Missing[];)
 
 ADText[textSpec_] := removeLineNumbers[ADTextData[textSpec][[1]]]
 
-ADObservationText[{textSpec_, range : {min_Integer, max_Integer}}] :=StringTake[ADText[textSpec], range]
+ADObservationText[{textSpec_, range : {min_Integer, max_Integer}}] := StringTake[ADText[textSpec], range]
 ADObservationText[l_List] := ADObservationText /@ l
 
 

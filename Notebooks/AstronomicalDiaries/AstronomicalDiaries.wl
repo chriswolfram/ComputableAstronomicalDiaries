@@ -15,11 +15,14 @@ ADFromBabylonianDate
 ADLineMonths
 ADLineMonthHardcode
 
+ADTextObservationPositions
+
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`Texts`"]
 Needs["AstronomicalDiaries`Chronology`"]
 Needs["AstronomicalDiaries`LineMonths`"]
+Needs["AstronomicalDiaries`ObservationIdentification`"]
 Needs["AstronomicalDiaries`FuzzyAlignment`"]
 Needs["AstronomicalDiaries`OpenAIUtilities`"]
 Needs["AstronomicalDiaries`Utilities`"]
