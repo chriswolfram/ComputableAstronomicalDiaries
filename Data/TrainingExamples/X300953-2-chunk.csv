@@ -1,0 +1,7 @@
+line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+o 9',the moon was 1 cubit in front of β Geminorum,FALSE,,4,4,beginning of the night,moon,1,,in front of,β Geminorum
+o 11',the moon was nn cu]bits,FALSE,,9,9,beginning of the night,moon,,,,
+o 11',it stood 2 1/2 cubits behind Jupiter to the east,FALSE,"It is possible that this is connecting to the previous observation, and that 'it' refers to the moon. However, it is safer to leave the object field blank because the damage makes it ambiguous.",9,12,,,2 1/2,,behind,Jupiter
+o 12',the moon was [...] in front of π Scorpii,TRUE,,13,16,beginning of the night,moon,,,in front of,π Scorpii
+o 13',the moon was 2 cubits in front of β Capricorni,FALSE,,17,17,last part of the night,moon,2,,in front of,β Capricorni
+o 13',the moon being 3 2/3 cu[bits low to the south,FALSE,,17,17,last part of the night,moon,3 2/3,,south,β Capricorni

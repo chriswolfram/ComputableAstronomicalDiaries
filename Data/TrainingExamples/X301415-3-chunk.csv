@@ -1,0 +1,15 @@
+line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
+r 2',the moon was [...] above α Virginis,TRUE,,4,4,beginning of the night,moon,,,above,α Virginis
+r 3',the moon] stood [... behind Jupiter?] to the east,TRUE,,6,6,beginning of the night,moon,,,behind,Jupiter
+r 3',the moon being 1 1/2 cubi[ts,FALSE,"This is connected to the earlier damaged observation, but because of the damage the date cannot be given exactly.",6,11,,moon,1 1/2,,,
+r 4',the moon being 4 1/2 cubits high to the north,FALSE,,6,11,,moon,4 1/2,,north,
+r 5',the moon was [...] in front of β [Capricorni],TRUE,,12,12,beginning of the night,moon,,,in front of,β Capricorni
+r 8',the moon was [...] below β Arie[tis],TRUE,,19,19,last part of the night,moon,,,below,β Arietis
+r 9',the moon was ... below η Tauri,TRUE,,21,21,last part of the night,moon,,,below,η Tauri
+r 9',the moon] having passed a little to the east,FALSE,"As above, this could be connected to the observation before, but the damage makes the date uncertain.",21,22,,moon,,,east,η Tauri
+r 9',it stood 1 cubit behind Mars to the east,FALSE,,21,22,,moon,1,,behind,Mars
+r 10',the moon was] 1 2/3 cubits [below ζ Tau]ri,FALSE,,23,23,last part of the night,moon,1 2/3,,below,ζ Tauri
+r 10',the moon having passed a little to the east,FALSE,,23,23,last part of the night,moon,,,east,ζ Tauri
+r 11',the moon was] 4 1/2 cubits [below β Gemi]norum,FALSE,,25,25,last part of the night,moon,4 1/2,,below,β Geminorum
+r 12',the moon was ... ε Leonis,TRUE,,27,27,last part of the night,moon,,,,ε Leonis
+r 12',the moon being 4 1/2 cubits low to the south,FALSE,"The date is certain because 'Night of the 28th' comes later. However, the time is not certain.",27,27,,moon,4 1/2,,south,ε Leonis

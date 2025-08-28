@@ -1,5 +1,0 @@
-line,raw_string,damaged,explanation,earliest_day,latest_day,time,object,cubits,fingers,relation,reference
-r 6',the moon being 1/2 cubit to [...],FALSE,,1,4,,moon,1/2,,,
-r 8',1 2/3 cubit [...] η Geminorum,TRUE,This is very damaged.,1,4,,,1 2/3,,,η Geminorum
-r 9',the moon having passed a little to the east,FALSE,,5,10,,moon,,,east,
-r 9',the moon was 3 [cubits] in front of α Leonis,FALSE,,11,11,beginning of the night,moon,3,,in front of,α Leonis
