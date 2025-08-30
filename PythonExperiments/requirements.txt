@@ -1,6 +1,0 @@
-numpy
-numpyro
-funsor
-tensorflow_probability
-jupyter
-matplotlib
