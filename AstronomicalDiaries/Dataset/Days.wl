@@ -58,9 +58,9 @@ findTextDayPositions[t_] :=
 
 
 nextEarlierDay[m_?MissingQ] := m
-nextEarlierDay[r_ -> m_?MissingQ] := r -> m
-nextEarlierDay[r_ -> {"Night", n_Integer}] := r -> {"Day", n - 1}
-nextEarlierDay[r_ -> {"Day", n_Integer}] := r -> {"Night", n}
+nextEarlierDay[{"Day", n_Integer}] := {"Night", n}
+nextEarlierDay[{"Night", n_Integer}] := {"Day", n - 1}
+nextEarlierDay[r_ -> d_] := r -> nextEarlierDay[d]
 
 
 End[];

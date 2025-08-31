@@ -34,7 +34,7 @@ optionalBracketPattern[str_] := StringExpression @@ Riffle[Characters[str], ("["
 (* Days and times *)
 
 findObservationDayTimes[text_, obsList_] :=
-	Module[{chunkSplits, damagePositions, dayPositions, timePositions, lastDamage, lastChunk, nextChunk, lastBreak, time, day, dayRange},
+	Module[{chunkSplits, damagePositions, dayPositions, timePositions, lastDamage, lastChunk, nextChunk, lastBreak, time, day, earlierDay, laterDay},
 		chunkSplits = findChunkSplits[text];
 		damagePositions = findTextDamagePositions[text];
 		dayPositions = findTextDayPositions[text];
@@ -42,7 +42,7 @@ findObservationDayTimes[text_, obsList_] :=
 		
 		Function[{obsStart, obsEnd},
 			lastDamage = Max[0,Select[damagePositions, # <= obsStart&]];
-			(*TODO: Should this use month breaks instead of chunk breaks?*)
+			(* TODO: Should this use month breaks instead of chunk breaks? *)
 			lastChunk = Max[0,Select[chunkSplits, # <= obsStart&]];
 			lastBreak = Max[lastDamage, lastChunk];
 
@@ -57,20 +57,22 @@ findObservationDayTimes[text_, obsList_] :=
 			];
 			
 			If[day =!= {},
-				dayRange = {Last[day], Last[day]},
-				dayRange = {
-					Last[
-						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; lastChunk <= start <= nextChunk && start <= obsEnd]],
+				(* If there is a day marker that is not seperated by damage from the observation, that is the earliest and latest day *)
+				earlierDay = laterDay = Last[day]
+				,
+				(* Otherwise, the earliest day is the last one before the observation (within the same chunk) *)
+				earlierDay = Last[
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; start <= obsEnd && lastChunk <= start <= nextChunk]],
 						Missing[] -> {"Night", 1}
-					],
-					nextEarlierDay@First[
-						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; lastChunk <= start <= nextChunk && obsStart <= end]],
+					];
+				(* and the latest day is the first one after the observation int he same chunk, so long as it is not earlier than earlierDay *)
+				laterDay = nextEarlierDay@First[
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; obsStart <= end && lastChunk <= start <= nextChunk && earlierDay[[2,2]] <= nextEarlierDay[day][[2]]]],
 						Missing[] -> {"Day", 30}
-					]
-				}
+					];
 			];
 			
-			<|"Time" -> time, "DayRange" -> dayRange|>
+			<|"Time" -> time, "DayRange" -> {earlierDay, laterDay}|>
 		] @@@ obsList
 	]
 
