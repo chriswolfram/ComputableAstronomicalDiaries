@@ -34,7 +34,7 @@ optionalBracketPattern[str_] := StringExpression @@ Riffle[Characters[str], ("["
 (* Days and times *)
 
 findObservationDayTimes[text_, obsList_] :=
-	Module[{chunkSplits, damagePositions, dayPositions, timePositions, lastDamage, lastChunk, lastBreak, time, day, dayRange},
+	Module[{chunkSplits, damagePositions, dayPositions, timePositions, lastDamage, lastChunk, nextChunk, lastBreak, time, day, dayRange},
 		chunkSplits = findChunkSplits[text];
 		damagePositions = findTextDamagePositions[text];
 		dayPositions = findTextDayPositions[text];
@@ -45,6 +45,8 @@ findObservationDayTimes[text_, obsList_] :=
 			(*TODO: Should this use month breaks instead of chunk breaks?*)
 			lastChunk = Max[0,Select[chunkSplits, # <= obsStart&]];
 			lastBreak = Max[lastDamage, lastChunk];
+
+			nextChunk = Min[StringLength[text],Select[chunkSplits, obsEnd <= #&]];
 			
 			time = Last[Select[timePositions,
 				MatchQ[({start_, end_} -> time_) /; lastBreak <= end && start <= obsEnd]
@@ -58,11 +60,11 @@ findObservationDayTimes[text_, obsList_] :=
 				dayRange = {Last[day], Last[day]},
 				dayRange = {
 					Last[
-						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; start <= obsEnd]],
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; lastChunk <= start <= nextChunk && start <= obsEnd]],
 						Missing[] -> {"Night", 1}
 					],
 					nextEarlierDay@First[
-						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; obsStart <= end]],
+						Select[dayPositions, MatchQ[({start_, end_} -> day_) /; lastChunk <= start <= nextChunk && obsStart <= end]],
 						Missing[] -> {"Day", 30}
 					]
 				}
