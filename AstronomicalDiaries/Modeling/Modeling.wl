@@ -24,16 +24,49 @@ modelObservationQ[observations_] :=
 	]
 
 
+(* Update rules *)
+
+(* l *)
+lPrior[] := NormalDistribution[1/2, 1/2]
+lInit[] := RandomVariate@lPrior[]
+lUpdate[c_, deltaStar_, sigma2_, inliers_] :=
+	normalNormalRegressionSample[lPrior[], Sqrt[sigma2], deltaStar[[inliers]], 0, c[[inliers]]];
+
+
+(* sigma2 *)
+sigma2Prior[] := InverseGammaDistribution[1/2, 1/2]
+sigma2Init[] := RandomVariate@sigma2Prior[]
+sigma2Update[c_, deltaStar_, l_, inliers_] :=
+	normalNormalVarianceSample[sigma2Prior[], deltaStar[[inliers]]*l, c[[inliers]]];
+
+
+(* muOutlier *)
+muOutlierPrior[] := NormalDistribution[]
+muOutlierInit[] := RandomVariate@muOutlierPrior[]
+muOutlierUpdate[c_, sigma2Outlier_, outliers_] :=
+	normalNormalMeanSample[muOutlierPrior[], Sqrt[sigma2Outlier], c[[outliers]]]
+
+
+(* sigma2Outlier *)
+(* TODO: Make higher variance? *)
+sigma2OutlierPrior[] := InverseGammaDistribution[1.5, 2]
+sigma2OutlierInit[] := RandomVariate@sigma2OutlierPrior[]
+sigma2OutlierUpdate[c_, muOutlier_, outliers_] :=
+	normalNormalVarianceSample[sigma2OutlierPrior[], muOutlier, c[[outliers]]]
+
+
+(* p *)
 pPrior[] := BetaDistribution[1/2, 1]
 pInit[] := RandomVariate@pPrior[]
 pUpdate[m_] := betaBernoulliSample[pPrior[], m]
 
 
-muPrior[p_] := BernoulliDistribution[p]
+(* m *)
+mPrior[p_] := BernoulliDistribution[p]
 mInit[p_, observations_] := RandomVariate[BernoulliDistribution[p], Length@observations]
 mUpdate[p_, deltaStar_, l_, sigma2_, muOutlier_, sigma2Outlier_, c_] :=
 	binaryNormalMixtureSample[
-		muPrior[p],
+		mPrior[p],
 		NormalDistribution[muOutlier, Sqrt[sigma2Outlier]],
 		NormalDistribution[deltaStar*l, Sqrt[sigma2]],
 		c
@@ -42,6 +75,7 @@ mUpdate[p_, deltaStar_, l_, sigma2_, muOutlier_, sigma2Outlier_, c_] :=
 getInliersOutliers[m_] := Lookup[PositionIndex[m], {0, 1}, {}]
 
 
+(* muTimes and sigma2Times *)
 muTimesPrior[possibleTimeCats_] := AssociationMap[NormalDistribution[0, 6] &, possibleTimeCats]
 muTimesInit[possibleTimeCats_] := RandomVariate /@ muTimesPrior[possibleTimeCats]
 
@@ -64,6 +98,7 @@ muTimesSigma2TimesUpdate[sigma2Times0_, t_, timeCats_, possibleTimeCats_] :=
 	]
 
 
+(* t *)
 tPrior[muTimes_, sigma2Times_, timeCats_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
 tInit[muTimes_, sigma2Times_, timeCats_] := normalArraySample@tPrior[muTimes, sigma2Times, timeCats]
 tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inliers_, outliers_] :=
@@ -85,8 +120,8 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 fitModel[observations_, steps_, vars_ : {}] :=
 	Module[{res, c, timeCats, possibleTimeCats, p,
 	m, muTimes,
-	sigma2Times, t, sigma2Prior, sigma2, lPrior,
-	l, muOutlierPrior, muOutlier, sigma2OutlierPrior,
+	sigma2Times, t, sigma2,
+	l, muOutlier,
 	sigma2Outlier, d, missingDates, missingTimes, timeCatDist,
 	timeCatDistPrior, deltaParams, deltaStar, outliers, inliers},
 
@@ -109,12 +144,11 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2Times = sigma2TimesInit[possibleTimeCats];
 		t = tInit[muTimes, sigma2Times, timeCats];
 
-		sigma2Prior = InverseGammaDistribution[1/2, 1/2]; sigma2 = RandomVariate@sigma2Prior;
-		lPrior = NormalDistribution[1/2, 1/2]; l = RandomVariate@lPrior;
+		sigma2 = sigma2Init[];
+		l = lInit[];
 
-		muOutlierPrior = NormalDistribution[]; muOutlier = RandomVariate@muOutlierPrior;
-		(*TODO: Make higher variance*)
-		sigma2OutlierPrior = InverseGammaDistribution[1.5, 2]; sigma2Outlier = RandomVariate@sigma2OutlierPrior;
+		muOutlier = muOutlierInit[];
+		sigma2Outlier = sigma2OutlierInit[];
 
 		missingDates = Position[MissingQ /@ observations[[All, "Date"]], True, {1}, Heads -> False][[All, 1]];
 		d = observations[[All, "Date"]];
@@ -180,11 +214,11 @@ fitModel[observations_, steps_, vars_ : {}] :=
 				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, inliers, outliers];
 				deltaStar = objectDistanceApprox[deltaParams, t];
 
-				l = normalNormalRegressionSample[lPrior, Sqrt[sigma2], deltaStar[[inliers]], 0, c[[inliers]]];
-				sigma2 = normalNormalVarianceSample[sigma2Prior, deltaStar[[inliers]]*l, c[[inliers]]];
+				l = lUpdate[c, deltaStar, sigma2, inliers];
+				sigma2 = sigma2Update[c, deltaStar, l, inliers];
 
-				muOutlier = normalNormalMeanSample[muOutlierPrior, Sqrt[sigma2Outlier], c[[outliers]]];
-				sigma2Outlier = normalNormalVarianceSample[sigma2OutlierPrior, muOutlier, c[[outliers]]];
+				muOutlier = muOutlierUpdate[c, sigma2Outlier, outliers];
+				sigma2Outlier = sigma2OutlierUpdate[c, muOutlier, outliers];
 
 				m = mUpdate[p, deltaStar, l, sigma2, muOutlier, sigma2Outlier, c];
 				{inliers, outliers} = getInliersOutliers[m];
