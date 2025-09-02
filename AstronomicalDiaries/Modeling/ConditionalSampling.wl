@@ -1,4 +1,4 @@
-BeginPackage["AstronomicalDiaries`Modeling`Updates`"];
+BeginPackage["AstronomicalDiaries`Modeling`ConditionalSampling`"];
 
 normalNormalMeanSample
 normalNormalVarianceSample
