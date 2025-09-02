@@ -16,31 +16,26 @@ modelObservationQ[observations_] :=
 			! MissingQ[#Object] &&
 			! MissingQ[#Reference] &&
 			! MissingQ[#EarliestDate] &&
-			! MissingQ[#LatestDate] && 
-			! MissingQ[#Time] && 
-			! MissingQ[#Relation] && 
+			! MissingQ[#LatestDate] &&
+			! MissingQ[#Time] &&
+			! MissingQ[#Relation] &&
 			! (MissingQ[#Cubits] && MissingQ[#Fingers])&
 		)
 	]
 
 
 fitModel[observations_, steps_, vars_ : {}] :=
-	Module[{res, c, timeCats, pPrior, p, 
+	Module[{res, c, timeCats, pPrior, p,
 	m, muTimesPrior, muTimes, sigma2TimesPrior,
-	sigma2Times, t, sigma2Prior, sigma2, lPrior, 
+	sigma2Times, t, sigma2Prior, sigma2, lPrior,
 	l, muOutlierPrior, muOutlier, sigma2OutlierPrior,
-	sigma2Outlier, d, alpha, beta, missingDates, missingTimes, 
-	possibleTimeCats, timeCatDist, 
+	sigma2Outlier, d, missingDates, missingTimes,
+	possibleTimeCats, timeCatDist,
 	timeCatDistPrior, deltaParams, deltaStar, outliers, inliers},
 
 		(*Observed data*)
 		c = N[observationCubitsSigned /@ observations];
 		timeCats = observations[[All, "Time"]];
-		possibleTimeCats = DeleteMissing@Union@timeCats;
-		missingTimes = Position[timeCats, _Missing, {1}, Heads -> False][[All, 1]];
-		timeCatDistPrior = DirichletDistribution[ConstantArray[1/2, Length@possibleTimeCats]];
-		timeCatDist = dirichletSample@timeCatDistPrior;
-		timeCats[[missingTimes]] = RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatDist], Length[missingTimes]];
 
 		(*Priors and initialization*)
 		pPrior = BetaDistribution[1/2, 1]; p = RandomVariate@pPrior;
@@ -61,11 +56,16 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2OutlierPrior = InverseGammaDistribution[1.5, 2]; sigma2Outlier = RandomVariate@sigma2OutlierPrior;
 
 		missingDates = Position[MissingQ /@ observations[[All, "Date"]], True, {1}, Heads -> False][[All, 1]];
-		alpha = beta = 1/2;
 		d = observations[[All, "Date"]];
 		d[[missingDates]] =
 			#EarliestDate +
-			Quantity[RandomVariate@BetaBinomialDistribution[alpha, beta, #LatestDay - #EarliestDay], "Days"]& /@ observations[[missingDates]];
+			Quantity[RandomVariate@DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}], "Days"]& /@ observations[[missingDates]];
+
+		possibleTimeCats = DeleteMissing@Union@timeCats;
+		missingTimes = Position[timeCats, _Missing, {1}, Heads -> False][[All, 1]];
+		timeCatDistPrior = DirichletDistribution[ConstantArray[1/2, Length@possibleTimeCats]];
+		timeCatDist = dirichletSample@timeCatDistPrior;
+		timeCats[[missingTimes]] = RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatDist], Length[missingTimes]];
 
 		(*Updates*)
 		res = Reap@GeneralUtilities`MonitoredScan[
@@ -120,17 +120,21 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 					timeCatDist = dirichletCategoricalSample[timeCatDistPrior, Lookup[Counts[timeCats], possibleTimeCats, 0]];
 
-					inlierCatLogProbs = Transpose[logNormalPDF[NormalDistribution[muTimes[#], Sqrt@sigma2Times[#]], t[[missingTimeCatInliers]]] & /@ possibleTimeCats];
-					timeCats[[missingTimeCatInliers]] = RandomChoice[Exp[#] -> possibleTimeCats] & /@ inlierCatLogProbs;
+					inlierCatLogProbs =
+						Transpose[
+							logNormalPDF[NormalDistribution[muTimes[#], Sqrt@sigma2Times[#]], t[[missingTimeCatInliers]]] & /@
+								possibleTimeCats
+						];
+					timeCats[[missingTimeCatInliers]] = logPMFSample[#, possibleTimeCats] & /@ inlierCatLogProbs;
 
 					timeCats[[missingTimeCatOutliers]] = RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatDist], Length[missingTimeCatOutliers]];
 				];
 
-				With[{
-						missingDateInliers = Intersection[missingDates, inliers], 
-						missingDateOutliers = Intersection[missingDates, outliers]
-						},
-					d[[missingDateInliers]] = 
+				Module[{missingDateInliers, missingDateOutliers},
+					missingDateInliers = Intersection[missingDates, inliers];
+					missingDateOutliers = Intersection[missingDates, outliers];
+
+					d[[missingDateInliers]] =
 						MapThread[
 							Function[Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
 								dmax = #LatestDay - #EarliestDay;
@@ -150,8 +154,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 							logProbs = priorLogProbs + dayLogProbs;
 							(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
 							logProbs = logProbs - logSumExp[logProbs];
-							(*TODO: Make this sampling more efficient*)
-							#EarliestDate + Quantity[RandomChoice[Quiet[Exp[logProbs], General::munfl] -> Range[0, dmax]],"Days"]
+							#EarliestDate + Quantity[logPMFSample[logProbs], "Days"]
 						]],
 						{observations[[missingDateInliers]], t[[missingDateInliers]], c[[missingDateInliers]]}
 					];

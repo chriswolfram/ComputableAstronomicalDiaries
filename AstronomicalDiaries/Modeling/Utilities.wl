@@ -42,6 +42,8 @@ dirichletSample[DirichletDistribution[a_]] :=
 *)
 logPMFSample[logPMF_] := Ordering[RandomVariate[ExtremeValueDistribution[], Length@logPMF] + logPMF, -1][[1]] - 1
 
+logPMFSample[logPMF_, vals_] := vals[[logPMFSample[logPMF]+1]]
+
 (* Direct version *)
 (* logPMFSample[logPMF_] := RandomChoice[Exp[logPMF] -> Range[0,Length[logPMF]-1]] *)
 
