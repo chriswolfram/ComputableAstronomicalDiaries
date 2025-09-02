@@ -117,23 +117,130 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 	]
 
 
+(* timeCats *)
+timeCatsInfo[observations_] := {
+		observations[[All, "Time"]],
+		DeleteMissing@Union@observations[[All, "Time"]],
+		Position[observations[[All, "Time"]], _Missing, {1}, Heads -> False][[All, 1]]
+	}
+
+timeCatsDistPrior[possibleTimeCats_] := DirichletDistribution[ConstantArray[1/2, Length@possibleTimeCats]]
+timeCatsDistInit[possibleTimeCats_] := dirichletSample@timeCatsDistPrior[possibleTimeCats]
+timeCatsDistUpdate[possibleTimeCats_, timeCats_] :=
+	dirichletCategoricalSample[timeCatsDistPrior[possibleTimeCats], Lookup[Counts[timeCats], possibleTimeCats, 0]]
+
+timeCatsPrior[possibleTimeCats_, timeCatsDist_] := CategoricalDistribution[possibleTimeCats, timeCatsDist]
+timeCatsInit[timeCatsRaw_, possibleTimeCats_, missingTimeCats_, timeCatsDist_] :=
+	Module[{timeCats = timeCatsRaw},
+		timeCats[[missingTimeCats]] = RandomVariate[timeCatsPrior[possibleTimeCats, timeCatsDist], Length[missingTimeCats]];
+		timeCats
+	]
+timeCatsUpdate[timeCats0_, possibleTimeCats_, missingTimeCats_, timeCatsDist_, muTimes_, sigma2Times_, t_, inliers_, outliers_] :=
+	Module[{timeCats = timeCats0, missingTimeCatInliers, missingTimeCatOutliers, inlierCatLogProbs},
+		missingTimeCatInliers = Intersection[missingTimeCats, inliers];
+		missingTimeCatOutliers = Intersection[missingTimeCats, outliers];
+
+		inlierCatLogProbs =
+			Transpose[
+				logNormalPDF[NormalDistribution[muTimes[#], Sqrt@sigma2Times[#]], t[[missingTimeCatInliers]]] & /@
+					possibleTimeCats
+			];
+
+		timeCats[[missingTimeCatInliers]] =
+			logPMFSample[#, possibleTimeCats] & /@ inlierCatLogProbs;
+
+		timeCats[[missingTimeCatOutliers]] =
+			RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatsDist], Length[missingTimeCatOutliers]];
+
+		timeCats
+	]
+
+
+(* d *)
+dateInfo[observations_] :=
+	Module[{missingDates},
+		missingDates = Position[observations[[All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]];
+		dateRanges = DateRange[#EarliestDate, #LatestDate, CalendarType->"Julian"] &/@ observations;
+		{
+			dateRanges,
+			missingDates
+		}
+	]
+
+dPrior[dateRanges_] :=
+	DiscreteUniformDistribution[{0, Length[#]-1}] &/@ dateRanges
+
+dInit[dateRanges_, missingDates_] :=
+	MapThread[
+		#1[[RandomVariate[#2]+1]]&,
+		{dateRanges, dPrior[dateRanges]}
+	]
+
+dUpdate[observations_, c_, l_, sigma2_, t_, dateRanges_, missingDates_, inliers_, outliers_] :=
+	Module[{d, missingDateInliers, missingDateOutliers},
+
+		If[missingDates === {}, Return[dateRanges[[All,1]]]];
+
+		d = dateRanges[[All, 1]];
+		missingDateInliers = Intersection[missingDates, inliers];
+		missingDateOutliers = Intersection[missingDates, outliers];
+
+		d[[missingDateInliers]] =
+				MapThread[
+					Function[{obs, ts, cs, dateRange, prior}, Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
+						dmax = Length[dateRange];
+						distances =
+							objectDistanceApprox[
+								ConstantArray[obs["Object"], dmax],
+								ConstantArray[obs["Reference"], dmax],
+								ConstantArray[obs["Relation"], dmax],
+								dateRange,
+								ts
+							];
+
+					dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+					priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, Length[dateRange]-1]];
+					logProbs = priorLogProbs + dayLogProbs;
+					(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
+					(* logProbs = logProbs - logSumExp[logProbs]; *)
+					logPMFSample[logProbs, dateRange]
+				]],
+				{
+					observations[[missingDateInliers]],
+					t[[missingDateInliers]],
+					c[[missingDateInliers]],
+					dateRanges[[missingDateInliers]],
+					dPrior[dateRanges[[missingDateInliers]]]
+				}
+			];
+
+		d[[missingDateOutliers]] =
+			MapThread[
+				#1[[RandomVariate[#2]+1]]&,
+				{
+					dateRanges[[missingDateOutliers]],
+					dPrior[dateRanges[[missingDateOutliers]]]
+				}
+			];
+
+		d
+	]
+
+
+(* Full model *)
 fitModel[observations_, steps_, vars_ : {}] :=
-	Module[{res, c, timeCats, possibleTimeCats, p,
+	Module[{res, c, timeCats, timeCatsRaw, possibleTimeCats, p,
 	m, muTimes,
 	sigma2Times, t, sigma2,
 	l, muOutlier,
-	sigma2Outlier, d, missingDates, missingTimes, timeCatDist,
-	timeCatDistPrior, deltaParams, deltaStar, outliers, inliers},
+	sigma2Outlier, d, missingDates, dateRanges, missingTimeCats, timeCatsDist, deltaParams, deltaStar, outliers, inliers},
 
 		(*Observed data*)
 		c = N[observationCubitsSigned /@ observations];
-		timeCats = observations[[All, "Time"]];
-		possibleTimeCats = DeleteMissing@Union@timeCats;
 
-		missingTimes = Position[timeCats, _Missing, {1}, Heads -> False][[All, 1]];
-		timeCatDistPrior = DirichletDistribution[ConstantArray[1/2, Length@possibleTimeCats]];
-		timeCatDist = dirichletSample@timeCatDistPrior;
-		timeCats[[missingTimes]] = RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatDist], Length[missingTimes]];
+		{timeCatsRaw, possibleTimeCats, missingTimeCats} = timeCatsInfo[observations];
+		timeCatsDist = timeCatsDistInit[possibleTimeCats];
+		timeCats = timeCatsInit[timeCatsRaw, possibleTimeCats, missingTimeCats, timeCatsDist];
 
 		(*Priors and initialization*)
 		p = pInit[];
@@ -150,11 +257,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		muOutlier = muOutlierInit[];
 		sigma2Outlier = sigma2OutlierInit[];
 
-		missingDates = Position[MissingQ /@ observations[[All, "Date"]], True, {1}, Heads -> False][[All, 1]];
-		d = observations[[All, "Date"]];
-		d[[missingDates]] =
-			#EarliestDate +
-			Quantity[RandomVariate@DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}], "Days"]& /@ observations[[missingDates]];
+		{dateRanges, missingDates} = dateInfo[observations];
+		d = dInit[dateRanges, missingDates];
 
 		(*Compute true distances*)
 		deltaParams = objectDistanceApproxParams[
@@ -168,50 +272,18 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		(*Updates*)
 		res = Reap@GeneralUtilities`MonitoredScan[
 			Function[
-				Module[{missingDateInliers, missingDateOutliers},
-					missingDateInliers = Intersection[missingDates, inliers];
-					missingDateOutliers = Intersection[missingDates, outliers];
 
-					d[[missingDateInliers]] =
-						MapThread[
-							Function[Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
-								dmax = #LatestDay - #EarliestDay;
-								distances =
-									objectDistanceApprox[
-										ConstantArray[#Object, dmax + 1],
-										ConstantArray[#Reference, dmax + 1],
-										ConstantArray[#Relation, dmax + 1],
-										(*TODO: precompute the date ranges once*)
-										#EarliestDate + Quantity[Range[0, dmax], "Days"],
-										#2
-									];
+				d = dUpdate[observations, c, l, sigma2, t, dateRanges, missingDates, inliers, outliers];
 
-							dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], #3];
-							(*priorLogProbs=LogLikelihood[BetaBinomialDistribution[alpha,beta,dmax],{#}]&/@Range[0,dmax];*)
-							priorLogProbs = 0;
-							logProbs = priorLogProbs + dayLogProbs;
-							(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
-							logProbs = logProbs - logSumExp[logProbs];
-							#EarliestDate + Quantity[logPMFSample[logProbs], "Days"]
-						]],
-						{observations[[missingDateInliers]], t[[missingDateInliers]], c[[missingDateInliers]]}
-					];
-				(*d[[missingDateOutliers]] =
-					#EarliestDate+
-					Quantity[RandomVariate@BetaBinomialDistribution[alpha,beta,#LatestDay-#EarliestDay],"Days"]&/@observations[[missingDateOutliers]];*)
-				d[[missingDateOutliers]] =
-					#EarliestDate +
-					Quantity[RandomVariate@DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}], "Days"] & /@ observations[[missingDateOutliers]];
-				];
-
-				(*Compute true distances*)
 				deltaParams = objectDistanceApproxParams[
 						observations[[All, "Object"]],
 						observations[[All, "Reference"]],
 						observations[[All, "Relation"]],
 						d
 					];
+
 				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, inliers, outliers];
+
 				deltaStar = objectDistanceApprox[deltaParams, t];
 
 				l = lUpdate[c, deltaStar, sigma2, inliers];
@@ -227,21 +299,9 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 				{muTimes, sigma2Times} = muTimesSigma2TimesUpdate[sigma2Times, t, timeCats, possibleTimeCats];
 
-				Module[{missingTimeCatInliers, missingTimeCatOutliers, inlierCatLogProbs},
-					missingTimeCatInliers = Intersection[missingTimes, inliers];
-					missingTimeCatOutliers = Intersection[missingTimes, outliers];
+				timeCatsDist = timeCatsDistUpdate[possibleTimeCats, timeCats];
 
-					timeCatDist = dirichletCategoricalSample[timeCatDistPrior, Lookup[Counts[timeCats], possibleTimeCats, 0]];
-
-					inlierCatLogProbs =
-						Transpose[
-							logNormalPDF[NormalDistribution[muTimes[#], Sqrt@sigma2Times[#]], t[[missingTimeCatInliers]]] & /@
-								possibleTimeCats
-						];
-					timeCats[[missingTimeCatInliers]] = logPMFSample[#, possibleTimeCats] & /@ inlierCatLogProbs;
-
-					timeCats[[missingTimeCatOutliers]] = RandomVariate[CategoricalDistribution[possibleTimeCats, timeCatDist], Length[missingTimeCatOutliers]];
-				];
+				timeCats = timeCatsUpdate[timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, muTimes, sigma2Times, t, inliers, outliers];
 
 				Sow@KeyTake[vars]@<|
 						"p" -> p,
@@ -255,7 +315,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 						"sigma2Outlier" -> sigma2Outlier,
 						"d" -> d,
 						"timeCats" -> timeCats,
-						"timeCatDist" -> timeCatDist
+						"timeCatsDist" -> timeCatsDist
 					|>
 			],
 			Range[steps]
