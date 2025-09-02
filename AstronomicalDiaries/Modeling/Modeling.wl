@@ -229,34 +229,46 @@ dUpdate[observations_, c_, l_, sigma2_, t_, dateRanges_, missingDates_, inliers_
 
 (* Full model *)
 fitModel[observations_, steps_, vars_ : {}] :=
-	Module[{res, c, timeCats, timeCatsRaw, possibleTimeCats, p,
-	m, muTimes,
-	sigma2Times, t, sigma2,
-	l, muOutlier,
-	sigma2Outlier, d, missingDates, dateRanges, missingTimeCats, timeCatsDist, deltaParams, deltaStar, outliers, inliers},
+	Module[{
+			res,
+			deltaParams, deltaStar,
+			c, l, sigma2,
+			muOutlier, sigma2Outlier,
+			muTimes, sigma2Times,
+			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
+			d, missingDates, dateRanges,
+			m, p, inliers, outliers
+		},
 
 		(*Observed data*)
 		c = N[observationCubitsSigned /@ observations];
 
+		(* Initialization *)
+
+		(* Time categories *)
 		{timeCatsRaw, possibleTimeCats, missingTimeCats} = timeCatsInfo[observations];
 		timeCatsDist = timeCatsDistInit[possibleTimeCats];
 		timeCats = timeCatsInit[timeCatsRaw, possibleTimeCats, missingTimeCats, timeCatsDist];
 
-		(*Priors and initialization*)
-		p = pInit[];
-		m = mInit[p, observations];
-		{inliers, outliers} = getInliersOutliers[m];
-
+		(* Times *)
 		muTimes = muTimesInit[possibleTimeCats];
 		sigma2Times = sigma2TimesInit[possibleTimeCats];
 		t = tInit[muTimes, sigma2Times, timeCats];
 
-		sigma2 = sigma2Init[];
-		l = lInit[];
+		(* Outlier detection *)
+		p = pInit[];
+		m = mInit[p, observations];
+		{inliers, outliers} = getInliersOutliers[m];
 
+		(* Inlier model *)
+		l = lInit[];
+		sigma2 = sigma2Init[];
+
+		(* Outlier model *)
 		muOutlier = muOutlierInit[];
 		sigma2Outlier = sigma2OutlierInit[];
 
+		(* Dates *)
 		{dateRanges, missingDates} = dateInfo[observations];
 		d = dInit[dateRanges, missingDates];
 
@@ -275,6 +287,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 				d = dUpdate[observations, c, l, sigma2, t, dateRanges, missingDates, inliers, outliers];
 
+				(* Update true params because they depend on d *)
 				deltaParams = objectDistanceApproxParams[
 						observations[[All, "Object"]],
 						observations[[All, "Reference"]],
@@ -284,23 +297,27 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, inliers, outliers];
 
+				(* Update true distance because they depend on t *)
 				deltaStar = objectDistanceApprox[deltaParams, t];
 
+				(* Inlier model *)
 				l = lUpdate[c, deltaStar, sigma2, inliers];
 				sigma2 = sigma2Update[c, deltaStar, l, inliers];
 
+				(* Outlier model *)
 				muOutlier = muOutlierUpdate[c, sigma2Outlier, outliers];
 				sigma2Outlier = sigma2OutlierUpdate[c, muOutlier, outliers];
 
+				(* Outlier detection *)
 				m = mUpdate[p, deltaStar, l, sigma2, muOutlier, sigma2Outlier, c];
+				p = pUpdate[m];
 				{inliers, outliers} = getInliersOutliers[m];
 
-				p = pUpdate[m];
-
+				(* Times *)
 				{muTimes, sigma2Times} = muTimesSigma2TimesUpdate[sigma2Times, t, timeCats, possibleTimeCats];
 
+				(* Time categories *)
 				timeCatsDist = timeCatsDistUpdate[possibleTimeCats, timeCats];
-
 				timeCats = timeCatsUpdate[timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, muTimes, sigma2Times, t, inliers, outliers];
 
 				Sow@KeyTake[vars]@<|
