@@ -11,17 +11,16 @@ Needs["AstronomicalDiaries`Modeling`TrueModel`"]
 Needs["AstronomicalDiaries`Astronomy`"]
 
 
-modelObservationQ[observations_] :=
-	MemberQ[observations, _?(
-			! MissingQ[#Object] &&
-			! MissingQ[#Reference] &&
-			! MissingQ[#EarliestDate] &&
-			! MissingQ[#LatestDate] &&
-			! MissingQ[#Time] &&
-			! MissingQ[#Relation] &&
-			! (MissingQ[#Cubits] && MissingQ[#Fingers])&
-		)
-	]
+modelObservationQ[obs_?AssociationQ] :=
+	! MissingQ[#Object] &&
+	! MissingQ[#Reference] &&
+	! MissingQ[#EarliestDay] &&
+	! MissingQ[#LatestDay] &&
+	! MissingQ[#Relation] &&
+	! (MissingQ[#Cubits] && MissingQ[#Fingers])&@obs
+
+modelObservationQ[observations_List] :=
+	AllTrue[observations, modelObservationQ]
 
 
 (* Update rules *)
@@ -239,6 +238,13 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			d, missingDates, dateRanges,
 			m, p, inliers, outliers
 		},
+
+		If[!modelObservationQ[observations],
+			Return@Failure["InvalidObservations", <|
+				"Message" -> "Some input observations cannot be used for inferencing.",
+				"InvalidObservations" -> Discard[observations, modelObservationQ]
+			|>]
+		];
 
 		(*Observed data*)
 		c = N[observationCubitsSigned /@ observations];
