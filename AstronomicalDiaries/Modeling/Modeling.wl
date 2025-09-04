@@ -157,43 +157,43 @@ timeCatsUpdate[timeCats0_, possibleTimeCats_, missingTimeCats_, timeCatsDist_, m
 
 (* d *)
 dateInfo[observations_] :=
-	Module[{missingDates},
-		missingDates = Position[observations[[All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]];
-		dateRanges = DateRange[#EarliestDate, #LatestDate, CalendarType->"Julian"] &/@ observations;
+	Module[{missingDays, dayRanges},
+		missingDays = Position[observations[[All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]];
+		dayRanges = Range[#EarliestDay, #LatestDay] &/@ observations;
 		{
-			dateRanges,
-			missingDates
+			dayRanges,
+			missingDays
 		}
 	]
 
-dPrior[dateRanges_] :=
-	DiscreteUniformDistribution[{0, Length[#]-1}] &/@ dateRanges
+dPrior[dayRanges] :=
+	DiscreteUniformDistribution[{0, Length[#]-1}] &/@ dayRanges
 
-dInit[dateRanges_, missingDates_] :=
+dInit[dayRanges, missingDays_] :=
 	MapThread[
 		#1[[RandomVariate[#2]+1]]&,
-		{dateRanges, dPrior[dateRanges]}
+		{dayRanges, dPrior[dayRanges]}
 	]
 
-dUpdate[observations_, c_, l_, sigma2_, t_, dateRanges_, missingDates_, inliers_, outliers_] :=
+dUpdate[observations_, c_, l_, sigma2_, t_, dayRanges, missingDays_, months_, years_, inliers_, outliers_] :=
 	Module[{d, missingDateInliers, missingDateOutliers},
 
-		If[missingDates === {}, Return[dateRanges[[All,1]]]];
+		If[missingDays === {}, Return[dayRanges[[All,1]]]];
 
-		d = dateRanges[[All, 1]];
-		missingDateInliers = Intersection[missingDates, inliers];
-		missingDateOutliers = Intersection[missingDates, outliers];
+		d = dayRanges[[All, 1]];
+		missingDateInliers = Intersection[missingDays, inliers];
+		missingDateOutliers = Intersection[missingDays, outliers];
 
 		d[[missingDateInliers]] =
 				MapThread[
-					Function[{obs, ts, cs, dateRange, prior}, Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
+					Function[{obs, ts, cs, dateRange, year, month, prior}, Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
 						dmax = Length[dateRange];
 						distances =
 							objectDistanceApprox[
 								ConstantArray[obs["Object"], dmax],
 								ConstantArray[obs["Reference"], dmax],
 								ConstantArray[obs["Relation"], dmax],
-								dateRange,
+								ADFromBabylonianDate[{year, month, #}] &/@ dayRange,
 								ts
 							];
 
@@ -208,8 +208,10 @@ dUpdate[observations_, c_, l_, sigma2_, t_, dateRanges_, missingDates_, inliers_
 					observations[[missingDateInliers]],
 					t[[missingDateInliers]],
 					c[[missingDateInliers]],
-					dateRanges[[missingDateInliers]],
-					dPrior[dateRanges[[missingDateInliers]]]
+					dayRanges[[missingDateInliers]],
+					years[[missingDateInliers]],
+					months[[missingDateInliers]],
+					dPrior[dayRanges[[missingDateInliers]]]
 				}
 			];
 
@@ -217,8 +219,8 @@ dUpdate[observations_, c_, l_, sigma2_, t_, dateRanges_, missingDates_, inliers_
 			MapThread[
 				#1[[RandomVariate[#2]+1]]&,
 				{
-					dateRanges[[missingDateOutliers]],
-					dPrior[dateRanges[[missingDateOutliers]]]
+					dayRanges[[missingDateOutliers]],
+					dPrior[dayRanges[[missingDateOutliers]]]
 				}
 			];
 
@@ -235,7 +237,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
 			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
-			d, missingDates, dateRanges,
+			months, years,
+			d, missingDays, dayRanges,
 			m, p, inliers, outliers
 		},
 
@@ -275,8 +278,12 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2Outlier = sigma2OutlierInit[];
 
 		(* Dates *)
-		{dateRanges, missingDates} = dateInfo[observations];
-		d = dInit[dateRanges, missingDates];
+		months = observations[[All, "Month"]];
+		years = observations[[All, "SEYear"]];
+
+		(* Day ranges *)
+		{dayRanges, missingDays} = dateInfo[observations];
+		d = dInit[dayRanges, missingDays];
 
 		(*Compute true distances*)
 		deltaParams = objectDistanceApproxParams[
@@ -291,7 +298,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		res = Reap@GeneralUtilities`MonitoredScan[
 			Function[
 
-				d = dUpdate[observations, c, l, sigma2, t, dateRanges, missingDates, inliers, outliers];
+				d = dUpdate[observations, c, l, sigma2, t, dayRanges, missingDays, months, years, inliers, outliers];
 
 				(* Update true params because they depend on d *)
 				deltaParams = objectDistanceApproxParams[
