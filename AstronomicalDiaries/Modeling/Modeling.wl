@@ -155,76 +155,60 @@ timeCatsUpdate[timeCats0_, possibleTimeCats_, missingTimeCats_, timeCatsDist_, m
 	]
 
 
-(* d *)
-dateInfo[observations_] :=
-	Module[{missingDays, dayRanges},
-		missingDays = Position[observations[[All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]];
-		dayRanges = Range[#EarliestDay, #LatestDay] &/@ observations;
-		{
-			dayRanges,
-			missingDays
-		}
-	]
+(* deltaD *)
+getMissingDays[observations_] :=
+	Position[observations[[All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]]
 
-dPrior[dayRanges] :=
-	DiscreteUniformDistribution[{0, Length[#]-1}] &/@ dayRanges
+deltaDPrior[observations_] :=
+	DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}] &/@ observations
 
-dInit[dayRanges, missingDays_] :=
-	MapThread[
-		#1[[RandomVariate[#2]+1]]&,
-		{dayRanges, dPrior[dayRanges]}
-	]
+deltaDInit[observations_] :=
+	RandomVariate /@ deltaDPrior[observations]
 
-dUpdate[observations_, c_, l_, sigma2_, t_, dayRanges, missingDays_, months_, years_, inliers_, outliers_] :=
-	Module[{d, missingDateInliers, missingDateOutliers},
+deltaDUpdate[observations_, c_, l_, sigma2_, t_, missingDays_, months_, years_, inliers_, outliers_] :=
+	Module[{deltaD, missingDateInliers, missingDateOutliers},
 
-		If[missingDays === {}, Return[dayRanges[[All,1]]]];
+		deltaD = ConstantArray[0, Length[observations]];
 
-		d = dayRanges[[All, 1]];
+		If[missingDays === {}, Return@deltaD];
+
 		missingDateInliers = Intersection[missingDays, inliers];
 		missingDateOutliers = Intersection[missingDays, outliers];
 
-		d[[missingDateInliers]] =
+		deltaD[[missingDateInliers]] =
 				MapThread[
-					Function[{obs, ts, cs, dateRange, year, month, prior}, Module[{dmax, distances, dayLogProbs, priorLogProbs, logProbs},
-						dmax = Length[dateRange];
+					Function[{obs, ts, cs, year, month, prior}, Module[{maxDeltaD, distances, dayLogProbs, priorLogProbs, logProbs},
+						maxDeltaD = obs["LatestDay"] - obs["EarliestDay"];
 						distances =
 							objectDistanceApprox[
-								ConstantArray[obs["Object"], dmax],
-								ConstantArray[obs["Reference"], dmax],
-								ConstantArray[obs["Relation"], dmax],
-								ADFromBabylonianDate[{year, month, #}] &/@ dayRange,
+								ConstantArray[obs["Object"], maxDeltaD + 1],
+								ConstantArray[obs["Reference"], maxDeltaD + 1],
+								ConstantArray[obs["Relation"], maxDeltaD + 1],
+								ADFromBabylonianDate[{year, month, #}] &/@ Range[obs["EarliestDay"], obs["LatestDay"]],
 								ts
 							];
 
 					dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
-					priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, Length[dateRange]-1]];
+					priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, maxDeltaD]];
 					logProbs = priorLogProbs + dayLogProbs;
 					(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
 					(* logProbs = logProbs - logSumExp[logProbs]; *)
-					logPMFSample[logProbs, dateRange]
+					logPMFSample[logProbs]
 				]],
 				{
 					observations[[missingDateInliers]],
 					t[[missingDateInliers]],
 					c[[missingDateInliers]],
-					dayRanges[[missingDateInliers]],
 					years[[missingDateInliers]],
 					months[[missingDateInliers]],
-					dPrior[dayRanges[[missingDateInliers]]]
+					deltaDPrior[observations[[missingDateInliers]]]
 				}
 			];
 
-		d[[missingDateOutliers]] =
-			MapThread[
-				#1[[RandomVariate[#2]+1]]&,
-				{
-					dayRanges[[missingDateOutliers]],
-					dPrior[dayRanges[[missingDateOutliers]]]
-				}
-			];
+		deltaD[[missingDateOutliers]] =
+			RandomVariate /@ deltaDPrior[observations[[missingDateOutliers]]];
 
-		d
+		deltaD
 	]
 
 
@@ -238,7 +222,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			muTimes, sigma2Times,
 			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
 			months, years,
-			d, missingDays, dayRanges,
+			d, deltaD, earliestDays, missingDays,
 			m, p, inliers, outliers
 		},
 
@@ -282,8 +266,14 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		years = observations[[All, "SEYear"]];
 
 		(* Day ranges *)
-		{dayRanges, missingDays} = dateInfo[observations];
-		d = dInit[dayRanges, missingDays];
+		missingDays = getMissingDays[observations];
+		earliestDays = observations[[All, "EarliestDay"]];
+		deltaD = deltaDInit[observations];
+
+		d = MapThread[
+				{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
+				{years, months, earliestDays, deltaD}
+			];
 
 		(*Compute true distances*)
 		deltaParams = objectDistanceApproxParams[
@@ -298,7 +288,11 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		res = Reap@GeneralUtilities`MonitoredScan[
 			Function[
 
-				d = dUpdate[observations, c, l, sigma2, t, dayRanges, missingDays, months, years, inliers, outliers];
+				deltaD = deltaDUpdate[observations, c, l, sigma2, t, missingDays, months, years, inliers, outliers];
+				d = MapThread[
+						{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
+						{years, months, earliestDays, deltaD}
+					];
 
 				(* Update true params because they depend on d *)
 				deltaParams = objectDistanceApproxParams[
@@ -343,7 +337,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 						"sigma2" -> sigma2,
 						"muOutlier" -> muOutlier,
 						"sigma2Outlier" -> sigma2Outlier,
-						"d" -> d,
+						"deltaD" -> deltaD,
 						"timeCats" -> timeCats,
 						"timeCatsDist" -> timeCatsDist
 					|>
