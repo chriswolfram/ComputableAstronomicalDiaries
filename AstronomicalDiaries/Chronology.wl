@@ -5,6 +5,9 @@ parseRegnalYear
 
 getPDChronologyMonthMap
 
+getYearMonths
+getMonthYears
+
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`"]
@@ -156,12 +159,25 @@ ADChronology["ADART"] := getADARTChronologyMonthMap[]
 ADChronology[Automatic] := ADChronology["ADART"]
 ADChronology[] := ADChronology[Automatic]
 
+
 ADFromBabylonianDate[{y_, m_, _Missing | Null}, chron_] := Missing[]
 
 ADFromBabylonianDate[{y_, m_, d_}, chron_] := ADFromBabylonianDate[{y, m, d}, chron] =
 	Catch[Lookup[chron, Key[{y, m}], Throw[Missing[]]] + Quantity[d - 1, "Days"]]
-	
+
 ADFromBabylonianDate[d_] := ADFromBabylonianDate[d, ADChronology[]]
+
+
+yearMonths[chron_] := yearMonths[chron] = GroupBy[Keys@ADChronology[], First -> Last];
+
+getYearMonths[year_, chron_] := yearMonths[chron][year]
+getYearMonths[year_] := getYearMonths[year, ADChronology[]]
+
+
+monthYears[chron_] := monthYears[chron] = GroupBy[Keys@ADChronology[], Last -> First];
+
+getMonthYears[month_, chron_] := monthYears[chron][month]
+getMonthYears[month_] := getMonthYears[month, ADChronology[]]
 
 End[];
 EndPackage[];

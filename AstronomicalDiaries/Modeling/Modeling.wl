@@ -8,6 +8,7 @@ Needs["AstronomicalDiaries`"]
 Needs["AstronomicalDiaries`Modeling`Utilities`"]
 Needs["AstronomicalDiaries`Modeling`ConditionalSampling`"]
 Needs["AstronomicalDiaries`Modeling`TrueModel`"]
+Needs["AstronomicalDiaries`Chronology`"]
 Needs["AstronomicalDiaries`Astronomy`"]
 
 
@@ -16,6 +17,7 @@ modelObservationQ[obs_?AssociationQ] :=
 	! MissingQ[#Reference] &&
 	! MissingQ[#EarliestDay] &&
 	! MissingQ[#LatestDay] &&
+	! MissingQ[#SEYear] &&
 	! MissingQ[#Relation] &&
 	! (MissingQ[#Cubits] && MissingQ[#Fingers])&@obs
 
@@ -188,12 +190,12 @@ deltaDUpdate[observations_, c_, l_, sigma2_, t_, missingDays_, months_, years_, 
 								ts
 							];
 
-					dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
-					priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, maxDeltaD]];
-					logProbs = priorLogProbs + dayLogProbs;
-					(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
-					(* logProbs = logProbs - logSumExp[logProbs]; *)
-					logPMFSample[logProbs]
+						dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+						priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, maxDeltaD]];
+						logProbs = priorLogProbs + dayLogProbs;
+						(*TODO: Is it right to normalize here or before combining the prior with the dayLogProbs?*)
+						(* logProbs = logProbs - logSumExp[logProbs]; *)
+						logPMFSample[logProbs]
 				]],
 				{
 					observations[[missingDateInliers]],
@@ -212,6 +214,63 @@ deltaDUpdate[observations_, c_, l_, sigma2_, t_, missingDays_, months_, years_, 
 	]
 
 
+(* months *)
+getMissingMonths[observations_] :=
+	Position[observations[[All, "Month"]], _Missing, {1}, Heads -> False][[All, 1]]
+
+(* monthsPrior[observations_] := CategoricalDistribution[getYearMonths[#SEYear]] &/@ observations *)
+monthsInit[observations_, missingMonths_] :=
+	Module[{months},
+		months = observations[[All, "Month"]];
+		months[[missingMonths]] = RandomChoice[getYearMonths[#SEYear]] &/@ observations[[missingMonths]];
+		months
+	]
+
+monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonths_, deltaD_, years_, inliers_, outliers_] :=
+	Module[{months, missingMonthInliers, missingMonthOutliers},
+
+		months = observations[[All, "Month"]];
+
+		If[missingMonths === {}, Return@months];
+
+		missingMonthInliers = Intersection[missingMonths, inliers];
+		missingMonthOutliers = Intersection[missingMonths, outliers];
+
+		months[[missingMonthInliers]] =
+				MapThread[
+					Function[{obs, ts, cs, year, delta}, Module[{possibleMonths, distances, monthLogProbs, priorLogProbs, logProbs},
+						possibleMonths = getYearMonths[year];
+						distances =
+							objectDistanceApprox[
+								ConstantArray[obs["Object"], Length[possibleMonths]],
+								ConstantArray[obs["Reference"], Length[possibleMonths]],
+								ConstantArray[obs["Relation"], Length[possibleMonths]],
+								ADFromBabylonianDate[{year, #, obs["EarliestDay"] + delta}] &/@ possibleMonths,
+								ts
+							];
+
+						monthLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+						(* Currently the prior is uniform over possible months *)
+						priorLogProbs = 0;
+						logProbs = priorLogProbs + monthLogProbs;
+						logPMFSample[logProbs, possibleMonths]
+				]],
+				{
+					observations[[missingMonthInliers]],
+					t[[missingMonthInliers]],
+					c[[missingMonthInliers]],
+					years[[missingMonthInliers]],
+					deltaD[[missingMonthInliers]]
+				}
+			];
+
+		months[[missingMonthOutliers]] =
+			RandomChoice[getYearMonths[#SEYear]] &/@ observations[[missingMonthOutliers]];
+
+		months
+	]
+
+
 (* Full model *)
 fitModel[observations_, steps_, vars_ : {}] :=
 	Module[{
@@ -221,7 +280,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
 			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
-			months, years,
+			months, missingMonths,
+			years,
 			d, deltaD, earliestDays, missingDays,
 			m, p, inliers, outliers
 		},
@@ -262,7 +322,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2Outlier = sigma2OutlierInit[];
 
 		(* Dates *)
-		months = observations[[All, "Month"]];
+		missingMonths = getMissingMonths[observations];
+		months = monthsInit[observations, missingMonths];
 		years = observations[[All, "SEYear"]];
 
 		(* Day ranges *)
@@ -289,6 +350,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			Function[
 
 				deltaD = deltaDUpdate[observations, c, l, sigma2, t, missingDays, months, years, inliers, outliers];
+				months = monthsUpdate[observations, c, l, sigma2, t, missingMonths, deltaD, years, inliers, outliers];
 				d = MapThread[
 						{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
 						{years, months, earliestDays, deltaD}
@@ -338,6 +400,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 						"muOutlier" -> muOutlier,
 						"sigma2Outlier" -> sigma2Outlier,
 						"deltaD" -> deltaD,
+						"months" -> months,
 						"timeCats" -> timeCats,
 						"timeCatsDist" -> timeCatsDist
 					|>
