@@ -215,28 +215,36 @@ deltaDUpdate[observations_, c_, l_, sigma2_, t_, missingDays_, months_, years_, 
 
 
 (* months *)
-getMissingMonths[observations_] :=
-	Position[observations[[All, "Month"]], _Missing, {1}, Heads -> False][[All, 1]]
+getMonthGroup[Missing["Unknown", i_]] := i
+getMonthGroup[a_] := Missing[]
+
+getMissingMonthGroups[observations_] :=
+	KeyDrop[PositionIndex[getMonthGroup /@ observations[[All, "Month"]]], Missing[]]
 
 (* monthsPrior[observations_] := CategoricalDistribution[getYearMonths[#SEYear]] &/@ observations *)
-monthsInit[observations_, missingMonths_] :=
-	Module[{months},
+monthsInit[observations_, missingMonthGroups_] :=
+	Module[{months, missingMonths},
 		months = observations[[All, "Month"]];
+		missingMonths = Catenate@missingMonthGroups;
 		months[[missingMonths]] = RandomChoice[getYearMonths[#SEYear]] &/@ observations[[missingMonths]];
 		months
 	]
 
-monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonths_, deltaD_, years_, inliers_, outliers_] :=
-	Module[{months, missingMonthInliers, missingMonthOutliers},
+monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, years_, inliers_, outliers_] :=
+	Module[{months, missingMonths, missingMonthInliers, missingMonthOutliers, monthPosteriors, groupSamples},
 
 		months = observations[[All, "Month"]];
 
-		If[missingMonths === {}, Return@months];
+		If[missingMonthGroups === {}, Return@months];
+
+		missingMonths = Catenate@missingMonthGroups;
 
 		missingMonthInliers = Intersection[missingMonths, inliers];
 		missingMonthOutliers = Intersection[missingMonths, outliers];
+		
+		monthPosteriors = ConstantArray[0, Length[months]];
 
-		months[[missingMonthInliers]] =
+		monthPosteriors[[missingMonthInliers]] =
 				MapThread[
 					Function[{obs, ts, cs, year, delta}, Module[{possibleMonths, distances, monthLogProbs, priorLogProbs, logProbs},
 						possibleMonths = getYearMonths[year];
@@ -253,7 +261,7 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonths_, deltaD_, years_
 						(* Currently the prior is uniform over possible months *)
 						priorLogProbs = 0;
 						logProbs = priorLogProbs + monthLogProbs;
-						logPMFSample[logProbs, possibleMonths]
+						logProbs
 				]],
 				{
 					observations[[missingMonthInliers]],
@@ -264,8 +272,12 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonths_, deltaD_, years_
 				}
 			];
 
-		months[[missingMonthOutliers]] =
-			RandomChoice[getYearMonths[#SEYear]] &/@ observations[[missingMonthOutliers]];
+		monthPosteriors[[missingMonthOutliers]] =
+			ConstantArray[0, Length@getYearMonths@#] &/@ years[[missingMonthOutliers]];
+
+		groupSamples = logPMFSample[Total[monthPosteriors[[#]]], getYearMonths[years[[#[[1]]]]]] &/@ missingMonthGroups;
+
+		MapThread[(months[[#1]] = #2)&, {missingMonthGroups, groupSamples}];
 
 		months
 	]
@@ -280,7 +292,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
 			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
-			months, missingMonths,
+			months, missingMonthGroups,
 			years,
 			d, deltaD, earliestDays, missingDays,
 			m, p, inliers, outliers
@@ -322,8 +334,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2Outlier = sigma2OutlierInit[];
 
 		(* Dates *)
-		missingMonths = getMissingMonths[observations];
-		months = monthsInit[observations, missingMonths];
+		missingMonthGroups = getMissingMonthGroups[observations];
+		months = monthsInit[observations, missingMonthGroups];
 		years = observations[[All, "SEYear"]];
 
 		(* Day ranges *)
@@ -350,7 +362,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			Function[
 
 				deltaD = deltaDUpdate[observations, c, l, sigma2, t, missingDays, months, years, inliers, outliers];
-				months = monthsUpdate[observations, c, l, sigma2, t, missingMonths, deltaD, years, inliers, outliers];
+				months = monthsUpdate[observations, c, l, sigma2, t, missingMonthGroups, deltaD, years, inliers, outliers];
 				d = MapThread[
 						{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
 						{years, months, earliestDays, deltaD}
