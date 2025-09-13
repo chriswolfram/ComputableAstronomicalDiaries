@@ -17,7 +17,6 @@ modelObservationQ[obs_?AssociationQ] :=
 	! MissingQ[#Reference] &&
 	! MissingQ[#EarliestDay] &&
 	! MissingQ[#LatestDay] &&
-	! MissingQ[#SEYear] &&
 	! MissingQ[#Relation] &&
 	! (MissingQ[#Cubits] && MissingQ[#Fingers])&@obs
 
@@ -222,11 +221,11 @@ getMissingMonthGroups[observations_] :=
 	KeyDrop[PositionIndex[getMonthGroup /@ observations[[All, "Month"]]], Missing[]]
 
 (* monthsPrior[observations_] := CategoricalDistribution[getYearMonths[#SEYear]] &/@ observations *)
-monthsInit[observations_, missingMonthGroups_] :=
+monthsInit[observations_, years_, missingMonthGroups_] :=
 	Module[{months, missingMonths},
 		months = observations[[All, "Month"]];
 		missingMonths = Catenate@missingMonthGroups;
-		months[[missingMonths]] = RandomChoice[getYearMonths[#SEYear]] &/@ observations[[missingMonths]];
+		months[[missingMonths]] = RandomChoice[getYearMonths[#]] &/@ years[[missingMonths]];
 		months
 	]
 
@@ -283,6 +282,81 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, y
 	]
 
 
+(* years *)
+getYearGroup[Missing["Unknown", i_]] := i
+getYearGroup[a_] := Missing[]
+
+getMissingYearGroups[observations_] :=
+	KeyDrop[PositionIndex[getYearGroup /@ observations[[All, "SEYear"]]], Missing[]]
+
+
+priorYearRange := priorYearRange = MinMax@Keys[ADChronology[]][[All, 1]];
+
+yearsInit[observations_, missingYearGroups_] :=
+	Module[{years, missingYears},
+		years = observations[[All, "SEYear"]];
+		missingYears = Catenate@missingYearGroups;
+		years[[missingYears]] =
+			If[MissingQ[#Month],
+				RandomInteger[priorYearRange],
+				RandomChoice[getMonthYears[#Month]]
+			] &/@ observations[[missingYears]];
+		years
+	]
+
+yearsUpdate[observations_, c_, l_, sigma2_, t_, missingYearGroups_, deltaD_, months_, inliers_, outliers_] :=
+	Module[{years, missingYears, missingYearInliers, missingYearOutliers, yearPosteriors, groupSamples},
+
+		years = observations[[All, "SEYear"]];
+
+		If[missingYearGroups === {}, Return@years];
+
+		missingYears = Catenate@missingYearGroups;
+
+		missingYearInliers = Intersection[missingYears, inliers];
+		missingYearOutliers = Intersection[missingYears, outliers];
+		
+		yearPosteriors = ConstantArray[0, Length[years]];
+
+		yearPosteriors[[missingYearInliers]] =
+				MapThread[
+					Function[{obs, ts, cs, month, delta}, Module[{possibleYears, distances, yearLogProbs, priorLogProbs, logProbs},
+						possibleYears = getMonthYears[month];
+						distances =
+							objectDistanceApprox[
+								ConstantArray[obs["Object"], Length[possibleYears]],
+								ConstantArray[obs["Reference"], Length[possibleYears]],
+								ConstantArray[obs["Relation"], Length[possibleYears]],
+								ADFromBabylonianDate[{#, month, obs["EarliestDay"] + delta}] &/@ possibleYears,
+								ts
+							];
+
+						yearLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+						(* Currently the prior is uniform over possible years *)
+						priorLogProbs = 0;
+						logProbs = priorLogProbs + yearLogProbs;
+						logProbs
+				]],
+				{
+					observations[[missingYearInliers]],
+					t[[missingYearInliers]],
+					c[[missingYearInliers]],
+					months[[missingYearInliers]],
+					deltaD[[missingYearInliers]]
+				}
+			];
+
+		yearPosteriors[[missingYearOutliers]] =
+			ConstantArray[0, Length@getMonthYears@#] &/@ months[[missingYearOutliers]];
+
+		groupSamples = logPMFSample[Total[yearPosteriors[[#]]], getMonthYears[months[[#[[1]]]]]] &/@ missingYearGroups;
+
+		MapThread[(years[[#1]] = #2)&, {missingYearGroups, groupSamples}];
+
+		years
+	]
+
+
 (* Full model *)
 fitModel[observations_, steps_, vars_ : {}] :=
 	Module[{
@@ -292,8 +366,8 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
 			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, t,
+			years, missingYearGroups,
 			months, missingMonthGroups,
-			years,
 			d, deltaD, earliestDays, missingDays,
 			m, p, inliers, outliers
 		},
@@ -334,9 +408,10 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		sigma2Outlier = sigma2OutlierInit[];
 
 		(* Dates *)
+		missingYearGroups = getMissingYearGroups[observations];
+		years = yearsInit[observations, missingYearGroups];
 		missingMonthGroups = getMissingMonthGroups[observations];
-		months = monthsInit[observations, missingMonthGroups];
-		years = observations[[All, "SEYear"]];
+		months = monthsInit[observations, years, missingMonthGroups];
 
 		(* Day ranges *)
 		missingDays = getMissingDays[observations];
@@ -363,6 +438,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 				deltaD = deltaDUpdate[observations, c, l, sigma2, t, missingDays, months, years, inliers, outliers];
 				months = monthsUpdate[observations, c, l, sigma2, t, missingMonthGroups, deltaD, years, inliers, outliers];
+				years = yearsUpdate[observations, c, l, sigma2, t, missingYearGroups, deltaD, months, inliers, outliers];
 				d = MapThread[
 						{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
 						{years, months, earliestDays, deltaD}
@@ -412,6 +488,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 						"muOutlier" -> muOutlier,
 						"sigma2Outlier" -> sigma2Outlier,
 						"deltaD" -> deltaD,
+						"years" -> years,
 						"months" -> months,
 						"timeCats" -> timeCats,
 						"timeCatsDist" -> timeCatsDist
