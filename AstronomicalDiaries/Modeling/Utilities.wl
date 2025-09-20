@@ -40,7 +40,17 @@ dirichletSample[DirichletDistribution[a_]] :=
 	Alternative version using the Gumbel-max trick:
 	https://en.wikipedia.org/wiki/Categorical_distribution#Sampling_via_the_Gumbel_distribution
 *)
-logPMFSample[logPMF_] := Ordering[RandomVariate[ExtremeValueDistribution[], Length@logPMF] + logPMF, -1][[1]] - 1
+(* logPMFSample[logPMF_] := Ordering[RandomVariate[ExtremeValueDistribution[], Length@logPMF] + logPMF, -1][[1]] - 1 *)
+
+logPMFSample[logPMF : {_?NumericQ..}] := Ordering[RandomVariate[ExtremeValueDistribution[], Length@logPMF] + logPMF, -1][[1]] - 1
+logPMFSample[logPMF_] :=
+	With[{idxs = Select[logPMF, NumericQ -> "Index"]},
+		If[Length[idxs] === 0,
+			RandomInteger[{0,Length[logPMF]-1}],
+			idxs[[logPMFSample[logPMF[[idxs]]]+1]]-1
+		]
+	]
+
 
 logPMFSample[logPMF_, vals_] := vals[[logPMFSample[logPMF]+1]]
 

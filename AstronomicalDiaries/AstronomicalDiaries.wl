@@ -21,6 +21,10 @@ ADObservationParses
 
 ADObservations
 
+ADObservationPlot
+
+(* ADFitModel *)
+
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`Texts`"]
@@ -31,6 +35,7 @@ Needs["AstronomicalDiaries`ObservationParsing`"]
 Needs["AstronomicalDiaries`Dataset`"]
 Needs["AstronomicalDiaries`Astronomy`"]
 Needs["AstronomicalDiaries`Modeling`"]
+Needs["AstronomicalDiaries`Visualization`"]
 Needs["AstronomicalDiaries`FuzzyAlignment`"]
 Needs["AstronomicalDiaries`OpenAIUtilities`"]
 Needs["AstronomicalDiaries`Utilities`"]

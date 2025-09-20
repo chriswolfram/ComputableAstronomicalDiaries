@@ -1,6 +1,7 @@
 BeginPackage["AstronomicalDiaries`Astronomy`"];
 
 $timeZone
+$observationLocation
 relationAxes
 relationSigns
 fingersPerCubit
@@ -14,6 +15,9 @@ Begin["`Private`"];
 Needs["AstronomicalDiaries`"]
 
 $timeZone = 3;
+
+(* The coordinates of Babylon (specifically Esagila temple) *)
+$observationLocation = GeoPosition[{32.533806, 44.421494}];
 
 (* For interpreting observations *)
 
@@ -62,19 +66,19 @@ observationCubitsSigned[obs_] :=
 
 (* For computing true positions *)
 
-objectDisplacement[obj1_, obj2_, date_] :=
+objectDisplacement[obj1_, obj2_, date_, opts___] :=
 	If[MissingQ[obj1] || MissingQ[obj2] || MissingQ[date], Missing[],
 		Mod[
-			AstroPosition[obj1, {"Ecliptic", "Date" -> date}][{"Latitude", "Longitude"}] - 
-			AstroPosition[obj2, {"Ecliptic", "Date" -> date}][{"Latitude", "Longitude"}],
+			AstroPosition[obj1, {"Ecliptic", opts, "Date" -> date, "Location" -> $observationLocation}][{"Latitude", "Longitude"}] - 
+			AstroPosition[obj2, {"Ecliptic", opts, "Date" -> date, "Location" -> $observationLocation}][{"Latitude", "Longitude"}],
 			{360, 180},
 			{-180, -90}
 		]
 	]
 
-observationDistance[obs_, t_:0] :=
+observationDistance[obs_, t_:0, opts___] :=
 	If[MissingQ[#Relation] || MissingQ[#Date], Missing[],
-		With[{disp = objectDisplacement[#Object, #Reference, DateObject[#Date, "Instant", TimeZone -> $timeZone] + t]},
+		With[{disp = objectDisplacement[#Object, #Reference, DateObject[#Date, "Instant", TimeZone -> $timeZone] + t, opts]},
 			If[MissingQ[disp], disp, disp[[relationAxes[#Relation]]]]
 		]
 	]& @ obs
