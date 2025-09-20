@@ -64,6 +64,19 @@ normalNormalRegressionSample[NormalDistribution[mu0_List, sigma0_List], sigma_, 
 		normalArraySample@NormalDistribution[sigman2 (mu0/sigma0^2 + (m*(y - b))/sigma^2), Sqrt[sigman2]]
 	]
 
+(* Truncated version: *)
+
+normalNormalTruncatedRegressionSample[NormalDistribution[mu0_List, sigma0_List], bounds_, sigma_, m_, b_, y_] :=
+	With[{sigman2 = (1/sigma0^2 + m^2/sigma^2)^-1},
+		MapThread[
+			RandomVariate@TruncatedDistribution[#1,#2]&,
+			{
+				bounds,
+				Thread@NormalDistribution[sigman2 (mu0/sigma0^2 + (m*(y - b))/sigma^2), Sqrt[sigman2]]
+			}
+		]
+	]
+
 
 (* Beta-Bernoulli *)
 

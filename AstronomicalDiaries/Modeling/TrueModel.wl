@@ -1,6 +1,6 @@
 BeginPackage["AstronomicalDiaries`Modeling`TrueModel`"];
 
-timeRange
+timeIntervals
 objectDistanceApproxParamsCache
 objectDistanceApproxParams
 objectDistanceApprox
@@ -13,7 +13,8 @@ Needs["AstronomicalDiaries`Astronomy`"]
 
 (* This is code for a linear approximation of the relative positions of astronomical objects. *)
 
-timeRange = {-12, 12};
+timeSamples = N@Table[t, {t, -12, 12, 4}];
+timeIntervals = Partition[timeSamples, 2, 1];
 objectDistanceApproxParamsCache = <||>;
 
 objectDistanceApproxParams[obj_, ref_, rel_, d_] :=
@@ -21,21 +22,21 @@ objectDistanceApproxParams[obj_, ref_, rel_, d_] :=
 		objectDistanceApproxParamsCache,
 		Key[{obj, ref, rel, d}],
 		objectDistanceApproxParamsCache[{obj, ref, rel, d}] =
-			Table[
+			Partition[Table[
 				objectDisplacement[obj, ref, DateObject[d, "Instant", TimeZone -> $timeZone] + Quantity[ti, "Hours"]][[relationAxes[rel]]],
-				{ti, timeRange}
-			]
+				{ti, timeSamples}
+			], 2, 1]
 	]
 
 objectDistanceApproxParams[obj_List, ref_List, rel_List, d_List] := 
 	MapThread[objectDistanceApproxParams, {obj, ref, rel, d}]
 
 
-objectDistanceApprox[params_, t_] /; ArrayDepth[params] === 1 :=
- (params[[2]] - params[[1]]) / (timeRange[[2]] - timeRange[[1]]) * (t - timeRange[[1]]) + params[[1]]
-
 objectDistanceApprox[params_, t_] /; ArrayDepth[params] === 2 :=
-(params[[All, 2]] - params[[All, 1]]) / (timeRange[[2]] - timeRange[[1]]) * (t - timeRange[[1]]) + params[[All, 1]]
+	params[[Replace[First@FirstPosition[timeSamples, _?(GreaterThan[t]), {Length[timeSamples]}] - 1, 0 -> 1]]] . {t, 1}
+
+objectDistanceApprox[params_, t_] /; ArrayDepth[params] === 3 :=
+	MapThread[objectDistanceApprox, {params, t}]
 
 objectDistanceApprox[obj_, ref_, rel_, d_, t_] :=
 	objectDistanceApprox[objectDistanceApproxParams[obj, ref, rel, d], t]

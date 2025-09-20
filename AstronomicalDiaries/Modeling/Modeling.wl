@@ -99,20 +99,53 @@ muTimesSigma2TimesUpdate[sigma2Times0_, t_, timeCats_, possibleTimeCats_] :=
 
 
 (* t *)
+
+logYGivenZ[NormalDistribution[\[Mu]0_, \[Sigma]0_], \[Sigma]_, 
+  y_, {m_, b_}, {l_, u_}] :=
+ -((b - y + m \[Mu]0)^2/(2 (\[Sigma]^2 + m^2 \[Sigma]0^2))) + 
+  1/2 (-Log[2] - Log[\[Pi]]) - 
+  1/2 Log[\[Sigma]^2 + m^2 \[Sigma]0^2] - (Log[
+     Erf[(-u + \[Mu]0)/(Sqrt[2] \[Sigma]0), (-l + \[Mu]0)/(
+      Sqrt[2] \[Sigma]0)]] /. (Indeterminate -> -Infinity)) + (Log[
+     Erf[((l - \[Mu]0) \[Sigma]^2 + m (b + l m - y) \[Sigma]0^2)/(
+      Sqrt[2] \[Sigma] \[Sigma]0 Sqrt[\[Sigma]^2 + 
+        m^2 \[Sigma]0^2]), ((u - \[Mu]0) \[Sigma]^2 + 
+       m (b + m u - y) \[Sigma]0^2)/(
+      Sqrt[2] \[Sigma] \[Sigma]0 Sqrt[\[Sigma]^2 + 
+        m^2 \[Sigma]0^2])]] /. (Indeterminate -> -Infinity))
+
 tPrior[muTimes_, sigma2Times_, timeCats_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
 tInit[muTimes_, sigma2Times_, timeCats_] := normalArraySample@tPrior[muTimes, sigma2Times, timeCats]
 tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inliers_, outliers_] :=
-	Module[{t},
+	Module[{t, prior, z, params},
 		t = ConstantArray[0., Length[c]];
+
+		prior = NormalDistribution[Lookup[muTimes, timeCats[[inliers]]], Sqrt@Lookup[sigma2Times, timeCats[[inliers]]]];
+		z =
+			1 + logPMFSample /@
+				logYGivenZ[
+					prior,
+					Sqrt[sigma2],
+					c[[inliers]],
+					Transpose[deltaParams[[inliers]], {2, 3, 1}],
+					Transpose[ConstantArray[timeIntervals, Length[inliers]], {2, 3, 1}]
+				];
+
+		params = MapThread[Part, {deltaParams[[inliers]], z}];
+
+		(* TODO: Needs truncation *)
 		t[[inliers]] =
-			normalNormalRegressionSample[
-				NormalDistribution[Lookup[muTimes, timeCats[[inliers]]], Sqrt@Lookup[sigma2Times, timeCats[[inliers]]]],
+			normalNormalTruncatedRegressionSample[
+				prior,
+				timeIntervals[[z]],
 				Sqrt[sigma2],
-				(l (deltaParams[[inliers, 2]] - deltaParams[[inliers, 1]]))/(timeRange[[2]] - timeRange[[1]]),
-				l (deltaParams[[inliers, 1]] - (timeRange[[1]] (deltaParams[[inliers, 2]] - deltaParams[[inliers, 1]]))/(timeRange[[2]] - timeRange[[1]])),
+				params[[All, 1]],
+				params[[All, 2]],
 				c[[inliers]]
 			];
-		t[[outliers]] = normalArraySample@NormalDistribution[Lookup[muTimes, timeCats[[outliers]]], Sqrt@Lookup[sigma2Times, timeCats[[outliers]]]];
+
+		t[[outliers]] =
+			normalArraySample@NormalDistribution[Lookup[muTimes, timeCats[[outliers]]], Sqrt@Lookup[sigma2Times, timeCats[[outliers]]]];
 		t
 	]
 
