@@ -7,6 +7,7 @@ griddyGibbsSampleLog
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`"]
+Needs["AstronomicalDiaries`Modeling`Interpolation`"]
 
 
 (*
@@ -28,7 +29,7 @@ pdfToCDF[pdf_] :=
 (* Adds a small value to points that coincide so that Interpolation doesn't panic *)
 jitterList[l_, tol_] := Catenate[# + tol*Range[0, Length[#] - 1] & /@ Split[l, Abs[#1-#2]<tol&]]
 jitterPoints[pts_, tol_ : $MachineEpsilon*1000] :=
-	SubsetMap[jitterList[#, tol] &, SubsetMap[jitterList[#, tol] &, pts, {All, 1}], {All, 2}]
+	SubsetMap[jitterList[#, tol]&, SubsetMap[jitterList[#, tol]&, pts, {All, 1}], {All, 2}]
 
 (* Set an interval to 0 in a pdf *)
 truncatePDF[pdf_, rawInterval_Interval] :=
@@ -73,55 +74,48 @@ pdfToCDFPositions[pts_] := Join[{pts[[1]]}, Most[pts] + Differences[pts]/2, {pts
 logPDFToLogCDF[x_, logPDF_] :=
 	Prepend[normalizeLogAccumulate[logPDF + Log[Differences[x]]], -$MaxMachineNumber]
 
-linearInterpolateMonotonic[x_, y_, p_] :=
-	Module[{lastIndex=0},
-		If[p <= x[[1]], Return[y[[1]]]];
-		If[x[[-1]] <= p, Return[y[[-1]]]];
-		Do[If[p < x[[i]], lastIndex=i-1;Break[]], {i,Length[x]}];
-		(y[[lastIndex+1]] - y[[lastIndex]]) / (x[[lastIndex+1]] - x[[lastIndex]]) * (p - x[[lastIndex]]) + y[[lastIndex]]
-	]
-
 eGriddyGibbsSampleLog[pts_, logPDFs_] :=
 	Module[{x},
 		x = pdfToCDFPositions[pts];
-		linearInterpolateMonotonic[x, logPDFToLogCDF[x, #], Log@RandomReal[]] &/@ logPDFs
+		eLinearInterpolateMonotonic[Exp@logPDFToLogCDF[x, #], x, RandomReal[]] &/@ logPDFs
 	]
 
-griddyGibbsSampleLog := griddyGibbsSampleLog = FunctionCompile[
-	{
-		FunctionDeclaration[Differences,
-			Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-			Function[l,
-				Rest[l]-Most[l]
+griddyGibbsSampleLog := griddyGibbsSampleLog =
+	FunctionCompile[
+		{
+			FunctionDeclaration[Differences,
+				Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
+				Function[l,
+					Rest[l]-Most[l]
+				]
+			],
+			FunctionDeclaration[logSumExpPlus,
+				Typed[{"MachineReal","MachineReal"}->"MachineReal"]@
+				DownValuesFunction[logSumExpPlus]
+			],
+			FunctionDeclaration[normalizeLogAccumulate,
+				Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
+				DownValuesFunction[normalizeLogAccumulate]
+			],
+			FunctionDeclaration[pdfToCDFPositions,
+				Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
+				DownValuesFunction[pdfToCDFPositions]
+			],
+			FunctionDeclaration[logPDFToLogCDF,
+				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
+				DownValuesFunction[logPDFToLogCDF]
+			],
+			FunctionDeclaration[eLinearInterpolateMonotonic,
+				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"MachineReal"}->"MachineReal"]@
+				DownValuesFunction[eLinearInterpolateMonotonic]
+			],
+			FunctionDeclaration[eGriddyGibbsSampleLog,
+				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 2]}->"PackedArray"::["MachineReal", 1]]@
+				DownValuesFunction[eGriddyGibbsSampleLog]
 			]
-		],
-		FunctionDeclaration[logSumExpPlus,
-			Typed[{"MachineReal","MachineReal"}->"MachineReal"]@
-			DownValuesFunction[logSumExpPlus]
-		],
-		FunctionDeclaration[normalizeLogAccumulate,
-			Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-			DownValuesFunction[normalizeLogAccumulate]
-		],
-		FunctionDeclaration[pdfToCDFPositions,
-			Typed[{"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-			DownValuesFunction[pdfToCDFPositions]
-		],
-		FunctionDeclaration[logPDFToLogCDF,
-			Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-			DownValuesFunction[logPDFToLogCDF]
-		],
-		FunctionDeclaration[linearInterpolateMonotonic,
-			Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"MachineReal"}->"MachineReal"]@
-			DownValuesFunction[linearInterpolateMonotonic]
-		],
-		FunctionDeclaration[eGriddyGibbsSampleLog,
-			Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 2]}->"PackedArray"::["MachineReal", 1]]@
-			DownValuesFunction[eGriddyGibbsSampleLog]
-		]
-	},
-	eGriddyGibbsSampleLog
-]
+		},
+		eGriddyGibbsSampleLog
+	]
 
 
 End[];

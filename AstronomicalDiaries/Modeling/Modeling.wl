@@ -9,6 +9,7 @@ Needs["AstronomicalDiaries`Modeling`Utilities`"]
 Needs["AstronomicalDiaries`Modeling`ConditionalSampling`"]
 Needs["AstronomicalDiaries`Modeling`TrueModel`"]
 Needs["AstronomicalDiaries`Modeling`GriddyGibbs`"]
+Needs["AstronomicalDiaries`Modeling`Interpolation`"]
 Needs["AstronomicalDiaries`Chronology`"]
 Needs["AstronomicalDiaries`Astronomy`"]
 
@@ -102,13 +103,13 @@ muTimesSigma2TimesUpdate[sigma2Times0_, t_, timeCats_, possibleTimeCats_] :=
 (* t *)
 tPrior[muTimes_, sigma2Times_, timeCats_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
 tInit[muTimes_, sigma2Times_, timeCats_] := normalArraySample@tPrior[muTimes, sigma2Times, timeCats]
-tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaFunctions_, inliers_, outliers_] :=
+tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inliers_, outliers_] :=
 	Module[{t, pts, ptsReplicated, distances, logPriors, logLikelihoods, logPDFs},
 		t = ConstantArray[0., Length[c]];
 
-		pts = Range[-11,11,0.1] + RandomReal[{-0.5,0.5}];
+		pts = Range[-11,11,0.1] + RandomReal[{-0.05,0.05}];
 		ptsReplicated = ConstantArray[pts, Length[inliers]];
-		distances = objectDistanceApprox[deltaFunctions[[inliers]], ptsReplicated];
+		distances = Transpose[objectDistanceApprox[deltaParams[[inliers]], #] &/@ Transpose[ptsReplicated]];
 
 		logPriors = logNormalPDF[tPrior[muTimes, sigma2Times, timeCats[[inliers]]], ptsReplicated];
 		logLikelihoods = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], c[[inliers]]];
@@ -116,7 +117,7 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaFunctions_, inl
 
 		(* TODO: Look at this Clip *)
 		(* t[[inliers]] = griddyGibbsSample[Transpose[{pts, Exp[Clip[#, {-10000, Infinity}]] /. -Infinity|Indeterminate -> $MachineEpsilon}]] &/@ logPDFs; *)
-		t[[inliers]] = griddyGibbsSampleLog[Transpose[{pts, #}]] &/@ logPDFs;
+		t[[inliers]] = griddyGibbsSampleLog[pts, logPDFs];
 
 		(* t[[inliers]] =
 			MapThread[
@@ -129,7 +130,7 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaFunctions_, inl
 						griddyGibbsSample[pdf]
 					]
 				],
-				{deltaFunctions[[inliers]], timeCats[[inliers]], c[[inliers]]}
+				{deltaParams[[inliers]], timeCats[[inliers]], c[[inliers]]}
 			]; *)
 
 		t[[outliers]] = normalArraySample@NormalDistribution[Lookup[muTimes, timeCats[[outliers]]], Sqrt@Lookup[sigma2Times, timeCats[[outliers]]]];
@@ -381,7 +382,7 @@ yearsUpdate[observations_, c_, l_, sigma2_, t_, missingYearGroups_, deltaD_, mon
 fitModel[observations_, steps_, vars_ : {}] :=
 	Module[{
 			res,
-			deltaFunctions, deltaStar,
+			deltaParams, deltaStar,
 			c, l, sigma2,
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
@@ -444,13 +445,13 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			];
 
 		(*Compute true distances*)
-		deltaFunctions = objectDistanceApproxFunction[
+		deltaParams = objectDistanceApproxParams[
 				observations[[All, "Object"]],
 				observations[[All, "Reference"]],
 				observations[[All, "Relation"]],
 				d
 			];
-		deltaStar = objectDistanceApprox[deltaFunctions, t];
+		deltaStar = objectDistanceApprox[deltaParams, t];
 
 		(*Updates*)
 		res = Reap@GeneralUtilities`MonitoredScan[
@@ -465,17 +466,17 @@ fitModel[observations_, steps_, vars_ : {}] :=
 					];
 
 				(* Update true params because they depend on d *)
-				deltaFunctions = objectDistanceApproxFunction[
+				deltaParams = objectDistanceApproxParams[
 						observations[[All, "Object"]],
 						observations[[All, "Reference"]],
 						observations[[All, "Relation"]],
 						d
 					];
 
-				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaFunctions, inliers, outliers];
+				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, inliers, outliers];
 
 				(* Update true distance because they depend on t *)
-				deltaStar = objectDistanceApprox[deltaFunctions, t];
+				deltaStar = objectDistanceApprox[deltaParams, t];
 
 				(* Inlier model *)
 				l = lUpdate[c, deltaStar, sigma2, inliers];

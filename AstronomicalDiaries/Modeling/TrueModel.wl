@@ -2,47 +2,43 @@ BeginPackage["AstronomicalDiaries`Modeling`TrueModel`"];
 
 timeRange
 objectDistanceApproxCache
-objectDistanceApproxFunction
+objectDistanceApproxParams
 objectDistanceApprox
 
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`"]
 Needs["AstronomicalDiaries`Astronomy`"]
+Needs["AstronomicalDiaries`Modeling`Interpolation`"]
 
 
-(* This is code for a linear approximation of the relative positions of astronomical objects. *)
+(* This is code for a piecewise-linear approximation of the relative positions of astronomical objects. *)
 
 timeRange = Range[-12,12,1.];
 objectDistanceApproxCache = <||>;
 
-objectDistanceApproxFunction[obj_, ref_, rel_, d_] :=
+objectDistanceApproxParams[obj_, ref_, rel_, d_] :=
 	Lookup[
 		objectDistanceApproxCache,
 		Key[{obj, ref, rel, d}],
 		objectDistanceApproxCache[{obj, ref, rel, d}] =
-			Interpolation[
-				Transpose@{
-					timeRange,
-					Table[
-						objectDisplacement[obj, ref, DateObject[d, "Instant", TimeZone -> $timeZone] + Quantity[ti, "Hours"]][[relationAxes[rel]]],
-						{ti, timeRange}
-					]
-				},
-				Method -> "Hermite",
-				InterpolationOrder -> 1
+			Table[
+				objectDisplacement[obj, ref, DateObject[d, "Instant", TimeZone -> $timeZone] + Quantity[ti, "Hours"]][[relationAxes[rel]]],
+				{ti, timeRange}
 			]
 	]
 
-objectDistanceApproxFunction[obj_List, ref_List, rel_List, d_List] := 
-	MapThread[objectDistanceApproxFunction, {obj, ref, rel, d}]
+objectDistanceApproxParams[obj_List, ref_List, rel_List, d_List] :=
+	MapThread[objectDistanceApproxParams, {obj, ref, rel, d}]
 
 
-objectDistanceApprox[if_, t_] := if[t]
-objectDistanceApprox[if_List, t_] := MapThread[#1[#2]&, {if,t}]
+objectDistanceApprox[params_, t_] := linearInterpolateMonotonic[timeRange, params, t]
+
+objectDistanceApprox[paramsList_List, tList_List] /; ArrayDepth[paramsList] === 2 :=
+	linearInterpolateMonotonic[ConstantArray[timeRange, Length[paramsList]], paramsList, tList]
 
 objectDistanceApprox[obj_, ref_, rel_, d_, t_] :=
-	objectDistanceApprox[objectDistanceApproxFunction[obj, ref, rel, d], t]
+	objectDistanceApprox[objectDistanceApproxParams[obj, ref, rel, d], t]
 
 
 End[];
