@@ -6,6 +6,7 @@ normalNormalRegressionSample
 betaBernoulliSample
 dirichletCategoricalSample
 binaryNormalMixtureSample
+normalNormalTruncatedRegressionSample
 
 Begin["`Private`"];
 
@@ -66,14 +67,28 @@ normalNormalRegressionSample[NormalDistribution[mu0_List, sigma0_List], sigma_, 
 
 (* Truncated version: *)
 
+normalCDF[NormalDistribution[mu_, sigma_], x_] := Erfc[(mu - x)/(Sqrt[2]*sigma)]/2
+
+normalInverseCDF[NormalDistribution[mu_, sigma_], x_] := mu - Sqrt[2]*sigma*InverseErfc[2*x]
+
+uniformSample[range_] /; ArrayDepth[range] == 1 := RandomReal[range]
+uniformSample[ranges_] := RandomReal[{0, 1}, Length[ranges]]*(ranges[[All, 2]] - ranges[[All, 1]]) + ranges[[All, 1]]
+
+truncatedNormalSample[TruncatedDistribution[{a_, b_}, d : NormalDistribution[mu_, sigma_]]] :=
+	Module[{res, inf},
+		res = normalInverseCDF[d, uniformSample@normalCDF[d, Transpose@{a, b}]];
+		inf = Position[res, -Infinity|Infinity, {1}, Heads->False][[All,1]];
+		(* TODO: This is a hack *)
+		res[[inf]] = (a[[inf]] + b[[inf]]) / 2;
+
+		res
+	]
+
 normalNormalTruncatedRegressionSample[NormalDistribution[mu0_List, sigma0_List], bounds_, sigma_, m_, b_, y_] :=
 	With[{sigman2 = (1/sigma0^2 + m^2/sigma^2)^-1},
-		MapThread[
-			RandomVariate@TruncatedDistribution[#1,#2]&,
-			{
-				bounds,
-				Thread@NormalDistribution[sigman2 (mu0/sigma0^2 + (m*(y - b))/sigma^2), Sqrt[sigman2]]
-			}
+		truncatedNormalSample@TruncatedDistribution[
+			Transpose@bounds,
+			NormalDistribution[sigman2 (mu0/sigma0^2 + (m*(y - b))/sigma^2), Sqrt[sigman2]]
 		]
 	]
 
