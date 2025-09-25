@@ -1,14 +1,15 @@
 BeginPackage["AstronomicalDiaries`Modeling`Interpolation`"];
 
-linearInterpolateMonotonic
-eLinearInterpolateMonotonic
+linearInterpolate
+eLinearInterpolate
 
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`"]
 
 
-eLinearInterpolateMonotonic[x_, y_, p_] :=
+(* This function performs linear interpolation. It assumes that x is increasing (i.e. sorted), though y need not be. *)
+eLinearInterpolate[x_, y_, p_] :=
 	Native`UncheckedBlock@Module[{lastIndex=1},
 		Assert[Length[x] == Length[y]];
 		If[p <= x[[1]], Return[y[[1]]]];
@@ -17,64 +18,64 @@ eLinearInterpolateMonotonic[x_, y_, p_] :=
 		(y[[lastIndex+1]] - y[[lastIndex]]) / (x[[lastIndex+1]] - x[[lastIndex]]) * (p - x[[lastIndex]]) + y[[lastIndex]]
 	]
 
-eLinearInterpolateMonotonicThreaded[x_, y_, p_] :=
+eLinearInterpolateThreaded[x_, y_, p_] :=
 	IfCompiled[
 		Assert[Length[x] === Length[y] === Length[p]];
-		Table[eLinearInterpolateMonotonic[x[[i]],y[[i]],p[[i]]], {i, Length[x]}],
-		MapThread[eLinearInterpolateMonotonic, {x, y, p}]
+		Table[eLinearInterpolate[x[[i]],y[[i]],p[[i]]], {i, Length[x]}],
+		MapThread[eLinearInterpolate, {x, y, p}]
 	]
 
-eLinearInterpolateMonotonicThreadedDeep[x_, y_, p_] :=
+eLinearInterpolateThreadedDeep[x_, y_, p_] :=
 	IfCompiled[
 		Assert[Length[x] === Length[y] === Length[Transpose[p]]];
-		Transpose[Table[eLinearInterpolateMonotonic[x[[i]],y[[i]],#[[i]]], {i, Length[x]}] &/@ Transpose[p]],
-		Transpose[MapThread[eLinearInterpolateMonotonic, {x, y, #}] &/@ Transpose[p]]
+		Transpose[Table[eLinearInterpolate[x[[i]],y[[i]],#[[i]]], {i, Length[x]}] &/@ Transpose[p]],
+		Transpose[MapThread[eLinearInterpolate, {x, y, #}] &/@ Transpose[p]]
 	]
 
-eLinearInterpolateMonotonicList[x_, y_, p_] :=
-	eLinearInterpolateMonotonic[x,y,#] &/@ p
+eLinearInterpolateList[x_, y_, p_] :=
+	eLinearInterpolate[x,y,#] &/@ p
 
 
-setDefs[] := {cLinearInterpolateMonotonic, cLinearInterpolateMonotonicThreaded, cLinearInterpolateMonotonicThreadedDeep, cLinearInterpolateMonotonicList} =
+setDefs[] := {clinearInterpolate, clinearInterpolateThreaded, clinearInterpolateThreadedDeep, clinearInterpolateList} =
 	FunctionCompile[
 		{
-			FunctionDeclaration[eLinearInterpolateMonotonic,
+			FunctionDeclaration[eLinearInterpolate,
 				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"MachineReal"}->"MachineReal"]@
-				DownValuesFunction[eLinearInterpolateMonotonic]
+				DownValuesFunction[eLinearInterpolate]
 			],
-			FunctionDeclaration[eLinearInterpolateMonotonicThreaded,
+			FunctionDeclaration[eLinearInterpolateThreaded,
 				Typed[{"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-				DownValuesFunction[eLinearInterpolateMonotonicThreaded]
+				DownValuesFunction[eLinearInterpolateThreaded]
 			],
-			FunctionDeclaration[eLinearInterpolateMonotonicThreadedDeep,
+			FunctionDeclaration[eLinearInterpolateThreadedDeep,
 				Typed[{"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 2]}->"PackedArray"::["MachineReal", 2]]@
-				DownValuesFunction[eLinearInterpolateMonotonicThreadedDeep]
+				DownValuesFunction[eLinearInterpolateThreadedDeep]
 			],
-			FunctionDeclaration[eLinearInterpolateMonotonicList,
+			FunctionDeclaration[eLinearInterpolateList,
 				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
-				DownValuesFunction[eLinearInterpolateMonotonicList]
+				DownValuesFunction[eLinearInterpolateList]
 			]
 		},
-		{eLinearInterpolateMonotonic, eLinearInterpolateMonotonicThreaded, eLinearInterpolateMonotonicThreadedDeep, eLinearInterpolateMonotonicList},
+		{eLinearInterpolate, eLinearInterpolateThreaded, eLinearInterpolateThreadedDeep, eLinearInterpolateList},
 		CompilerOptions -> {"AbortHandling" -> False}
 	]
 
-cLinearInterpolateMonotonic := (setDefs[]; cLinearInterpolateMonotonic)
-cLinearInterpolateMonotonicThreaded := (setDefs[]; cLinearInterpolateMonotonicThreaded)
-cLinearInterpolateMonotonicThreadedDeep := (setDefs[]; cLinearInterpolateMonotonicThreadedDeep)
-cLinearInterpolateMonotonicList := (setDefs[]; cLinearInterpolateMonotonicList)
+clinearInterpolate := (setDefs[]; clinearInterpolate)
+clinearInterpolateThreaded := (setDefs[]; clinearInterpolateThreaded)
+clinearInterpolateThreadedDeep := (setDefs[]; clinearInterpolateThreadedDeep)
+clinearInterpolateList := (setDefs[]; clinearInterpolateList)
 
-linearInterpolateMonotonic[x_, y_, z_] :=
-	cLinearInterpolateMonotonic[x,y,z]
+linearInterpolate[x_, y_, z_] :=
+	clinearInterpolate[x,y,z]
 
-linearInterpolateMonotonic[x_, y_, z_] /; ArrayDepth[x] === 2 && ArrayDepth[z] === 1 :=
-	cLinearInterpolateMonotonicThreaded[x,y,z]
+linearInterpolate[x_, y_, z_] /; ArrayDepth[x] === 2 && ArrayDepth[z] === 1 :=
+	clinearInterpolateThreaded[x,y,z]
 
-linearInterpolateMonotonic[x_, y_, z_] /; ArrayDepth[x] === 2 && ArrayDepth[z] === 2 :=
-	cLinearInterpolateMonotonicThreadedDeep[x,y,z]
+linearInterpolate[x_, y_, z_] /; ArrayDepth[x] === 2 && ArrayDepth[z] === 2 :=
+	clinearInterpolateThreadedDeep[x,y,z]
 
-linearInterpolateMonotonic[x_, y_, z_] /; ArrayDepth[x] === 1 && ArrayDepth[z] === 1 :=
-	eLinearInterpolateMonotonicList[x,y,z]
+linearInterpolate[x_, y_, z_] /; ArrayDepth[x] === 1 && ArrayDepth[z] === 1 :=
+	eLinearInterpolateList[x,y,z]
 
 
 End[];

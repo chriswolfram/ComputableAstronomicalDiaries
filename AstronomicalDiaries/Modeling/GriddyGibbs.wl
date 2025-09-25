@@ -77,7 +77,7 @@ logPDFToLogCDF[x_, logPDF_] :=
 eGriddyGibbsSampleLog[pts_, logPDFs_] :=
 	Module[{x},
 		x = pdfToCDFPositions[pts];
-		eLinearInterpolateMonotonic[Exp@logPDFToLogCDF[x, #], x, RandomReal[]] &/@ logPDFs
+		eLinearInterpolate[Exp@logPDFToLogCDF[x, #], x, RandomReal[]] &/@ logPDFs
 	]
 
 griddyGibbsSampleLog := griddyGibbsSampleLog =
@@ -105,9 +105,9 @@ griddyGibbsSampleLog := griddyGibbsSampleLog =
 				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
 				DownValuesFunction[logPDFToLogCDF]
 			],
-			FunctionDeclaration[eLinearInterpolateMonotonic,
+			FunctionDeclaration[eLinearInterpolate,
 				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"MachineReal"}->"MachineReal"]@
-				DownValuesFunction[eLinearInterpolateMonotonic]
+				DownValuesFunction[eLinearInterpolate]
 			],
 			FunctionDeclaration[eGriddyGibbsSampleLog,
 				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 2]}->"PackedArray"::["MachineReal", 1]]@

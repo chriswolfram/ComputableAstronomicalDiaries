@@ -32,10 +32,10 @@ objectDistanceApproxParams[obj_List, ref_List, rel_List, d_List] :=
 	MapThread[objectDistanceApproxParams, {obj, ref, rel, d}]
 
 
-objectDistanceApprox[params_, t_] := linearInterpolateMonotonic[timeRange, params, t]
+objectDistanceApprox[params_, t_] := linearInterpolate[timeRange, params, t]
 
 objectDistanceApprox[paramsList_List, tList_List] /; ArrayDepth[paramsList] === 2 :=
-	linearInterpolateMonotonic[ConstantArray[timeRange, Length[paramsList]], paramsList, tList]
+	linearInterpolate[ConstantArray[timeRange, Length[paramsList]], paramsList, tList]
 
 objectDistanceApprox[obj_, ref_, rel_, d_, t_] :=
 	objectDistanceApprox[objectDistanceApproxParams[obj, ref, rel, d], t]
