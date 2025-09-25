@@ -65,7 +65,7 @@ griddyGibbsSample[pdf_] := griddyGibbsSample[pdf, 1]
 
 (* Log-space version *)
 
-logSumExpPlus[a_,b_] := With[{c = Max[a, b]}, c + Log[Exp[a - c] + Exp[b - c]]]
+logSumExpPlus[a_,b_] := Native`UncheckedBlock@With[{c = Max[a, b]}, c + Log[Exp[a - c] + Exp[b - c]]]
 
 normalizeLogAccumulate[logPDF_] := With[{cdf = FoldList[logSumExpPlus, logPDF]}, cdf - Last[cdf]]
 
@@ -114,7 +114,8 @@ griddyGibbsSampleLog := griddyGibbsSampleLog =
 				DownValuesFunction[eGriddyGibbsSampleLog]
 			]
 		},
-		eGriddyGibbsSampleLog
+		eGriddyGibbsSampleLog,
+		CompilerOptions -> {"AbortHandling" -> False}
 	]
 
 

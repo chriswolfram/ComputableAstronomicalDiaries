@@ -109,31 +109,16 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 
 		pts = Range[-11,11,0.1] + RandomReal[{-0.05,0.05}];
 		ptsReplicated = ConstantArray[pts, Length[inliers]];
-		distances = Transpose[objectDistanceApprox[deltaParams[[inliers]], #] &/@ Transpose[ptsReplicated]];
+		distances = objectDistanceApprox[deltaParams[[inliers]], ptsReplicated];
 
 		logPriors = logNormalPDF[tPrior[muTimes, sigma2Times, timeCats[[inliers]]], ptsReplicated];
 		logLikelihoods = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], c[[inliers]]];
 		logPDFs = logPriors + logLikelihoods;
 
-		(* TODO: Look at this Clip *)
-		(* t[[inliers]] = griddyGibbsSample[Transpose[{pts, Exp[Clip[#, {-10000, Infinity}]] /. -Infinity|Indeterminate -> $MachineEpsilon}]] &/@ logPDFs; *)
 		t[[inliers]] = griddyGibbsSampleLog[pts, logPDFs];
 
-		(* t[[inliers]] =
-			MapThread[
-				Function[{deltaFunction, timeCat, cs},
-					Module[{prior, likelihood, pdf},
-						prior = PDF[NormalDistribution[muTimes[timeCat], Sqrt@sigma2Times[timeCat]], pts];
-						likelihood = PDF[NormalDistribution[#*l, Sqrt[sigma2]], cs]&/@deltaFunction[pts];
-						(* likelihood = Exp[-(cs - deltaFunction[pts]*l)^2 / (2*sigma2)] / (Sqrt[2 * Pi] * Sqrt[sigma2]); *)
-						pdf = Transpose[{pts, prior * likelihood}];
-						griddyGibbsSample[pdf]
-					]
-				],
-				{deltaParams[[inliers]], timeCats[[inliers]], c[[inliers]]}
-			]; *)
-
 		t[[outliers]] = normalArraySample@NormalDistribution[Lookup[muTimes, timeCats[[outliers]]], Sqrt@Lookup[sigma2Times, timeCats[[outliers]]]];
+		
 		t
 	]
 
@@ -207,7 +192,7 @@ deltaDUpdate[observations_, c_, l_, sigma2_, t_, missingDays_, months_, years_, 
 								ConstantArray[obs["Reference"], maxDeltaD + 1],
 								ConstantArray[obs["Relation"], maxDeltaD + 1],
 								ADFromBabylonianDate[{year, month, #}] &/@ Range[obs["EarliestDay"], obs["LatestDay"]],
-								ts
+								ConstantArray[ts, maxDeltaD + 1]
 							];
 
 						dayLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
@@ -274,7 +259,7 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, y
 								ConstantArray[obs["Reference"], Length[possibleMonths]],
 								ConstantArray[obs["Relation"], Length[possibleMonths]],
 								ADFromBabylonianDate[{year, #, obs["EarliestDay"] + delta}] &/@ possibleMonths,
-								ts
+								ConstantArray[ts, Length[possibleMonths]]
 							];
 
 						monthLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
@@ -349,7 +334,7 @@ yearsUpdate[observations_, c_, l_, sigma2_, t_, missingYearGroups_, deltaD_, mon
 								ConstantArray[obs["Reference"], Length[possibleYears]],
 								ConstantArray[obs["Relation"], Length[possibleYears]],
 								ADFromBabylonianDate[{#, month, obs["EarliestDay"] + delta}] &/@ possibleYears,
-								ts
+								ConstantArray[ts, Length[possibleYears]]
 							];
 
 						yearLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];

@@ -15,7 +15,7 @@ Needs["AstronomicalDiaries`Modeling`Interpolation`"]
 (* This is code for a piecewise-linear approximation of the relative positions of astronomical objects. *)
 
 timeRange = Range[-12,12,1.];
-objectDistanceApproxCache = <||>;
+If[!AssociationQ[objectDistanceApproxCache], objectDistanceApproxCache = <||>];
 
 objectDistanceApproxParams[obj_, ref_, rel_, d_] :=
 	Lookup[
