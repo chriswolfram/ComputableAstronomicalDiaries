@@ -12,8 +12,8 @@ Needs["AstronomicalDiaries`"]
 eLinearInterpolate[x_, y_, p_] :=
 	Native`UncheckedBlock@Module[{lastIndex=1},
 		Assert[Length[x] == Length[y]];
-		If[p <= x[[1]], Return[y[[1]]]];
-		If[x[[-1]] <= p, Return[y[[-1]]]];
+		If[p <= First[x], Return[First[y]]];
+		If[Last[x] <= p, Return[Last[y]]];
 		Do[If[p < x[[i]], lastIndex=i-1;Break[]], {i,2,Length[x]}];
 		(y[[lastIndex+1]] - y[[lastIndex]]) / (x[[lastIndex+1]] - x[[lastIndex]]) * (p - x[[lastIndex]]) + y[[lastIndex]]
 	]
