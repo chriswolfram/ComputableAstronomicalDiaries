@@ -17,15 +17,29 @@ timeSamples = N@Table[t, {t, -12, 12, 4}];
 timeIntervals = Partition[timeSamples, 2, 1];
 objectDistanceApproxParamsCache = <||>;
 
+pathParams[path_, intervals_] :=
+	MapThread[
+		With[{m = (#1[[2]] - #1[[1]])/(#2[[2]] - #2[[1]])},
+			{m, #1[[1]] - m*#2[[1]]}
+		] &,
+		{
+			Partition[path, 2, 1],
+			intervals
+		}
+	]
+
 objectDistanceApproxParams[obj_, ref_, rel_, d_] :=
 	Lookup[
 		objectDistanceApproxParamsCache,
 		Key[{obj, ref, rel, d}],
 		objectDistanceApproxParamsCache[{obj, ref, rel, d}] =
-			Partition[Table[
-				objectDisplacement[obj, ref, DateObject[d, "Instant", TimeZone -> $timeZone] + Quantity[ti, "Hours"]][[relationAxes[rel]]],
-				{ti, timeSamples}
-			], 2, 1]
+			pathParams[
+				Table[
+					objectDisplacement[obj, ref, DateObject[d, "Instant", TimeZone -> $timeZone] + Quantity[ti, "Hours"]][[relationAxes[rel]]],
+					{ti, timeSamples}
+				],
+				timeIntervals
+			]
 	]
 
 objectDistanceApproxParams[obj_List, ref_List, rel_List, d_List] := 

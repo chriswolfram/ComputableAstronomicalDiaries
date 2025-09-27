@@ -123,17 +123,17 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 		prior = NormalDistribution[Lookup[muTimes, timeCats[[inliers]]], Sqrt@Lookup[sigma2Times, timeCats[[inliers]]]];
 		z =
 			1 + logPMFSample /@
-				logYGivenZ[
+				EchoFunction[Take[#,10]&]@logYGivenZ[
 					prior,
 					Sqrt[sigma2],
-					c[[inliers]],
+					c[[inliers]] / l,
 					Transpose[deltaParams[[inliers]], {2, 3, 1}],
 					Transpose[ConstantArray[timeIntervals, Length[inliers]], {2, 3, 1}]
 				];
 
+		(* TODO: NOT SURE WHERE l GOES HERE *)
 		params = MapThread[Part, {deltaParams[[inliers]], z}];
 
-		(* TODO: Needs truncation *)
 		t[[inliers]] =
 			normalNormalTruncatedRegressionSample[
 				prior,
@@ -141,7 +141,7 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 				Sqrt[sigma2],
 				params[[All, 1]],
 				params[[All, 2]],
-				c[[inliers]]
+				c[[inliers]] / l
 			];
 
 		t[[outliers]] =
