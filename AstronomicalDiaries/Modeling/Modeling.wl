@@ -115,7 +115,7 @@ tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inlier
 		logLikelihoods = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], c[[inliers]]];
 		logPDFs = logPriors + logLikelihoods;
 
-		t[[inliers]] = griddyGibbsSampleLog[pts, logPDFs];
+		t[[inliers]] = griddyGibbsSample[ptsReplicated, logPDFs];
 
 		t[[outliers]] = normalArraySample@NormalDistribution[Lookup[muTimes, timeCats[[outliers]]], Sqrt@Lookup[sigma2Times, timeCats[[outliers]]]];
 		
