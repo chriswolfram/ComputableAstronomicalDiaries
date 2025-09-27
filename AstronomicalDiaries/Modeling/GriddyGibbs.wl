@@ -36,15 +36,15 @@ eGriddyGibbsSampleThreaded[xPDFs_, logPDFs_] :=
 	Native`UncheckedBlock@MapThread[eGriddyGibbsSample, {xPDFs, logPDFs}]
 
 
-eGriddyGibbsMakeGrid[xPDF_, logPDF_] :=
+eGriddyGibbsMakeGrid[xPDF_, logPDF_, n_] :=
 	Native`UncheckedBlock@Module[{xCDF, cdf},
 		xCDF = pdfToCDFPositions[xPDF];
 		cdf = Exp@logPDFToLogCDF[xCDF, logPDF];
-		eLinearInterpolate[cdf, xCDF, #] &/@ Range[0,1,1./(Length[xPDF]-1)]
+		eLinearInterpolate[cdf, xCDF, #] &/@ Range[0,1,1./(n-1)]
 	]
 
-eGriddyGibbsMakeGridThreaded[xPDFs_, logPDFs_] :=
-	Native`UncheckedBlock@MapThread[eGriddyGibbsMakeGrid, {xPDFs, logPDFs}]
+eGriddyGibbsMakeGridThreaded[xPDFs_, logPDFs_, n_] :=
+	Native`UncheckedBlock@MapThread[eGriddyGibbsMakeGrid[#1,#2,n]&, {xPDFs, logPDFs}]
 
 
 setDefs[] := {cGriddyGibbsSample, cGriddyGibbsSampleThreaded, cGriddyGibbsMakeGrid, cGriddyGibbsMakeGridThreaded} =
@@ -87,11 +87,11 @@ setDefs[] := {cGriddyGibbsSample, cGriddyGibbsSampleThreaded, cGriddyGibbsMakeGr
 			],
 
 			FunctionDeclaration[eGriddyGibbsMakeGrid,
-				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1]}->"PackedArray"::["MachineReal", 1]]@
+				Typed[{"PackedArray"::["MachineReal", 1],"PackedArray"::["MachineReal", 1],"MachineInteger"}->"PackedArray"::["MachineReal", 1]]@
 				DownValuesFunction[eGriddyGibbsMakeGrid]
 			],
 			FunctionDeclaration[eGriddyGibbsMakeGridThreaded,
-				Typed[{"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 2]}->"PackedArray"::["MachineReal", 2]]@
+				Typed[{"PackedArray"::["MachineReal", 2],"PackedArray"::["MachineReal", 2],"MachineInteger"}->"PackedArray"::["MachineReal", 2]]@
 				DownValuesFunction[eGriddyGibbsMakeGridThreaded]
 			]
 		},
@@ -105,8 +105,11 @@ cGriddyGibbsMakeGrid := (setDefs[]; cGriddyGibbsMakeGrid)
 cGriddyGibbsMakeGridThreaded := (setDefs[]; cGriddyGibbsMakeGridThreaded)
 
 
-griddyGibbsSample[x_, logPDF_] /; ArrayDepth[logPDF] === 1 := Echo[cGriddyGibbsSample[x, logPDF], 1]
-griddyGibbsSample[x_, logPDFs_] /; ArrayDepth[logPDFs] === 2 := Echo[cGriddyGibbsSampleThreaded[x, logPDFs], 2]
+griddyGibbsSample[x_, logPDF_] /; ArrayDepth[logPDF] === 1 := cGriddyGibbsSample[x, logPDF]
+griddyGibbsSample[x_, logPDFs_] /; ArrayDepth[logPDFs] === 2 := cGriddyGibbsSampleThreaded[x, logPDFs]
+
+griddyGibbsMakeGrid[x_, logPDF_, n_] /; ArrayDepth[logPDF] === 1 := cGriddyGibbsMakeGrid[x, logPDF, n]
+griddyGibbsMakeGrid[x_, logPDFs_, n_] /; ArrayDepth[logPDFs] === 2 := cGriddyGibbsMakeGridThreaded[x, logPDFs, n]
 
 
 End[];
