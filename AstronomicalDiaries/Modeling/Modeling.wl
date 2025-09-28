@@ -101,15 +101,8 @@ muTimesSigma2TimesUpdate[sigma2Times0_, t_, timeCats_, possibleTimeCats_] :=
 
 
 (* t *)
-tInitSamplePoints = N@Subdivide[-12,12,200];
-tMetaSamplePoints = N@Subdivide[-12,12,200];
-tSamplePointConstantBackground = N@Subdivide[-12,12,50];
-tSamplePointCount = 50;
-tSamplePointsUpdateInterval = 100;
-
-computeTimeLogPDFs[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, samplePoints_] :=
-	Module[{distances, logPriors, logLikelihoods, logPDFs},
-		distances = objectDistanceApprox[deltaParams, samplePoints];
+computeTimeLogPDFs[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, distances_, samplePoints_] :=
+	Module[{logPriors, logLikelihoods, logPDFs},
 
 		logPriors = logNormalPDF[tPrior[muTimes, sigma2Times, timeCats], samplePoints];
 		logLikelihoods = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], c];
@@ -118,33 +111,53 @@ computeTimeLogPDFs[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaPara
 		logPDFs
 	]
 
-tSamplePointInit[observations_] := ConstantArray[tInitSamplePoints, Length[observations]];
-tSamplePointUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_] :=
-	Module[{metaSamplePoints, logPDFs, newGrid},
-		metaSamplePoints = ConstantArray[tMetaSamplePoints, Length[c]];
-		logPDFs = computeTimeLogPDFs[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, metaSamplePoints];
+tFixedSamplePointCount = 200;
+tAdaptiveSamplePointCount = 50;
+tSamplePointsUpdateInterval = 50;
 
-		Global`metaSamplePoints = metaSamplePoints;
-		Global`metaLogPDFs = logPDFs;
+jitteredGrid[min_, max_, len_] :=
+	Subdivide[min, max, len - 1] + RandomReal[{-1, 1}*(max - min)/(len - 1)/2]
+
+tSamplePointsDistancesInit[deltaParams_] :=
+	Module[{samplePoints, distances},
+		samplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount + tAdaptiveSamplePointCount], Length[deltaParams]];
+		distances = objectDistanceApprox[deltaParams, samplePoints];
+		{samplePoints, distances}
+	]
+
+tSamplePointsDistancesUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_] :=
+	Module[{metaSamplePoints, metaDistances, logPDFs, adaptiveGrid, adaptiveDistances, samplePoints, distances},
+		metaSamplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount], Length[c]];
+		metaDistances = objectDistanceApprox[deltaParams, metaSamplePoints];
+
+		logPDFs = computeTimeLogPDFs[muTimes, sigma2Times, timeCats, l, sigma2, c, metaDistances, metaSamplePoints];
 		
-		newGrid = griddyGibbsMakeGrid[metaSamplePoints, logPDFs, tSamplePointCount];
+		adaptiveGrid = griddyGibbsMakeGrid[metaSamplePoints, logPDFs, tSamplePointCount];
+		adaptiveDistances = objectDistanceApprox[deltaParams, adaptiveGrid];
 
-		Sort@Join[#, tSamplePointConstantBackground] &/@ newGrid
+		{samplePoints, distances} =
+			Transpose[
+				SortBy[First] /@ Transpose[
+					{
+						Join[metaSamplePoints, adaptiveGrid, 2],
+						Join[metaDistances, adaptiveDistances, 2]
+					},
+					{3, 1, 2}
+				],
+				{2, 3, 1}
+			];
+
+		{samplePoints, distances}
 	]
 
 tPrior[muTimes_, sigma2Times_, timeCats_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
 tInit[muTimes_, sigma2Times_, timeCats_] := normalArraySample@tPrior[muTimes, sigma2Times, timeCats]
-tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, deltaParams_, inliers_, outliers_, tSamplePoints_] :=
+tUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, distances_, inliers_, outliers_, tSamplePoints_] :=
 	Module[{t, samplePoints, logPDFs},
 		t = ConstantArray[0., Length[c]];
 
 		samplePoints = tSamplePoints[[inliers]];
-		logPDFs = computeTimeLogPDFs[muTimes, sigma2Times, timeCats[[inliers]], l, sigma2, c[[inliers]], deltaParams[[inliers]], samplePoints];
-		
-		Global`samplePoints = samplePoints;
-		Global`distances = distances;
-		Global`logLikelihoods = logLikelihoods;
-		Global`logPDFs = logPDFs;
+		logPDFs = computeTimeLogPDFs[muTimes, sigma2Times, timeCats[[inliers]], l, sigma2, c[[inliers]], distances[[inliers]], samplePoints];
 
 		t[[inliers]] = griddyGibbsSample[samplePoints, logPDFs];
 
@@ -402,7 +415,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			c, l, sigma2,
 			muOutlier, sigma2Outlier,
 			muTimes, sigma2Times,
-			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, tSamplePoints, t,
+			timeCatsRaw, timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, tSamplePoints, tDistances, tDeltaParams, t,
 			years, missingYearGroups,
 			months, missingMonthGroups,
 			d, deltaD, earliestDays, missingDays,
@@ -430,7 +443,6 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		muTimes = muTimesInit[possibleTimeCats];
 		sigma2Times = sigma2TimesInit[possibleTimeCats];
 		t = tInit[muTimes, sigma2Times, timeCats];
-		tSamplePoints = tSamplePointInit[observations];
 
 		(* Outlier detection *)
 		p = pInit[];
@@ -470,6 +482,9 @@ fitModel[observations_, steps_, vars_ : {}] :=
 			];
 		deltaStar = objectDistanceApprox[deltaParams, t];
 
+		(* Get the sample points and distances for time updates *)
+		{tSamplePoints, tDistances} = tSamplePointsDistancesInit[tDeltaParams = deltaParams];
+
 		(*Updates*)
 		res = Reap@GeneralUtilities`MonitoredScan[
 			Function[
@@ -490,10 +505,20 @@ fitModel[observations_, steps_, vars_ : {}] :=
 						d
 					];
 
+				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates for all observations *)
 				If[Divisible[#, tSamplePointsUpdateInterval],
-					tSamplePoints = tSamplePointUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams]
+					{tSamplePoints, tDistances} = tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams]
 				];
-				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams, inliers, outliers, tSamplePoints];
+				(* If deltaParams was change since the last iteration, also recompute the grid *)
+				With[{changedIndices = Position[MapThread[SameQ, {deltaParams, tDeltaParams}],False,{1}][[All,1]]},
+					If[Length[changedIndices] > 0,
+						tDeltaParams = deltaParams;
+						{tSamplePoints[[changedIndices]], tDistances[[changedIndices]]} =
+							tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats[[changedIndices]], l, sigma2, c[[changedIndices]], deltaParams[[changedIndices]]];
+					]
+				];
+				(* Update observation times *)
+				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, tDistances, inliers, outliers, tSamplePoints];
 
 				(* Update true distance because they depend on t *)
 				deltaStar = objectDistanceApprox[deltaParams, t];
