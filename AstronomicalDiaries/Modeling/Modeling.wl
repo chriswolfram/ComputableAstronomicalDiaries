@@ -113,6 +113,19 @@ muTimesSigma2TimesUpdate[s_] :=
 	]
 
 
+(* delta *)
+setDeltaParams[s_] :=
+	<|"deltaParams" -> objectDistanceApproxParams[
+		s[["observations", All, "Object"]],
+		s[["observations", All, "Reference"]],
+		s[["observations", All, "Relation"]],
+		s["d"]
+	]|>
+
+setDeltaStar[s_] :=
+	<|"deltaStar" -> objectDistanceApprox[s["deltaParams"], s["t"]]|>
+
+
 (* t *)
 computeTimeLogPDFs[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, distances_, samplePoints_] :=
 	Module[{logPriors, logLikelihoods, logPDFs},
@@ -169,9 +182,19 @@ tSamplePointsDistancesUpdate[s_, idxs_:All] :=
 	]
 
 tPrior[timeCats_, muTimes_, sigma2Times_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
-tInit[s_] := <|"t" -> normalArraySample@tPrior[s["timeCats"], s["muTimes"], s["sigma2Times"]]|>
-tUpdate[s_] :=
-	Module[{t, samplePoints, logPDFs},
+tInit[s_] := <|"t" -> normalArraySample@tPrior[s["timeCats"], s["muTimes"], s["sigma2Times"]], "oldDeltaParams" -> Missing[]|>
+tUpdate[s0_] :=
+	Module[{s = s0, t, changedIndices, cacheUpdate = <||>, samplePoints, logPDFs},
+
+		(* If deltaParams was changed since the last iteration, recompute the cached grid values *)
+		If[!MissingQ[s["oldDeltaParams"]] && s["oldDeltaParams"] =!= s["deltaParams"],
+			changedIndices = Position[MapThread[SameQ, {s["oldDeltaParams"], s["deltaParams"]}],False,{1}][[All,1]];
+			If[Length[changedIndices] > 0,
+				cacheUpdate = tSamplePointsDistancesUpdate[s, changedIndices];
+				s //= Append@cacheUpdate
+			]
+		];
+
 		t = ConstantArray[0., Length[s["observations"]]];
 
 		samplePoints = s[["tSamplePoints", s["inliers"]]];
@@ -181,7 +204,7 @@ tUpdate[s_] :=
 
 		t[[s["outliers"]]] = normalArraySample@NormalDistribution[Lookup[s["muTimes"], s[["timeCats", s["outliers"]]]], Sqrt@Lookup[s["sigma2Times"], s[["timeCats", s["outliers"]]]]];
 
-		<|"t" -> t|>
+		<|"t" -> t, "oldDeltaParams" -> s["deltaParams"], cacheUpdate|>
 	]
 
 
@@ -482,13 +505,8 @@ initializeModel[observations_] :=
 		s //= Append@setD[s];
 
 		(*Compute true distances*)
-		s["deltaParams"] = objectDistanceApproxParams[
-				observations[[All, "Object"]],
-				observations[[All, "Reference"]],
-				observations[[All, "Relation"]],
-				s["d"]
-			];
-		s["deltaStar"] = objectDistanceApprox[s["deltaParams"], s["t"]];
+		s //= Append@setDeltaParams[s];
+		s //= Append@setDeltaStar[s];
 
 		(* Get the sample points and distances for time updates *)
 		(* TODO: Move this higher? *)
@@ -498,9 +516,49 @@ initializeModel[observations_] :=
 	]
 
 
+updateModel[s0_] :=
+	Module[{s = s0},
+
+		s //= Append@deltaDUpdate[s];
+		s //= Append@monthsUpdate[s];
+		s //= Append@yearsUpdate[s];
+		s //= Append@setD[s];
+
+		(* Update true params because they depend on d *)
+		s //= Append@setDeltaParams[s];
+
+		(* Update observation times *)
+		s //= Append@tUpdate[s];
+
+		(* Update true distance because they depend on t *)
+		s //= Append@setDeltaStar[s];
+
+		(* Inlier model *)
+		s //= Append@lUpdate[s];
+		s //= Append@sigma2Update[s];
+
+		(* Outlier model *)
+		s //= Append@muOutlierUpdate[s];
+		s //= Append@sigma2OutlierUpdate[s];
+
+		(* Outlier detection *)
+		s //= Append@mUpdate[s];
+		s //= Append@pUpdate[s];
+
+		(* Times *)
+		s //= Append@muTimesSigma2TimesUpdate[s];
+
+		(* Time categories *)
+		s //= Append@timeCatsDistUpdate[s];
+		s //= Append@timeCatsUpdate[s];
+
+		s
+	]
+
+
 (* Full model *)
 fitModel[observations_, steps_, vars_ : {}] :=
-	Module[{s, oldDeltaParams},
+	Module[{s, oldDeltaParams = Missing[], changedIndices},
 
 		s = initializeModel[observations];
 
@@ -508,54 +566,12 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		GeneralUtilities`MonitoredMap[
 			Function[
 
-				s //= Append@deltaDUpdate[s];
-				s //= Append@monthsUpdate[s];
-				s //= Append@yearsUpdate[s];
-				s //= Append@setD[s];
+				s = updateModel[s];
 
-				(* Update true params because they depend on d *)
-				oldDeltaParams = s["deltaParams"];
-				s["deltaParams"] = objectDistanceApproxParams[
-					observations[[All, "Object"]],
-					observations[[All, "Reference"]],
-					observations[[All, "Relation"]],
-					s["d"]
-				];
-
-				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates for all observations *)
+				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates of all observations *)
 				If[Divisible[#, tSamplePointsUpdateInterval],
 					s //= Append@tSamplePointsDistancesUpdate[s]
 				];
-				(* If deltaParams was change since the last iteration, also recompute the grid *)
-				With[{changedIndices = Position[MapThread[SameQ, {oldDeltaParams, s["deltaParams"]}],False,{1}][[All,1]]},
-					If[Length[changedIndices] > 0,
-						s //= Append@tSamplePointsDistancesUpdate[s, changedIndices];
-					]
-				];
-				(* Update observation times *)
-				s //= Append@tUpdate[s];
-
-				(* Update true distance because they depend on t *)
-				s["deltaStar"] = objectDistanceApprox[s["deltaParams"], s["t"]];
-
-				(* Inlier model *)
-				s //= Append@lUpdate[s];
-				s //= Append@sigma2Update[s];
-
-				(* Outlier model *)
-				s //= Append@muOutlierUpdate[s];
-				s //= Append@sigma2OutlierUpdate[s];
-
-				(* Outlier detection *)
-				s //= Append@mUpdate[s];
-				s //= Append@pUpdate[s];
-
-				(* Times *)
-				s //= Append@muTimesSigma2TimesUpdate[s];
-
-				(* Time categories *)
-				s //= Append@timeCatsDistUpdate[s];
-				s //= Append@timeCatsUpdate[s];
 
 				KeyTake[s, vars]
 			],
