@@ -136,7 +136,7 @@ tSamplePointsDistancesInit[s_] :=
 		samplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount + tAdaptiveSamplePointCount], Length[s["deltaParams"]]];
 		distances = objectDistanceApprox[s["deltaParams"], samplePoints];
 
-		<|"tSamplePoints" -> samplePoints, "distances" -> distances|>
+		<|"tSamplePoints" -> samplePoints, "tSampleDistances" -> distances|>
 	]
 
 tSamplePointsDistancesUpdate[s_, idxs_:All] :=
@@ -164,8 +164,8 @@ tSamplePointsDistancesUpdate[s_, idxs_:All] :=
 
 		s0 = s;
 		s0[["tSamplePoints", idxs]] = samplePoints;
-		s0[["distances", idxs]] = distances;
-		<|"tSamplePoints" -> s0["tSamplePoints"], "distances" -> s0["distances"]|>
+		s0[["tSampleDistances", idxs]] = distances;
+		<|"tSamplePoints" -> s0["tSamplePoints"], "tSampleDistances" -> s0["tSampleDistances"]|>
 	]
 
 tPrior[timeCats_, muTimes_, sigma2Times_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
@@ -175,7 +175,7 @@ tUpdate[s_] :=
 		t = ConstantArray[0., Length[s["observations"]]];
 
 		samplePoints = s[["tSamplePoints", s["inliers"]]];
-		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", s["inliers"]]], s["l"], s["sigma2"], s[["c", s["inliers"]]], s[["distances", s["inliers"]]], s[["tSamplePoints", s["inliers"]]]];
+		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", s["inliers"]]], s["l"], s["sigma2"], s[["c", s["inliers"]]], s[["tSampleDistances", s["inliers"]]], s[["tSamplePoints", s["inliers"]]]];
 
 		t[[s["inliers"]]] = griddyGibbsSample[samplePoints, logPDFs];
 
