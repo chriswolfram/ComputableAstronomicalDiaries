@@ -140,8 +140,9 @@ tSamplePointsDistancesInit[s_] :=
 	]
 
 tSamplePointsDistancesUpdate[s_, idxs_:All] :=
-	Module[{s0, metaSamplePoints, metaDistances, logPDFs, adaptiveGrid, adaptiveDistances, samplePoints, distances},
-		metaSamplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount], Length[s["c"]]];
+	Module[{s0, metaSamplePoints, metaDistances, logPDFs, adaptiveGrid, adaptiveDistances, samplePoints, distances, len},
+		len = If[idxs === All, Length[s["c"]], Length[idxs]];
+		metaSamplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount], len];
 		metaDistances = objectDistanceApprox[s[["deltaParams", idxs]], metaSamplePoints];
 
 		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", idxs]], s["l"], s["sigma2"], s[["c", idxs]], metaDistances, metaSamplePoints];
