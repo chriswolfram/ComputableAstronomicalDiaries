@@ -32,14 +32,14 @@ modelObservationQ[observations_List] :=
 lPrior[] := NormalDistribution[1/2, 1/2]
 lInit[] := <|"l" -> RandomVariate@lPrior[]|>
 lUpdate[s_] :=
-	<|"l" -> normalNormalRegressionSample[lPrior[], Sqrt[s["sigma2"]], s[["deltaStar", s["inliers"]]], 0, s[["c", s["inliers"]]]]|>;
+	<|"l" -> normalNormalRegressionSample[lPrior[], Sqrt[s["sigma2"]], s[["deltaStar", s["inliers"]]], 0, s[["c", s["inliers"]]]]|>
 
 
 (* sigma2 *)
 sigma2Prior[] := InverseGammaDistribution[1/2, 1/2]
 sigma2Init[] := <|"sigma2" -> RandomVariate@sigma2Prior[]|>
 sigma2Update[s_] :=
-	normalNormalVarianceSample[sigma2Prior[], s[["deltaStar", s["inliers"]]]*s["l"], s[["c", s["inliers"]]]];
+	<|"sigma2" -> normalNormalVarianceSample[sigma2Prior[], s[["deltaStar", s["inliers"]]]*s["l"], s[["c", s["inliers"]]]]|>
 
 
 (* muOutlier *)
@@ -54,7 +54,7 @@ muOutlierUpdate[s_] :=
 sigma2OutlierPrior[] := InverseGammaDistribution[1.5, 2]
 sigma2OutlierInit[] := <|"sigma2Outlier" -> RandomVariate@sigma2OutlierPrior[]|>
 sigma2OutlierUpdate[s_] :=
-	<|"sigma2Outlier" -> normalNormalVarianceSample[sigma2OutlierPrior[], s["muOutlier", s[["c", s["outliers"]]]]]|>
+	<|"sigma2Outlier" -> normalNormalVarianceSample[sigma2OutlierPrior[], s["muOutlier"], s[["c", s["outliers"]]]]|>
 
 
 (* p *)
@@ -64,29 +64,36 @@ pUpdate[s_] := <|"p" -> betaBernoulliSample[pPrior[], s["m"]]|>
 
 
 (* m *)
-mPrior[s_] := BernoulliDistribution[s["p"]]
-mInit[s_] := RandomVariate[BernoulliDistribution[s["p"]], Length@s["observations"]]
-mUpdate[s_] :=
-	<|"m" -> binaryNormalMixtureSample[
-		mPrior[s],
-		NormalDistribution[s["muOutlier"], Sqrt[s["sigma2Outlier"]]],
-		NormalDistribution[s["deltaStar"]*s["l"], Sqrt[s["sigma2"]]],
-		c
-	]|>
-
-getInliersOutliers[s_] :=
+getInliersOutliers[m_] :=
 	Module[{inliers, outliers},
 		{inliers, outliers} = Lookup[PositionIndex[m], {0, 1}, {}];
 		<|"inliers" -> inliers, "outliers" -> outliers|>
 	]
 
+mPrior[p_] := BernoulliDistribution[p]
+mInit[s_] :=
+	With[{m = RandomVariate[mPrior[s["p"]], Length@s["observations"]]},
+		<|"m" -> m, getInliersOutliers[m]|>
+	]
+mUpdate[s_] :=
+	Module[{m},
+		m =
+			binaryNormalMixtureSample[
+				mPrior[s["p"]],
+				NormalDistribution[s["muOutlier"], Sqrt[s["sigma2Outlier"]]],
+				NormalDistribution[s["deltaStar"]*s["l"], Sqrt[s["sigma2"]]],
+				s["c"]
+			];
+		<|"m" -> m, getInliersOutliers[m]|>
+	]
+
 
 (* muTimes and sigma2Times *)
-muTimesPrior[s_] := AssociationMap[NormalDistribution[0, 6]&, s["possibleTimeCats"]]
-muTimesInit[s_] := RandomVariate /@ muTimesPrior[s]
+muTimesPrior[possibleTimeCats_] := AssociationMap[NormalDistribution[0, 6]&, possibleTimeCats]
+muTimesInit[s_] := <|"muTimes" -> RandomVariate /@ muTimesPrior[s["possibleTimeCats"]]|>
 
-sigma2TimesPrior[s_] := AssociationMap[InverseGammaDistribution[1/2, 1/2]&, s["possibleTimeCats"]]
-sigma2TimesInit[s_] := RandomVariate /@ sigma2TimesPrior[s]
+sigma2TimesPrior[possibleTimeCats_] := AssociationMap[InverseGammaDistribution[1/2, 1/2]&, possibleTimeCats]
+sigma2TimesInit[s_] := <|"sigma2Times" -> RandomVariate /@ sigma2TimesPrior[s["possibleTimeCats"]]|>
 
 muTimesSigma2TimesUpdate[s_] :=
 	Module[{sigma2Times0, muPrior, sigma2Prior, muTimes, sigma2Times},
@@ -109,7 +116,7 @@ muTimesSigma2TimesUpdate[s_] :=
 computeTimeLogPDFs[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_, distances_, samplePoints_] :=
 	Module[{logPriors, logLikelihoods, logPDFs},
 
-		logPriors = logNormalPDF[tPrior[muTimes, sigma2Times, timeCats], samplePoints];
+		logPriors = logNormalPDF[tPrior[timeCats, muTimes, sigma2Times], samplePoints];
 		logLikelihoods = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], c];
 		logPDFs = logPriors + logLikelihoods;
 
@@ -125,20 +132,21 @@ jitteredGrid[min_, max_, len_] :=
 
 tSamplePointsDistancesInit[s_] :=
 	Module[{samplePoints, distances},
-		samplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount + tAdaptiveSamplePointCount], Length[deltaParams]];
-		distances = objectDistanceApprox[deltaParams, samplePoints];
-		{samplePoints, distances}
+		samplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount + tAdaptiveSamplePointCount], Length[s["deltaParams"]]];
+		distances = objectDistanceApprox[s["deltaParams"], samplePoints];
+
+		<|"tSamplePoints" -> samplePoints, "distances" -> distances|>
 	]
 
-tSamplePointsDistancesUpdate[s_] :=
-	Module[{metaSamplePoints, metaDistances, logPDFs, adaptiveGrid, adaptiveDistances, samplePoints, distances},
+tSamplePointsDistancesUpdate[s_, idxs_:All] :=
+	Module[{s0, metaSamplePoints, metaDistances, logPDFs, adaptiveGrid, adaptiveDistances, samplePoints, distances},
 		metaSamplePoints = ConstantArray[jitteredGrid[-12,12,tFixedSamplePointCount], Length[s["c"]]];
-		metaDistances = objectDistanceApprox[s["deltaParams"], metaSamplePoints];
+		metaDistances = objectDistanceApprox[s[["deltaParams", idxs]], metaSamplePoints];
 
-		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s["timeCats"], s["l"], s["sigma2"], s["c"], metaDistances, s["tSamplePoints"]];
+		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", idxs]], s["l"], s["sigma2"], s[["c", idxs]], metaDistances, metaSamplePoints];
 		
 		adaptiveGrid = griddyGibbsMakeGrid[metaSamplePoints, logPDFs, tAdaptiveSamplePointCount];
-		adaptiveDistances = objectDistanceApprox[s["deltaParams"], adaptiveGrid];
+		adaptiveDistances = objectDistanceApprox[s[["deltaParams", idxs]], adaptiveGrid];
 
 		{samplePoints, distances} =
 			Transpose[
@@ -152,22 +160,25 @@ tSamplePointsDistancesUpdate[s_] :=
 				{2, 3, 1}
 			];
 
-		<|"tSamplePoints" -> samplePoints, "distances" -> distances|>
+		s0 = s;
+		s0[["tSamplePoints", idxs]] = samplePoints;
+		s0[["distances", idxs]] = distances;
+		<|"tSamplePoints" -> s0["tSamplePoints"], "distances" -> s0["distances"]|>
 	]
 
-tPrior[s_] := NormalDistribution[Lookup[s["muTimes"], s["timeCats"]], Sqrt@Lookup[s["sigma2Times"], s["timeCats"]]]
-tInit[s_] := normalArraySample@tPrior[s]
+tPrior[timeCats_, muTimes_, sigma2Times_] := NormalDistribution[Lookup[muTimes, timeCats], Sqrt@Lookup[sigma2Times, timeCats]]
+tInit[s_] := <|"t" -> normalArraySample@tPrior[s["timeCats"], s["muTimes"], s["sigma2Times"]]|>
 tUpdate[s_] :=
 	Module[{t, samplePoints, logPDFs},
 		t = ConstantArray[0., Length[s["observations"]]];
 
 		samplePoints = s[["tSamplePoints", s["inliers"]]];
-		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", s["inliers"]]], s["l"], s["sigma2"], s[["c", s["inliers"]]], s[["distances", s["inliers"]]], s["tSamplePoints"]];
+		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", s["inliers"]]], s["l"], s["sigma2"], s[["c", s["inliers"]]], s[["distances", s["inliers"]]], s[["tSamplePoints", s["inliers"]]]];
 
 		t[[s["inliers"]]] = griddyGibbsSample[samplePoints, logPDFs];
 
 		t[[s["outliers"]]] = normalArraySample@NormalDistribution[Lookup[s["muTimes"], s[["timeCats", s["outliers"]]]], Sqrt@Lookup[s["sigma2Times"], s[["timeCats", s["outliers"]]]]];
-		
+
 		<|"t" -> t|>
 	]
 
@@ -179,12 +190,12 @@ timeCatsInfo[s_] := <|
 		"missingTimeCats" -> Position[s["observations"][[All, "Time"]], _Missing, {1}, Heads -> False][[All, 1]]
 	|>
 
-timeCatsDistPrior[s_] := DirichletDistribution[ConstantArray[1/2, Length@s["possibleTimeCats"]]]
+timeCatsDistPrior[possibleTimeCats_] := DirichletDistribution[ConstantArray[1/2, Length@possibleTimeCats]]
 timeCatsDistInit[s_] := <|"timeCatsDist" -> dirichletSample@timeCatsDistPrior[s["possibleTimeCats"]]|>
 timeCatsDistUpdate[s_] :=
 	<|"timeCatsDist" -> dirichletCategoricalSample[timeCatsDistPrior[s["possibleTimeCats"]], Lookup[Counts[s["timeCats"]], s["possibleTimeCats"], 0]]|>
 
-timeCatsPrior[s_] := CategoricalDistribution[s["possibleTimeCats"], s["timeCatsDist"]]
+timeCatsPrior[possibleTimeCats_, timeCatsDist_] := CategoricalDistribution[possibleTimeCats, timeCatsDist]
 timeCatsInit[s_] :=
 	Module[{timeCats = s["timeCatsRaw"]},
 		timeCats[[s["missingTimeCats"]]] = RandomVariate[timeCatsPrior[s["possibleTimeCats"], s["timeCatsDist"]], Length[s["missingTimeCats"]]];
@@ -211,27 +222,38 @@ timeCatsUpdate[s_] :=
 	]
 
 
-(* deltaD *)
-getMissingDays[s_] :=
-	Position[s[["observations", All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]]
+(* d *)
+(* d represents the dates of all observations. It needs to be updated once after all of the day, month, and year sampling is done. *)
+setD[s_] :=
+	<|
+		"d" -> MapThread[
+				{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
+				{s["years"], s["months"], s["earliestDays"], s["deltaD"]}
+			]
+	|>
 
-deltaDPrior[s_] :=
-	DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}] &/@ s["observations"]
+(* deltaD *)
+deltaDPrior[observations_] :=
+	DiscreteUniformDistribution[{0, #LatestDay - #EarliestDay}] &/@ observations
 
 deltaDInit[s_] :=
-	<|"deltaD" -> RandomVariate /@ deltaDPrior[s["observations"]]|>
+	<|
+		"deltaD" -> RandomVariate /@ deltaDPrior[s["observations"]],
+		"missingDays" -> Position[s[["observations", All, "Date"]], _Missing, {1}, Heads -> False][[All, 1]],
+		"earliestDays" -> s[["observations", All, "EarliestDay"]]
+	|>
 
 deltaDUpdate[s_] :=
 	Module[{deltaD, missingDateInliers, missingDateOutliers, priors},
 
-		deltaD = ConstantArray[0, Length[s["observations"]]];
+		If[s["missingDays"] === {}, <||>];
 
-		If[s["missingDays"] === {}, Return@deltaD];
+		deltaD = ConstantArray[0, Length[s["observations"]]];
 
 		missingDateInliers = Intersection[s["missingDays"], s["inliers"]];
 		missingDateOutliers = Intersection[s["missingDays"], s["inliers"]];
 
-		priors = deltaDPrior[s];
+		priors = deltaDPrior[s["observations"]];
 
 		deltaD[[missingDateInliers]] =
 				MapThread[
@@ -272,29 +294,27 @@ deltaDUpdate[s_] :=
 getMonthGroup[Missing["Unknown", i_]] := i
 getMonthGroup[a_] := Missing[]
 
-getMissingMonthGroups[observations_] :=
-	KeyDrop[PositionIndex[getMonthGroup /@ observations[[All, "Month"]]], Missing[]]
-
 (* monthsPrior[observations_] := CategoricalDistribution[getYearMonths[#SEYear]] &/@ observations *)
-monthsInit[observations_, years_, missingMonthGroups_] :=
-	Module[{months, missingMonths},
-		months = observations[[All, "Month"]];
+monthsInit[s_] :=
+	Module[{months, missingMonthGroups, missingMonths},
+		months = s[["observations", All, "Month"]];
+		missingMonthGroups = KeyDrop[PositionIndex[getMonthGroup /@ months], Missing[]];
 		missingMonths = Catenate@missingMonthGroups;
-		months[[missingMonths]] = RandomChoice[getYearMonths[#]] &/@ years[[missingMonths]];
-		months
+		months[[missingMonths]] = RandomChoice[getYearMonths[#]] &/@ s[["years", missingMonths]];
+		<|"months" -> months, "missingMonthGroups" -> missingMonthGroups|>
 	]
 
-monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, years_, inliers_, outliers_] :=
+monthsUpdate[s_] :=
 	Module[{months, missingMonths, missingMonthInliers, missingMonthOutliers, monthPosteriors, groupSamples},
 
-		months = observations[[All, "Month"]];
+		If[s["missingMonthGroups"] === <||>, Return@<||>];
 
-		If[missingMonthGroups === {}, Return@months];
+		months = s[["observations", All, "Month"]];
 
-		missingMonths = Catenate@missingMonthGroups;
+		missingMonths = Catenate@s["missingMonthGroups"];
 
-		missingMonthInliers = Intersection[missingMonths, inliers];
-		missingMonthOutliers = Intersection[missingMonths, outliers];
+		missingMonthInliers = Intersection[missingMonths, s["inliers"]];
+		missingMonthOutliers = Intersection[missingMonths, s["outliers"]];
 		
 		monthPosteriors = ConstantArray[0, Length[months]];
 
@@ -311,29 +331,29 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, y
 								ConstantArray[ts, Length[possibleMonths]]
 							];
 
-						monthLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+						monthLogProbs = logNormalPDF[NormalDistribution[distances*s["l"], Sqrt[s["sigma2"]]], cs];
 						(* Currently the prior is uniform over possible months *)
 						priorLogProbs = 0;
 						logProbs = priorLogProbs + monthLogProbs;
 						logProbs
 				]],
 				{
-					observations[[missingMonthInliers]],
-					t[[missingMonthInliers]],
-					c[[missingMonthInliers]],
-					years[[missingMonthInliers]],
-					deltaD[[missingMonthInliers]]
+					s[["observations", missingMonthInliers]],
+					s[["t", missingMonthInliers]],
+					s[["c", missingMonthInliers]],
+					s[["years", missingMonthInliers]],
+					s[["deltaD", missingMonthInliers]]
 				}
 			];
 
 		monthPosteriors[[missingMonthOutliers]] =
-			ConstantArray[0, Length@getYearMonths@#] &/@ years[[missingMonthOutliers]];
+			ConstantArray[0, Length@getYearMonths@#] &/@ s[["years", missingMonthOutliers]];
 
-		groupSamples = logPMFSample[Total[monthPosteriors[[#]]], getYearMonths[years[[#[[1]]]]]] &/@ missingMonthGroups;
+		groupSamples = logPMFSample[Total[monthPosteriors[[#]]], getYearMonths[s[["years", #[[1]]]]]] &/@ s["missingMonthGroups"];
 
-		MapThread[(months[[#1]] = #2)&, {missingMonthGroups, groupSamples}];
+		MapThread[(months[[#1]] = #2)&, {s["missingMonthGroups"], groupSamples}];
 
-		months
+		<|"months" -> months|>
 	]
 
 
@@ -341,35 +361,33 @@ monthsUpdate[observations_, c_, l_, sigma2_, t_, missingMonthGroups_, deltaD_, y
 getYearGroup[Missing["Unknown", i_]] := i
 getYearGroup[a_] := Missing[]
 
-getMissingYearGroups[observations_] :=
-	KeyDrop[PositionIndex[getYearGroup /@ observations[[All, "SEYear"]]], Missing[]]
-
-
 priorYearRange := priorYearRange = MinMax@Keys[ADChronology[]][[All, 1]];
 
-yearsInit[observations_, missingYearGroups_] :=
-	Module[{years, missingYears},
-		years = observations[[All, "SEYear"]];
+yearsInit[s_] :=
+	Module[{years, missingYearGroups, missingYears},
+		years = s[["observations", All, "SEYear"]];
+		missingYearGroups = KeyDrop[PositionIndex[getYearGroup /@ years], Missing[]];
 		missingYears = Catenate@missingYearGroups;
 		years[[missingYears]] =
 			If[MissingQ[#Month],
 				RandomInteger[priorYearRange],
 				RandomChoice[getMonthYears[#Month]]
-			] &/@ observations[[missingYears]];
-		years
+			] &/@ s[["observations", missingYears]];
+
+		<|"years" -> years, "missingYearGroups" -> missingYearGroups|>
 	]
 
-yearsUpdate[observations_, c_, l_, sigma2_, t_, missingYearGroups_, deltaD_, months_, inliers_, outliers_] :=
+yearsUpdate[s_] :=
 	Module[{years, missingYears, missingYearInliers, missingYearOutliers, yearPosteriors, groupSamples},
+
+		If[s["missingYearGroups"] === <||>, Return@<||>];
 
 		years = observations[[All, "SEYear"]];
 
-		If[missingYearGroups === {}, Return@years];
-
 		missingYears = Catenate@missingYearGroups;
 
-		missingYearInliers = Intersection[missingYears, inliers];
-		missingYearOutliers = Intersection[missingYears, outliers];
+		missingYearInliers = Intersection[missingYears, s["inliers"]];
+		missingYearOutliers = Intersection[missingYears, s["outliers"]];
 		
 		yearPosteriors = ConstantArray[0, Length[years]];
 
@@ -386,48 +404,34 @@ yearsUpdate[observations_, c_, l_, sigma2_, t_, missingYearGroups_, deltaD_, mon
 								ConstantArray[ts, Length[possibleYears]]
 							];
 
-						yearLogProbs = logNormalPDF[NormalDistribution[distances*l, Sqrt[sigma2]], cs];
+						yearLogProbs = logNormalPDF[NormalDistribution[distances*s["l"], Sqrt[s["sigma2"]]], cs];
 						(* Currently the prior is uniform over possible years *)
 						priorLogProbs = 0;
 						logProbs = priorLogProbs + yearLogProbs;
 						logProbs
 				]],
 				{
-					observations[[missingYearInliers]],
-					t[[missingYearInliers]],
-					c[[missingYearInliers]],
-					months[[missingYearInliers]],
-					deltaD[[missingYearInliers]]
+					s[["observations", missingYearInliers]],
+					s[["t", missingYearInliers]],
+					s[["c", missingYearInliers]],
+					s[["months", missingYearInliers]],
+					s[["deltaD", missingYearInliers]]
 				}
 			];
 
 		yearPosteriors[[missingYearOutliers]] =
-			ConstantArray[0, Length@getMonthYears@#] &/@ months[[missingYearOutliers]];
+			ConstantArray[0, Length@getMonthYears@#] &/@ s[["months", missingYearOutliers]];
 
-		groupSamples = logPMFSample[Total[yearPosteriors[[#]]], getMonthYears[months[[#[[1]]]]]] &/@ missingYearGroups;
+		groupSamples = logPMFSample[Total[yearPosteriors[[#]]], getMonthYears[s[["months", #[[1]]]]]] &/@ s["missingYearGroups"];
 
-		MapThread[(years[[#1]] = #2)&, {missingYearGroups, groupSamples}];
+		MapThread[(years[[#1]] = #2)&, {s["missingYearGroups"], groupSamples}];
 
-		years
+		<|"years" -> years|>
 	]
 
 
-(* Full model *)
-fitModel[observations_, steps_, vars_ : {}] :=
-	Module[{
-			s,
-
-			res,
-			deltaParams, deltaStar,
-			c, l, sigma2,
-			muOutlier, sigma2Outlier,
-			muTimes, sigma2Times,
-			timeCatsRaw, timeCats, tSamplePoints, tDistances, tDeltaParams, t,
-			years, missingYearGroups,
-			months, missingMonthGroups,
-			d, deltaD, earliestDays, missingDays,
-			m, p, inliers, outliers
-		},
+initializeModel[observations_] :=
+	Module[{s},
 
 		If[!modelObservationQ[observations],
 			Return@Failure["InvalidObservations", <|
@@ -450,130 +454,111 @@ fitModel[observations_, steps_, vars_ : {}] :=
 		s //= Append@timeCatsInit[s];
 
 		(* Times *)
-		muTimes = muTimesInit[possibleTimeCats];
-		sigma2Times = sigma2TimesInit[possibleTimeCats];
-		t = tInit[muTimes, sigma2Times, timeCats];
+		s //= Append@muTimesInit[s];
+		s //= Append@sigma2TimesInit[s];
+		s //= Append@tInit[s];
 
 		(* Outlier detection *)
-		p = pInit[];
-		m = mInit[p, observations];
-		{inliers, outliers} = getInliersOutliers[m];
+		s //= Append@pInit[];
+		s //= Append@mInit[s];
 
 		(* Inlier model *)
-		l = lInit[];
-		sigma2 = sigma2Init[];
+		s //= Append@lInit[];
+		s //= Append@sigma2Init[];
 
 		(* Outlier model *)
-		muOutlier = muOutlierInit[];
-		sigma2Outlier = sigma2OutlierInit[];
+		s //= Append@muOutlierInit[];
+		s //= Append@sigma2OutlierInit[];
 
 		(* Dates *)
-		missingYearGroups = getMissingYearGroups[observations];
-		years = yearsInit[observations, missingYearGroups];
-		missingMonthGroups = getMissingMonthGroups[observations];
-		months = monthsInit[observations, years, missingMonthGroups];
+		s //= Append@yearsInit[s];
+		s //= Append@monthsInit[s];
 
 		(* Day ranges *)
-		s["missingDays"] = getMissingDays[s];
-		s["earliestDays"] = s[["observations", All, "EarliestDay"]];
-		deltaD = deltaDInit[s];
+		s //= Append@deltaDInit[s];
 
-		d = MapThread[
-				{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
-				{years, months, earliestDays, deltaD}
-			];
+		s //= Append@setD[s];
 
 		(*Compute true distances*)
-		deltaParams = objectDistanceApproxParams[
+		s["deltaParams"] = objectDistanceApproxParams[
 				observations[[All, "Object"]],
 				observations[[All, "Reference"]],
 				observations[[All, "Relation"]],
-				d
+				s["d"]
 			];
-		deltaStar = objectDistanceApprox[deltaParams, t];
+		s["deltaStar"] = objectDistanceApprox[s["deltaParams"], s["t"]];
 
 		(* Get the sample points and distances for time updates *)
-		{tSamplePoints, tDistances} = tSamplePointsDistancesInit[tDeltaParams = deltaParams];
+		(* TODO: Move this higher? *)
+		s //= Append@tSamplePointsDistancesInit[s];
+
+		s
+	]
+
+
+(* Full model *)
+fitModel[observations_, steps_, vars_ : {}] :=
+	Module[{s, oldDeltaParams},
+
+		s = initializeModel[observations];
 
 		(*Updates*)
-		res = Reap@GeneralUtilities`MonitoredScan[
+		GeneralUtilities`MonitoredMap[
 			Function[
 
-				deltaD = deltaDUpdate[observations, c, l, sigma2, t, missingDays, months, years, inliers, outliers];
-				months = monthsUpdate[observations, c, l, sigma2, t, missingMonthGroups, deltaD, years, inliers, outliers];
-				years = yearsUpdate[observations, c, l, sigma2, t, missingYearGroups, deltaD, months, inliers, outliers];
-				d = MapThread[
-						{y, m, ed, delta} |-> ADFromBabylonianDate[{y, m, ed + delta}],
-						{years, months, earliestDays, deltaD}
-					];
+				s //= Append@deltaDUpdate[s];
+				s //= Append@monthsUpdate[s];
+				s //= Append@yearsUpdate[s];
+				s //= Append@setD[s];
 
 				(* Update true params because they depend on d *)
-				deltaParams = objectDistanceApproxParams[
-						observations[[All, "Object"]],
-						observations[[All, "Reference"]],
-						observations[[All, "Relation"]],
-						d
-					];
+				oldDeltaParams = s["deltaParams"];
+				s["deltaParams"] = objectDistanceApproxParams[
+					observations[[All, "Object"]],
+					observations[[All, "Reference"]],
+					observations[[All, "Relation"]],
+					s["d"]
+				];
 
 				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates for all observations *)
 				If[Divisible[#, tSamplePointsUpdateInterval],
-					{tSamplePoints, tDistances} = tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams];
+					s //= Append@tSamplePointsDistancesUpdate[s]
 				];
 				(* If deltaParams was change since the last iteration, also recompute the grid *)
-				With[{changedIndices = Position[MapThread[SameQ, {deltaParams, tDeltaParams}],False,{1}][[All,1]]},
+				With[{changedIndices = Position[MapThread[SameQ, {oldDeltaParams, s["deltaParams"]}],False,{1}][[All,1]]},
 					If[Length[changedIndices] > 0,
-						tDeltaParams = deltaParams;
-						{tSamplePoints[[changedIndices]], tDistances[[changedIndices]]} =
-							tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats[[changedIndices]], l, sigma2, c[[changedIndices]], deltaParams[[changedIndices]]];
+						s //= Append@tSamplePointsDistancesUpdate[s, changedIndices];
 					]
 				];
 				(* Update observation times *)
-				t = tUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, tDistances, inliers, outliers, tSamplePoints];
+				s //= Append@tUpdate[s];
 
 				(* Update true distance because they depend on t *)
-				deltaStar = objectDistanceApprox[deltaParams, t];
+				s["deltaStar"] = objectDistanceApprox[s["deltaParams"], s["t"]];
 
 				(* Inlier model *)
-				l = lUpdate[c, deltaStar, sigma2, inliers];
-				sigma2 = sigma2Update[c, deltaStar, l, inliers];
+				s //= Append@lUpdate[s];
+				s //= Append@sigma2Update[s];
 
 				(* Outlier model *)
-				muOutlier = muOutlierUpdate[c, sigma2Outlier, outliers];
-				sigma2Outlier = sigma2OutlierUpdate[c, muOutlier, outliers];
+				s //= Append@muOutlierUpdate[s];
+				s //= Append@sigma2OutlierUpdate[s];
 
 				(* Outlier detection *)
-				m = mUpdate[p, deltaStar, l, sigma2, muOutlier, sigma2Outlier, c];
-				p = pUpdate[m];
-				{inliers, outliers} = getInliersOutliers[m];
+				s //= Append@mUpdate[s];
+				s //= Append@pUpdate[s];
 
 				(* Times *)
-				{muTimes, sigma2Times} = muTimesSigma2TimesUpdate[sigma2Times, t, timeCats, possibleTimeCats];
+				s //= Append@muTimesSigma2TimesUpdate[s];
 
 				(* Time categories *)
-				timeCatsDist = timeCatsDistUpdate[possibleTimeCats, timeCats];
-				timeCats = timeCatsUpdate[timeCats, possibleTimeCats, missingTimeCats, timeCatsDist, muTimes, sigma2Times, t, inliers, outliers];
+				s //= Append@timeCatsDistUpdate[s];
+				s //= Append@timeCatsUpdate[s];
 
-				Sow@KeyTake[vars]@<|
-						"p" -> p,
-						"m" -> m,
-						"muTimes" -> muTimes,
-						"sigma2Times" -> sigma2Times,
-						"t" -> t,
-						"l" -> l,
-						"sigma2" -> sigma2,
-						"muOutlier" -> muOutlier,
-						"sigma2Outlier" -> sigma2Outlier,
-						"deltaD" -> deltaD,
-						"years" -> years,
-						"months" -> months,
-						"timeCats" -> timeCats,
-						"timeCatsDist" -> timeCatsDist
-					|>
+				KeyTake[s, vars]
 			],
 			Range[steps]
-		];
-
-		res[[2, 1]]
+		]
 	]
 
 
