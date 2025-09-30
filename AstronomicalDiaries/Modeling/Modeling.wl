@@ -132,7 +132,7 @@ tSamplePointsDistancesUpdate[muTimes_, sigma2Times_, timeCats_, l_, sigma2_, c_,
 
 		logPDFs = computeTimeLogPDFs[muTimes, sigma2Times, timeCats, l, sigma2, c, metaDistances, metaSamplePoints];
 		
-		adaptiveGrid = griddyGibbsMakeGrid[metaSamplePoints, logPDFs, tSamplePointCount];
+		adaptiveGrid = griddyGibbsMakeGrid[metaSamplePoints, logPDFs, tAdaptiveSamplePointCount];
 		adaptiveDistances = objectDistanceApprox[deltaParams, adaptiveGrid];
 
 		{samplePoints, distances} =
@@ -507,7 +507,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 
 				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates for all observations *)
 				If[Divisible[#, tSamplePointsUpdateInterval],
-					{tSamplePoints, tDistances} = tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams]
+					{tSamplePoints, tDistances} = tSamplePointsDistancesUpdate[muTimes, sigma2Times, timeCats, l, sigma2, c, deltaParams];
 				];
 				(* If deltaParams was change since the last iteration, also recompute the grid *)
 				With[{changedIndices = Position[MapThread[SameQ, {deltaParams, tDeltaParams}],False,{1}][[All,1]]},
