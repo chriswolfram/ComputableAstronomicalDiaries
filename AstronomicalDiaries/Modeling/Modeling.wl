@@ -407,7 +407,7 @@ yearsUpdate[s_] :=
 
 		If[s["missingYearGroups"] === <||>, Return@<||>];
 
-		years = observations[[All, "SEYear"]];
+		years = s[["observations", All, "SEYear"]];
 
 		missingYears = Catenate@s["missingYearGroups"];
 
