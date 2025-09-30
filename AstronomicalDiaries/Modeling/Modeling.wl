@@ -108,7 +108,8 @@ muTimesSigma2TimesUpdate[s_] :=
 			]&,
 			s["possibleTimeCats"]
 		];
-		<|"muTimes" -> muTimes, sigma2Times -> "sigma2Times"|>
+
+		<|"muTimes" -> muTimes, "sigma2Times" -> sigma2Times|>
 	]
 
 
@@ -246,12 +247,12 @@ deltaDInit[s_] :=
 deltaDUpdate[s_] :=
 	Module[{deltaD, missingDateInliers, missingDateOutliers, priors},
 
-		If[s["missingDays"] === {}, <||>];
+		If[s["missingDays"] === {}, Return@<||>];
 
 		deltaD = ConstantArray[0, Length[s["observations"]]];
 
 		missingDateInliers = Intersection[s["missingDays"], s["inliers"]];
-		missingDateOutliers = Intersection[s["missingDays"], s["inliers"]];
+		missingDateOutliers = Intersection[s["missingDays"], s["outliers"]];
 
 		priors = deltaDPrior[s["observations"]];
 
@@ -268,7 +269,7 @@ deltaDUpdate[s_] :=
 								ConstantArray[ts, maxDeltaD + 1]
 							];
 
-						dayLogProbs = logNormalPDF[NormalDistribution[s["distances"]*s["l"], Sqrt[s["sigma2"]]], cs];
+						dayLogProbs = logNormalPDF[NormalDistribution[distances*s["l"], Sqrt[s["sigma2"]]], cs];
 						priorLogProbs = N[LogLikelihood[prior, {#}] &/@ Range[0, maxDeltaD]];
 						logProbs = priorLogProbs + dayLogProbs;
 						logPMFSample[logProbs]
@@ -384,7 +385,7 @@ yearsUpdate[s_] :=
 
 		years = observations[[All, "SEYear"]];
 
-		missingYears = Catenate@missingYearGroups;
+		missingYears = Catenate@s["missingYearGroups"];
 
 		missingYearInliers = Intersection[missingYears, s["inliers"]];
 		missingYearOutliers = Intersection[missingYears, s["outliers"]];
