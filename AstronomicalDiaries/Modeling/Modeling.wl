@@ -573,7 +573,7 @@ fitModel[observations_, steps_, vars_ : {}] :=
 					s //= Append@tSamplePointsDistancesUpdate[s]
 				];
 
-				KeyTake[s, vars]
+				KeyTake[s, Replace[vars, All -> Keys[s]]]
 			],
 			Range[steps]
 		]
