@@ -557,99 +557,30 @@ updateModel[s0_] :=
 
 
 (* Full model *)
-fitModel[observations_, steps_, vars_ : {}] :=
+fitModel[observations_, samples_, stepsPerSample_:1, vars_ : {}] :=
 	Module[{s, oldDeltaParams = Missing[], changedIndices},
 
 		s = initializeModel[observations];
 
 		(*Updates*)
 		GeneralUtilities`MonitoredMap[
-			Function[
+			Function[sample,
 
-				s = updateModel[s];
+				Do[
+					s = updateModel[s];
 
-				(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates of all observations *)
-				If[Divisible[#, tSamplePointsUpdateInterval],
-					s //= Append@tSamplePointsDistancesUpdate[s]
+					(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates of all observations *)
+					If[Divisible[stepsPerSample * sample + step, tSamplePointsUpdateInterval],
+						s //= Append@tSamplePointsDistancesUpdate[s]
+					],
+					{step, stepsPerSample}
 				];
 
 				KeyTake[s, Replace[vars, All -> Keys[s]]]
 			],
-			Range[steps]
+			Range[samples]
 		]
 	]
-
-
-(* Options[ADFitModel] = {
-	MaxIterations -> 2000,
-	"BurnIn" -> 500,
-	"Chains" -> 1,
-	"Parallel" -> False
-};
-ADFitModel[observations_, opts:OptionsPattern[]] :=
-	Module[{samples, chains, vars, numChains, parallelQ, burnIn, numSamples, tableFun},
-		numChains = OptionValue["Chains"];
-		parallelQ = numChains === 1 || OptionValue["Parallel"];
-		numSamples = OptionValue[MaxIterations];
-		burnIn = OptionValue["BurnIn"];
-
-		vars = {
-			"p",
-			"m",
-			"muTimes",
-			"sigma2Times",
-			"t",
-			"l",
-			"sigma2",
-			"muOutlier",
-			"sigma2Outlier",
-			"deltaD",
-			"years",
-			"months",
-			"timeCats",
-			"timeCatsDist"
-		};
-
-		tableFun = If[parallelQ, ParallelTable, Table];
-		chains = tableFun[fitModel[observations, numSamples], {numChains}];
-		samples = Catenate@chains[[All, 500;;]];
-
-		<|
-			"CubitLength" -> EmpiricalDistribution[1/samples[[All,"l"]]],
-			"Variance" -> EmpiricalDistribution[1/samples[[All,"sigma2"]]],
-			"OutlierProbability" -> EmpiricalDistribution[samples[[All,"p"]]],
-			"IdealObservationTimes" -> EmpiricalDistribution /@ Merge[samples[[All, "muTimes"]], Identity],
-			"IdealObservationTimesVariance" -> EmpiricalDistribution /@ Merge[samples[[All, "sigma2Times"]], Identity],
-			"Observations" ->
-				MapThread[
-					Function[{obs, t, m, months, years, deltaD, timeCats}, Module[{dateCounts},
-						dateCounts =
-							KeyMap[
-								ADFromBabylonianDate,
-								Counts@Transpose@{years, months, obs["EarliestDay"] + deltaD}
-							];
-						<|
-							"Time" -> EmpiricalDistribution[t],
-							"TimeCategory" -> EmpiricalDistribution[timeCats],
-							"Outlier" -> N@Mean[m],
-							"Month" -> EmpiricalDistribution[months],
-							"Year" -> EmpiricalDistribution[years],
-							"DeltaD" -> EmpiricalDistribution[deltaD],
-							"DateProbabilities" -> N@dateCounts / Total[dateCounts],
-							"Date" -> EmpiricalDistribution[Values[dateCounts] -> Keys[dateCounts]]
-						|>
-					]],
-					Prepend[Transpose[{
-						samples[[All,"t"]],
-						samples[[All,"m"]],
-						samples[[All,"months"]],
-						samples[[All,"years"]],
-						samples[[All,"deltaD"]],
-						samples[[All,"timeCats"]]
-					}, 2<->3], observations]
-				]
-		|>
-	] *)
 
 
 End[];
