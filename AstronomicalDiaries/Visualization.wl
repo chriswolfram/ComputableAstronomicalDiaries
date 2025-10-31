@@ -1,5 +1,8 @@
 BeginPackage["AstronomicalDiaries`Visualization`"];
 
+eclipticLatitudeLine
+eclipticLongitudeLine
+
 Begin["`Private`"];
 
 Needs["AstronomicalDiaries`"]
@@ -15,7 +18,7 @@ eclipticLongitudeLine[lat_, date_] :=
 (* TODO: Don't hardcode these like this *)
 
 cubitLength = Quantity[2.4, "AngularDegrees"];
-observationVariance = Quantity[1.3, "AngularDegrees"];
+observationVariance = Quantity[0.512, "AngularDegrees"];
 
 
 Options[ADObservationPlot] =
@@ -27,7 +30,7 @@ Options[ADObservationPlot] =
 	];
 ADObservationPlot[obs_, opts:OptionsPattern[]] :=
 	Module[{date, ref, observedDist, referencePos},
-		date = DateObject[obs["Date"], "Instant"];
+		date = DateObject[obs["Date"], "Instant", TimeZone->$timeZone];
 		ref = {"Ecliptic", "Date" -> date, "Location" -> $observationLocation};
 		
 		observedDist = QuantityMagnitude[observationCubitsSigned[obs]*cubitLength, "AngularDegrees"];
