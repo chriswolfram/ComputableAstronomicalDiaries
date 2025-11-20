@@ -12,8 +12,11 @@ Needs["AstronomicalDiaries`"]
 
 
 (* Efficiently samples from normal distributions in a threaded way *)
-normalArraySample[NormalDistribution[mu_List, sigma_List]] :=
+normalArraySample[NormalDistribution[mu_List, sigma_]] :=
 	RandomVariate[NormalDistribution[], Length[mu]]*sigma + mu
+
+normalArraySample[NormalDistribution[mu_, sigma_List]] :=
+	RandomVariate[NormalDistribution[], Length[sigma]]*sigma + mu
 
 normalArraySample[n_NormalDistribution] := RandomVariate@n
 

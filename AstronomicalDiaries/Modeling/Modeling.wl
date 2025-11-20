@@ -28,6 +28,17 @@ modelObservationQ[observations_List] :=
 
 (* Update rules *)
 
+(* c (needed for Geweke testing) *)
+cUpdate[s_] :=
+	Module[{c, inliers, outliers},
+		c = ConstantArray[0., Length[s["c"]]];
+		inliers = s["inliers"];
+		outliers = s["outliers"];
+		c[[inliers]] = normalArraySample[NormalDistribution[s[["deltaStar", inliers]] * s["l"], Sqrt@s["sigma2"]]];
+		c[[outliers]] = RandomVariate[NormalDistribution[s["muOutlier"], Sqrt@s["sigma2Outlier"]], Length[outliers]];
+		<|"c" -> c|>
+	]
+
 (* l *)
 lPrior[] := NormalDistribution[1/2, 1/2]
 lInit[] := <|"l" -> RandomVariate@lPrior[]|>
@@ -200,7 +211,9 @@ tUpdate[s0_] :=
 		samplePoints = s[["tSamplePoints", s["inliers"]]];
 		logPDFs = computeTimeLogPDFs[s["muTimes"], s["sigma2Times"], s[["timeCats", s["inliers"]]], s["l"], s["sigma2"], s[["c", s["inliers"]]], s[["tSampleDistances", s["inliers"]]], s[["tSamplePoints", s["inliers"]]]];
 
-		t[[s["inliers"]]] = griddyGibbsSample[samplePoints, logPDFs];
+		If[Length[s["inliers"]] > 0,
+			t[[s["inliers"]]] = griddyGibbsSample[samplePoints, logPDFs]
+		];
 
 		t[[s["outliers"]]] = normalArraySample@NormalDistribution[Lookup[s["muTimes"], s[["timeCats", s["outliers"]]]], Sqrt@Lookup[s["sigma2Times"], s[["timeCats", s["outliers"]]]]];
 
@@ -516,7 +529,7 @@ initializeModel[observations_] :=
 	]
 
 
-updateModel[s0_] :=
+updateLatents[s0_] :=
 	Module[{s = s0},
 
 		s //= Append@deltaDUpdate[s];
@@ -556,8 +569,18 @@ updateModel[s0_] :=
 	]
 
 
+(* For Geweke testing *)
+updateData[s0_] :=
+	Module[{s = s0},
+
+		s //= Append@cUpdate[s];
+
+		s
+	]
+
+
 (* Full model *)
-fitModel[observations_, samples_, stepsPerSample_:1, vars_ : {}] :=
+fitModel[observations_, samples_, stepsPerSample_:1, vars_ : {}, gewekeUpdate_:False] :=
 	Module[{s, oldDeltaParams = Missing[], changedIndices},
 
 		s = initializeModel[observations];
@@ -567,7 +590,10 @@ fitModel[observations_, samples_, stepsPerSample_:1, vars_ : {}] :=
 			Function[sample,
 
 				Do[
-					s = updateModel[s];
+					s = updateLatents[s];
+					If[gewekeUpdate,
+						s = updateData[s]
+					];
 
 					(* Every tSamplePointsUpdateInterval steps, recompute the grid used for time estimates of all observations *)
 					If[Divisible[stepsPerSample * sample + step, tSamplePointsUpdateInterval],
